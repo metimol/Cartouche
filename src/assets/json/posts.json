@@ -1,0 +1,57 @@
+[
+  {
+    "id": 0,
+    "name": "Melies Kubrick",
+    "username": "melieskubrick",
+    "avatar_uri": "https://randomuser.me/api/portraits/men/86.jpg",
+    "post": "Cada vez mais decepcionado com a política!",
+    "postImage": "https://www.leiaja.com/sites/default/files/field/image/cultura/topo/2023/06/foto_topo_pato_donald_1.jpg",
+    "likes": "16",
+    "answers": [
+      {
+        "id": 1,
+        "name": "Pedro Melo",
+        "username": "pedromelo",
+        "avatar_uri": "https://randomuser.me/api/portraits/men/86.jpg",
+        "likes": "10",
+        "answers": "teste de resposta"
+      }
+    ]
+  },
+  {
+    "id": 1,
+    "name": "Alexandra Grey",
+    "username": "alexandra",
+    "avatar_uri": "https://randomuser.me/api/portraits/women/2.jpg",
+    "post": "Que dia mais incrível para nadar. Acordei de manhã cedo olhei pro ceú e o dia bem limpo, sem chuva!",
+    "likes": "16",
+    "answers": [
+      {
+        "id": 1,
+        "name": "Pedro Melo",
+        "username": "pedromelo",
+        "avatar_uri": "https://randomuser.me/api/portraits/men/86.jpg",
+        "likes": "10",
+        "answers": "teste de resposta"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Ricardo Mota",
+    "username": "ricardomota",
+    "avatar_uri": "https://randomuser.me/api/portraits/men/83.jpg",
+    "post": "Dica rápida, você que busca aprender algo na área de tecnologia, pricipalmente na área de desenvolvimento de softwares, siga @melieskubrick",
+    "likes": "16",
+    "answers": [
+      {
+        "id": 1,
+        "name": "Pedro Melo",
+        "username": "pedromelo",
+        "avatar_uri": "https://randomuser.me/api/portraits/men/86.jpg",
+        "likes": "10",
+        "answers": "teste de resposta"
+      }
+    ]
+  }
+]

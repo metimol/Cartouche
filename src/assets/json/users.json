@@ -1,0 +1,58 @@
+[
+  {
+    "id": 0,
+    "name": "Joana Melo",
+    "username": "joanamelo",
+    "avatar_uri": "https://randomuser.me/api/portraits/women/32.jpg",
+    "followers": "16",
+    "verified": true
+  },
+  {
+    "id": 1,
+    "name": "Alexendre Ricardo",
+    "username": "alexandre",
+    "avatar_uri": "https://randomuser.me/api/portraits/men/28.jpg",
+    "followers": "300",
+    "verified": true
+  },
+  {
+    "id": 2,
+    "name": "Robson Thiago",
+    "username": "robsonthiago",
+    "avatar_uri": "https://randomuser.me/api/portraits/men/32.jpg",
+    "followers": "436",
+    "verified": true
+  },
+  {
+    "id": 3,
+    "name": "Roberto Maia",
+    "username": "robertomaia",
+    "avatar_uri": "https://randomuser.me/api/portraits/men/66.jpg",
+    "followers": "544",
+    "verified": true
+  },
+  {
+    "id": 4,
+    "name": "Katarina Almeida",
+    "username": "katarina_almeida",
+    "avatar_uri": "https://randomuser.me/api/portraits/women/64.jpg",
+    "followers": "242",
+    "verified": true
+  },
+  {
+    "id": 5,
+    "name": "Livia Andrade",
+    "username": "liviaaaandrade",
+    "avatar_uri": "https://randomuser.me/api/portraits/women/82.jpg",
+    "followers": "786",
+    "verified": true
+  },
+  {
+    "id": 6,
+    "name": "Sundar Musk",
+    "username": "sundar",
+    "avatar_uri": "https://randomuser.me/api/portraits/men/39.jpg",
+    "followers": "440",
+    "verified": true
+  }
+]
