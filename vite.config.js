@@ -14,5 +14,8 @@ export default defineConfig({
   build: {
     outDir: "../../web-build",
     emptyOutDir: true,
+    rollupOptions: {
+      input: path.resolve(__dirname, "src/web/index.html"),
+    },
   },
 });
