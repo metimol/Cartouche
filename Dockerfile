@@ -1,12 +1,10 @@
-# Используем официальный Node.js для сборки
 FROM node:20 AS build
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci
+COPY package.json ./
+RUN npm ci || npm install
 COPY . .
 RUN npm run build
 
-# Используем nginx для сервировки статики
 FROM nginx:1.25-alpine
 COPY --from=build /app/web-build /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/nginx.conf
