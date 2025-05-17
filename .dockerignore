@@ -1,7 +1,3 @@
-node_modules
-web-build
-public
-src
 *.log
 .dockerignore
 Dockerfile
