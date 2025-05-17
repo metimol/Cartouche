@@ -2,7 +2,7 @@
   "name": "cartouche",
   "version": "1.0.0",
   "scripts": {
-    "start": "vite --config vite.config.js"
+    "build": "vite build --config vite.config.js"
   },
   "dependencies": {
     "react": "18.2.0",
