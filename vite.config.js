@@ -15,10 +15,4 @@ export default defineConfig({
     outDir: "../../web-build",
     emptyOutDir: true,
   },
-  server: {
-    port: 8000,
-    open: true,
-    host: '0.0.0.0',
-    allowedHosts: [process.env.HOST],
-  },
 });
