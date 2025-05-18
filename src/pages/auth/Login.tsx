@@ -3,6 +3,39 @@ import styled from 'styled-components';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 
+// Status Bar (макет)
+const StatusBar = styled.div`
+  width: 100%;
+  height: 44px;
+  background: #101010;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 27px;
+  box-sizing: border-box;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  filter: blur(0.5px);
+`;
+const StatusBarLeft = styled.div`
+  color: #fff;
+  font-family: 'SF Pro Text', 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: -0.024em;
+`;
+const StatusBarRight = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+const StatusBarIcon = styled.img`
+  height: 16px;
+  margin-left: 4px;
+`;
+
 const PageContainer = styled.div`
   background-color: ${props => props.theme.colors.background};
   min-height: 100vh;
@@ -13,56 +46,98 @@ const PageContainer = styled.div`
   padding: 0 24px;
 `;
 
-const Logo = styled.div`
-  margin-bottom: 16px;
+const MainContainer = styled.div`
+  width: 390px;
+  min-height: 844px;
+  background: #101010;
+  border-radius: 32px;
+  margin: 48px auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
 
-const LogoIcon = styled.svg`
+const Header = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 44px 0 0 0;
+`;
+const Logo = styled.img`
   width: 64px;
   height: 64px;
-  stroke: ${props => props.theme.colors.white};
-  fill: none;
-  stroke-width: 2;
 `;
-
+const LoginText = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+`;
 const Title = styled.h1`
-  color: ${props => props.theme.colors.white};
-  font-size: ${props => props.theme.fontSizes.xxlarge};
-  font-weight: 600;
-  margin: 16px 0 32px;
-  text-align: center;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 1.25em;
+  margin: 0;
 `;
-
+const Subtitle = styled.div`
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  font-size: 15px;
+  line-height: 1.07em;
+  margin: 0;
+`;
 const Form = styled.form`
   width: 100%;
   max-width: 320px;
   display: flex;
   flex-direction: column;
   gap: 24px;
+  margin-top: 40px;
+  padding: 0 30px;
 `;
-
-const ButtonsContainer = styled.div`
+const Buttons = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 15px;
   margin-top: 24px;
 `;
-
-const Footer = styled.footer`
+const Footer = styled.div`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   position: absolute;
-  bottom: 16px;
-  color: ${props => props.theme.colors.gray};
-  font-size: ${props => props.theme.fontSizes.small};
+  bottom: 0;
+  left: 0;
+  padding: 5px 10px;
+  background: transparent;
 `;
-
-const GitHubIcon = styled.svg`
+const Copyright = styled.div`
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-weight: 200;
+  font-size: 13px;
+`;
+const GitHubButton = styled.a`
+  display: flex;
+  align-items: center;
+  color: #fff;
+  text-decoration: none;
+  gap: 6px;
+  font-size: 15px;
+`;
+const GitHubIcon = styled.img`
   width: 24px;
   height: 24px;
-  fill: ${props => props.theme.colors.white};
-  position: absolute;
-  right: 16px;
-  bottom: 16px;
 `;
 
 const Login: React.FC = () => {
@@ -72,68 +147,63 @@ const Login: React.FC = () => {
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value);
   };
-
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
   };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle login logic here
-    console.log('Login with:', { username, password });
   };
-
   const handleBackClick = () => {
-    // Navigate back to welcome page
     window.location.href = '/';
   };
-
   return (
     <PageContainer>
-      <Logo>
-        <LogoIcon viewBox="0 0 24 24">
-          <path d="M19 3H5C3.89543 3 3 3.89543 3 5V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V5C21 3.89543 20.1046 3 19 3Z" />
-          <path d="M3 9H21" />
-          <path d="M9 21V9" />
-        </LogoIcon>
-      </Logo>
-      
-      <Title>Log In</Title>
-      
-      <Form onSubmit={handleSubmit}>
-        <Input 
-          placeholder="Your username..." 
-          value={username}
-          onChange={handleUsernameChange}
-          fullWidth
-          required
-        />
-        
-        <Input 
-          placeholder="Your password..." 
-          type="password"
-          value={password}
-          onChange={handlePasswordChange}
-          fullWidth
-          required
-          showPasswordToggle
-        />
-        
-        <ButtonsContainer>
-          <Button primary fullWidth type="submit">
-            Login
-          </Button>
-          
-          <Button outline fullWidth type="button" onClick={handleBackClick}>
-            ← Back
-          </Button>
-        </ButtonsContainer>
-      </Form>
-      
-      <Footer>2025. All rights reserved</Footer>
-      <GitHubIcon viewBox="0 0 24 24">
-        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
-      </GitHubIcon>
+      <StatusBar>
+        <StatusBarLeft>9:41</StatusBarLeft>
+        <StatusBarRight>
+          <StatusBarIcon src="/src/assets/images/status/wifi.svg" alt="wifi" />
+          <StatusBarIcon src="/src/assets/images/status/signal.svg" alt="signal" />
+          <StatusBarIcon src="/src/assets/images/status/battery.svg" alt="battery" />
+        </StatusBarRight>
+      </StatusBar>
+      <MainContainer>
+        <Header>
+          <Logo src="/src/images/login_page.png" alt="Cartouche Logo" />
+          <LoginText>
+            <Title>Log In</Title>
+            <Subtitle>Enter your credentials to continue</Subtitle>
+          </LoginText>
+        </Header>
+        <Form onSubmit={handleSubmit}>
+          <Input 
+            placeholder="Your username..." 
+            value={username}
+            onChange={handleUsernameChange}
+            fullWidth
+            required
+          />
+          <Input 
+            placeholder="Your password..." 
+            type="password"
+            value={password}
+            onChange={handlePasswordChange}
+            fullWidth
+            required
+            showPasswordToggle
+          />
+          <Buttons>
+            <Button primary fullWidth type="submit">Login</Button>
+            <Button outline fullWidth type="button" onClick={handleBackClick}>← Back</Button>
+          </Buttons>
+        </Form>
+        <Footer>
+          <Copyright>2025. All rights reserved</Copyright>
+          <GitHubButton href="https://github.com/Metimol/Cartouche" target="_blank" rel="noopener noreferrer">
+            <GitHubIcon src="/src/assets/images/github.svg" alt="GitHub" />
+          </GitHubButton>
+        </Footer>
+      </MainContainer>
     </PageContainer>
   );
 };
