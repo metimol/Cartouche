@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import Button from '../components/common/Button';
+import Button from '../../components/common/Button';
 
 const PageContainer = styled.div`
   background-color: ${props => props.theme.colors.background};

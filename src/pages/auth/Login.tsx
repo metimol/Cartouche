@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import Button from '../components/common/Button';
-import Input from '../components/common/Input';
+import Button from '../../components/common/Button';
+import Input from '../../components/common/Input';
 
 const PageContainer = styled.div`
   background-color: ${props => props.theme.colors.background};
