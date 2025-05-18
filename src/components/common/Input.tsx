@@ -45,6 +45,13 @@ const PasswordToggle = styled.span`
   cursor: pointer;
   color: ${props => props.theme.colors.gray};
   font-size: ${props => props.theme.fontSizes.medium};
+  display: flex;
+  align-items: center;
+`;
+
+const EyeIcon = styled.img`
+  width: 24px;
+  height: 24px;
 `;
 
 const Input: React.FC<InputProps> = ({
@@ -76,7 +83,10 @@ const Input: React.FC<InputProps> = ({
       />
       {type === 'password' && showPasswordToggle && (
         <PasswordToggle onClick={togglePasswordVisibility}>
-          {showPassword ? '👁️' : '👁️‍🗨️'}
+          <EyeIcon
+            src={showPassword ? '/assets/images/eye_open.svg' : '/assets/images/eye_closed.svg'}
+            alt={showPassword ? 'Hide password' : 'Show password'}
+          />
         </PasswordToggle>
       )}
     </InputContainer>

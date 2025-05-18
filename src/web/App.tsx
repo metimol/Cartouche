@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import styled, { ThemeProvider } from 'styled-components';
+import styled, { ThemeProvider, createGlobalStyle } from 'styled-components';
 import { dark } from "../themes/dark";
 import Home from "../pages/Home";
 import Activities from "../pages/Activities";
@@ -11,42 +11,22 @@ import Login from "../pages/auth/Login";
 import SignUp from "../pages/auth/SignUp";
 
 // Global styles
-const GlobalStyle = styled.div`
-  * {
-    box-sizing: border-box;
+const GlobalStyle = createGlobalStyle`
+  html, body {
     margin: 0;
     padding: 0;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    width: 100vw;
+    min-height: 100vh;
+    background: ${({ theme }) => theme.colors.background};
+    color: ${({ theme }) => theme.colors.white};
+    box-sizing: border-box;
+    overflow-x: hidden;
   }
-  
+  *, *::before, *::after {
+    box-sizing: inherit;
+  }
   body {
-    background-color: ${props => props.theme.colors.background};
-    color: ${props => props.theme.colors.white};
-  }
-  
-  /* Responsive styles */
-  @media (min-width: 768px) {
-    .auth-container {
-      max-width: 480px;
-      margin: 0 auto;
-      border-radius: 16px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-      overflow: hidden;
-    }
-    
-    .main-container {
-      max-width: 768px;
-      margin: 0 auto;
-      border-radius: 16px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-      overflow: hidden;
-    }
-  }
-  
-  @media (min-width: 1200px) {
-    .main-container {
-      max-width: 1024px;
-    }
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   }
 `;
 
@@ -57,7 +37,7 @@ const AuthPageWrapper = styled.div`
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    padding: 32px;
+    padding: 0;
   }
 `;
 

@@ -39,6 +39,20 @@ const BackButton = styled.button`
   align-items: center;
 `;
 
+const BackIcon = styled.img`
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+`;
+
+const BackText = styled.span`
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 16px;
+  color: #FFFFFF;
+`;
+
 const RightActionContainer = styled.div`
   min-width: 40px;
   display: flex;
@@ -55,7 +69,8 @@ const Header: React.FC<HeaderProps> = ({
     <HeaderContainer>
       {showBackButton ? (
         <BackButton onClick={onBack}>
-          ← Back
+          <BackIcon src="/assets/images/arrow_back.svg" alt="Back" />
+          <BackText>Back</BackText>
         </BackButton>
       ) : (
         <div style={{ width: 40 }} />

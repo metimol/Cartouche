@@ -2,123 +2,103 @@ import React from 'react';
 import styled from 'styled-components';
 import Button from '../../components/common/Button';
 
-// Status Bar (макет)
-const StatusBar = styled.div`
-  width: 100%;
-  height: 44px;
-  background: #101010;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 27px;
-  box-sizing: border-box;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 2;
-  filter: blur(0.5px);
-`;
-const StatusBarLeft = styled.div`
-  color: #fff;
-  font-family: 'SF Pro Text', 'Inter', sans-serif;
-  font-weight: 600;
-  font-size: 17px;
-  letter-spacing: -0.024em;
-`;
-const StatusBarRight = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;
-const StatusBarIcon = styled.img`
-  height: 16px;
-  margin-left: 4px;
-`;
-
 const MainContainer = styled.div`
-  width: 390px;
-  min-height: 844px;
-  background: #101010;
-  border-radius: 32px;
-  margin: 48px auto;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
   position: relative;
-  overflow: hidden;
+  width: 100vw;
+  min-height: 100vh;
+  background: #101010;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-start;
+  padding: 4vh 0 2vh 0;
 `;
-
 const Header = styled.div`
   width: 100%;
+  max-width: 100vw;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
-  padding: 44px 0 0 0;
+  padding: 0 8vw;
+  gap: 2.5vh;
+  margin-top: 5vh;
 `;
 const Logo = styled.img`
-  width: 64px;
-  height: 64px;
+  width: clamp(60px, 20vw, 100px);
+  height: clamp(60px, 20vw, 100px);
+  object-fit: contain;
 `;
 const WelcomeText = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  padding: 0 5vw;
+  gap: 1vh;
+  height: auto;
 `;
 const Title = styled.h1`
   color: #fff;
   font-family: 'Inter', sans-serif;
   font-weight: 700;
-  font-size: 32px;
+  font-size: clamp(1.5rem, 5vw, 2.2rem);
   line-height: 1.25em;
   margin: 0;
+  text-align: center;
 `;
 const Subtitle = styled.div`
   color: #fff;
   font-family: 'Inter', sans-serif;
   font-weight: 300;
-  font-size: 15px;
+  font-size: clamp(0.9rem, 3vw, 1.1rem);
   line-height: 1.07em;
   margin: 0;
+  text-align: center;
 `;
 const Buttons = styled.div`
   width: 100%;
+  max-width: 500px;
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  padding: 15px 30px;
-  margin-top: 40px;
+  align-items: center;
+  padding: 2vh 6vw;
+  gap: 2vh;
+  margin: 8vh 0 0 0;
 `;
 const Footer = styled.div`
   width: 100%;
+  max-width: 100vw;
   display: flex;
-  align-items: center;
+  flex-direction: row;
   justify-content: space-between;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  padding: 5px 10px;
+  align-items: center;
+  padding: 1vh 3vw;
+  gap: 2vw;
   background: transparent;
+  margin-top: auto;
 `;
 const Copyright = styled.div`
   color: #fff;
   font-family: 'Inter', sans-serif;
   font-weight: 200;
-  font-size: 13px;
+  font-size: clamp(0.7rem, 2vw, 0.9rem);
+  line-height: 1.2em;
 `;
 const GitHubButton = styled.a`
   display: flex;
+  flex-direction: row;
   align-items: center;
+  width: auto;
+  height: auto;
   color: #fff;
   text-decoration: none;
-  gap: 6px;
-  font-size: 15px;
+  gap: 0.5vw;
+  font-size: clamp(0.8rem, 2vw, 1rem);
+  padding: 0;
+  margin: 0;
 `;
 const GitHubIcon = styled.img`
-  width: 24px;
-  height: 24px;
+  width: clamp(20px, 6vw, 28px);
+  height: clamp(20px, 6vw, 28px);
 `;
 
 const Welcome: React.FC = () => {
@@ -130,16 +110,8 @@ const Welcome: React.FC = () => {
   };
   return (
     <MainContainer>
-      <StatusBar>
-        <StatusBarLeft>9:41</StatusBarLeft>
-        <StatusBarRight>
-          <StatusBarIcon src="/src/assets/images/status/wifi.svg" alt="wifi" />
-          <StatusBarIcon src="/src/assets/images/status/signal.svg" alt="signal" />
-          <StatusBarIcon src="/src/assets/images/status/battery.svg" alt="battery" />
-        </StatusBarRight>
-      </StatusBar>
       <Header>
-        <Logo src="/src/images/main_page.png" alt="Cartouche Logo" />
+        <Logo src="/assets/images/logo.svg" alt="Cartouche Logo" />
         <WelcomeText>
           <Title>Welcome</Title>
           <Subtitle>To the best AI Social Network</Subtitle>
@@ -152,7 +124,7 @@ const Welcome: React.FC = () => {
       <Footer>
         <Copyright>2025. All rights reserved</Copyright>
         <GitHubButton href="https://github.com/Metimol/Cartouche" target="_blank" rel="noopener noreferrer">
-          <GitHubIcon src="/src/assets/images/github.svg" alt="GitHub" />
+          <GitHubIcon src="/assets/images/GitHub.svg" alt="GitHub" />
         </GitHubButton>
       </Footer>
     </MainContainer>
