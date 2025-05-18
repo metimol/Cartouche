@@ -23,21 +23,25 @@ const StyledButton = styled.button<ButtonProps>`
   cursor: pointer;
   transition: all 0.2s ease;
   border: 1px solid transparent;
-  
+  /* Prevent browser dark mode color inversion */
+  color-scheme: only dark;
+
   ${props => props.primary && `
-    background-color: ${props.theme.colors.white};
-    color: ${props.theme.colors.background};
+    background-color: #fff !important;
+    color: #000 !important;
+    border: 1px solid #fff !important;
+    box-shadow: 0 1px 8px 0 rgba(0,0,0,0.04);
   `}
   
   ${props => props.outline && `
-    background-color: transparent;
-    border: 1px solid ${props.theme.colors.white};
-    color: ${props.theme.colors.white};
+    background-color: transparent !important;
+    border: 1px solid #fff !important;
+    color: #fff !important;
   `}
   
   ${props => !props.primary && !props.outline && `
     background-color: ${props.theme.colors.gray_mid};
-    color: ${props.theme.colors.white};
+    color: #fff;
   `}
   
   ${props => props.fullWidth && `
@@ -47,7 +51,6 @@ const StyledButton = styled.button<ButtonProps>`
   &:hover {
     opacity: 0.9;
   }
-  
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
