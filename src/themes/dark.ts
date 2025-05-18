@@ -1,6 +1,6 @@
 export const dark = {
   colors: {
-    background: "#000000",
+    background: "#101010",
     gray: "#616161",
     gray_mid: "#181818",
     gray_dark: "#1E1E1E",
