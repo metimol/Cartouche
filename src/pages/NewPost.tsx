@@ -1,56 +1,179 @@
-import React, { useState } from "react";
-import styled from "styled-components";
+import React, { useState } from 'react';
+import styled from 'styled-components';
+import Header from '../components/common/Header';
+import Avatar from '../components/common/Avatar';
+import Button from '../components/common/Button';
 
-const Container = styled.div`
+const PageContainer = styled.div`
+  background-color: ${props => props.theme.colors.background};
   min-height: 100vh;
-  background: #101010;
-  color: #fff;
-  padding: 32px 0;
-`;
-const Card = styled.div`
-  max-width: 600px;
-  margin: 0 auto;
-  background: #181818;
-  border-radius: 12px;
-  padding: 32px;
   display: flex;
   flex-direction: column;
 `;
-const Input = styled.textarea`
-  width: 100%;
-  min-height: 80px;
-  border-radius: 8px;
-  border: none;
-  padding: 12px;
-  font-size: 1rem;
-  margin-bottom: 16px;
-  resize: vertical;
-`;
-const Button = styled.button`
-  background: #673fe6;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 24px;
-  font-size: 1rem;
-  cursor: pointer;
-  align-self: flex-end;
+
+const HeaderContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid ${props => props.theme.colors.gray_dark};
 `;
 
-const NewPost = () => {
-  const [text, setText] = useState("");
+const CancelButton = styled.button`
+  background: transparent;
+  border: none;
+  color: ${props => props.theme.colors.gray};
+  font-size: ${props => props.theme.fontSizes.medium};
+  cursor: pointer;
+`;
+
+const HeaderTitle = styled.h1`
+  color: ${props => props.theme.colors.white};
+  font-size: ${props => props.theme.fontSizes.large};
+  font-weight: 600;
+  margin: 0;
+`;
+
+const PublishButton = styled(Button)`
+  background-color: ${props => props.theme.colors.purple};
+  color: ${props => props.theme.colors.white};
+  padding: 8px 16px;
+  border-radius: 16px;
+`;
+
+const PostContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  flex: 1;
+`;
+
+const UserSection = styled.div`
+  display: flex;
+  margin-bottom: 16px;
+`;
+
+const UserInfo = styled.div`
+  margin-left: 12px;
+`;
+
+const TextareaContainer = styled.div`
+  flex: 1;
+  margin-left: 12px;
+`;
+
+const PostTextarea = styled.textarea`
+  width: 100%;
+  min-height: 120px;
+  background-color: transparent;
+  border: none;
+  color: ${props => props.theme.colors.white};
+  font-family: ${props => props.theme.fonts.primary};
+  font-size: ${props => props.theme.fontSizes.medium};
+  resize: none;
+  outline: none;
+  
+  &::placeholder {
+    color: ${props => props.theme.colors.gray};
+  }
+`;
+
+const AttachmentButton = styled.button`
+  background: transparent;
+  border: none;
+  color: ${props => props.theme.colors.gray};
+  font-size: 24px;
+  cursor: pointer;
+  padding: 8px;
+`;
+
+const BottomSection = styled.div`
+  margin-top: auto;
+  padding: 16px;
+  border-top: 1px solid ${props => props.theme.colors.gray_dark};
+`;
+
+const PrivacyText = styled.p`
+  color: ${props => props.theme.colors.gray};
+  font-size: ${props => props.theme.fontSizes.small};
+  margin: 0;
+`;
+
+const ToolbarContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background-color: ${props => props.theme.colors.gray_dark};
+  border-radius: 8px;
+`;
+
+const ToolbarButton = styled.button`
+  background: transparent;
+  border: none;
+  color: ${props => props.theme.colors.gray};
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px;
+`;
+
+const NewPost: React.FC = () => {
+  const [postContent, setPostContent] = useState('');
+  
+  // Mock user data
+  const user = {
+    username: 'Metimol',
+    avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+  };
+
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setPostContent(e.target.value);
+  };
+
+  const handlePublish = () => {
+    console.log('Publishing post:', postContent);
+    // In a real app, you would send this to your backend
+  };
+
   return (
-    <Container>
-      <Card>
-        <h2>New Post</h2>
-        <Input
-          placeholder="What's on your mind?"
-          value={text}
-          onChange={e => setText(e.target.value)}
-        />
-        <Button disabled={!text.trim()}>Post</Button>
-      </Card>
-    </Container>
+    <PageContainer>
+      <HeaderContainer>
+        <CancelButton>Cancel</CancelButton>
+        <HeaderTitle>New Post</HeaderTitle>
+        <PublishButton onClick={handlePublish}>Publish</PublishButton>
+      </HeaderContainer>
+      
+      <PostContainer>
+        <UserSection>
+          <Avatar src={user.avatar} size="medium" />
+          <TextareaContainer>
+            <PostTextarea 
+              placeholder="Write a new post..." 
+              value={postContent}
+              onChange={handleContentChange}
+              autoFocus
+            />
+          </TextareaContainer>
+        </UserSection>
+        
+        <AttachmentButton>
+          📎
+        </AttachmentButton>
+      </PostContainer>
+      
+      <BottomSection>
+        <PrivacyText>Anyone can answer</PrivacyText>
+      </BottomSection>
+      
+      <ToolbarContainer>
+        <ToolbarButton>GIF</ToolbarButton>
+        <ToolbarButton>⚙️</ToolbarButton>
+        <ToolbarButton>🖼️</ToolbarButton>
+        <ToolbarButton>😊</ToolbarButton>
+        <ToolbarButton>•••</ToolbarButton>
+        <ToolbarButton>🎤</ToolbarButton>
+      </ToolbarContainer>
+    </PageContainer>
   );
 };
 

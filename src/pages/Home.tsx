@@ -1,74 +1,152 @@
-import React from "react";
-import styled from "styled-components";
-import posts from "../assets/json/posts.json";
+import React from 'react';
+import styled from 'styled-components';
+import Header from '../components/common/Header';
+import TabBar from '../components/common/TabBar';
+import PostCard from '../components/common/PostCard';
+import { ResponsiveContainer, FlexContainer } from '../components/layout/Responsive';
 
-const Container = styled.div`
+const PageContainer = styled.div`
+  background-color: ${props => props.theme.colors.background};
   min-height: 100vh;
-  background: #101010;
-  color: #fff;
-  padding: 32px 0;
+  padding-bottom: 60px;
+  
+  @media (min-width: 768px) {
+    padding-bottom: 0;
+  }
+  
+  @media (min-width: 992px) {
+    padding-left: 100px;
+  }
 `;
-const List = styled.div`
-  max-width: 600px;
-  margin: 0 auto;
+
+const PostsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  
+  @media (min-width: 768px) {
+    border-radius: 8px;
+    overflow: hidden;
+  }
 `;
-const Divider = styled.div`
-  width: 100%;
-  height: 1px;
-  background: #323232;
-  margin: 24px 0;
+
+const SidebarContainer = styled.div`
+  display: none;
+  
+  @media (min-width: 992px) {
+    display: block;
+    width: 280px;
+    padding: 16px;
+  }
 `;
-const ThreadCard = styled.div`
-  background: #181818;
-  border-radius: 12px;
-  padding: 24px;
+
+const SidebarCard = styled.div`
+  background-color: ${props => props.theme.colors.gray_dark};
+  border-radius: 16px;
+  padding: 16px;
   margin-bottom: 16px;
 `;
-const Username = styled.div`
-  font-weight: 600;
-  font-size: 1.1rem;
-`;
-const Post = styled.div`
-  margin: 12px 0;
-`;
-const Avatar = styled.img`
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  margin-right: 16px;
-`;
-const Row = styled.div`
-  display: flex;
-  align-items: center;
+
+const SidebarTitle = styled.h3`
+  color: ${props => props.theme.colors.white};
+  font-size: ${props => props.theme.fontSizes.medium};
+  margin-bottom: 12px;
 `;
 
-const Home = () => (
-  <Container>
-    <List>
-      {posts.map((item, idx) => (
-        <React.Fragment key={item.id}>
-          <ThreadCard>
-            <Row>
-              <Avatar src={item.avatar_uri} alt={item.username} />
-              <Username>@{item.username}</Username>
-            </Row>
-            <Post>{item.post}</Post>
-            {item.postImage && (
-              <img
-                src={item.postImage}
-                alt="post"
-                style={{ width: "100%", borderRadius: 8, marginTop: 8 }}
+const SidebarContent = styled.p`
+  color: ${props => props.theme.colors.gray};
+  font-size: ${props => props.theme.fontSizes.small};
+`;
+
+const Home: React.FC = () => {
+  const [activeTab, setActiveTab] = React.useState('home');
+  
+  // Mock data for posts
+  const posts = [
+    {
+      id: 1,
+      username: 'Metimol',
+      userAvatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+      verified: true,
+      timeAgo: '2 min',
+      content: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.',
+      image: 'https://i.imgur.com/ybt3P5P.jpg', // Cat bread image
+      likes: 27,
+      answers: 3
+    },
+    {
+      id: 2,
+      username: 'Liza',
+      userAvatar: 'https://randomuser.me/api/portraits/women/44.jpg',
+      verified: false,
+      timeAgo: '10 min',
+      content: 'There are many variations of passages of Lorem Ipsum available.',
+      likes: 12,
+      answers: 2
+    },
+    {
+      id: 3,
+      username: 'Metimol',
+      userAvatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+      verified: true,
+      timeAgo: '15 min',
+      content: 'The standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those interested.',
+      likes: 59,
+      answers: 7
+    }
+  ];
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    // In a real app, you would navigate to the corresponding page
+  };
+
+  return (
+    <PageContainer>
+      <Header />
+      
+      <ResponsiveContainer>
+        <FlexContainer gap="24px">
+          <PostsContainer>
+            {posts.map(post => (
+              <PostCard
+                key={post.id}
+                username={post.username}
+                userAvatar={post.userAvatar}
+                verified={post.verified}
+                timeAgo={post.timeAgo}
+                content={post.content}
+                image={post.image}
+                likes={post.likes}
+                answers={post.answers}
+                onLike={() => console.log('Like')}
+                onComment={() => console.log('Comment')}
+                onShare={() => console.log('Share')}
+                onRepost={() => console.log('Repost')}
               />
-            )}
-            <div style={{ color: "#616161", marginTop: 12 }}>
-              {item.answers.length} answers - {item.likes} likes
-            </div>
-          </ThreadCard>
-          {idx < posts.length - 1 && <Divider />}
-        </React.Fragment>
-      ))}
-    </List>
-  </Container>
-);
+            ))}
+          </PostsContainer>
+          
+          <SidebarContainer>
+            <SidebarCard>
+              <SidebarTitle>Trending Topics</SidebarTitle>
+              <SidebarContent>
+                #AI #MachineLearning #WebDevelopment
+              </SidebarContent>
+            </SidebarCard>
+            
+            <SidebarCard>
+              <SidebarTitle>Suggested Users</SidebarTitle>
+              <SidebarContent>
+                Find more interesting people to follow
+              </SidebarContent>
+            </SidebarCard>
+          </SidebarContainer>
+        </FlexContainer>
+      </ResponsiveContainer>
+      
+      <TabBar activeTab={activeTab} onTabChange={handleTabChange} />
+    </PageContainer>
+  );
+};
 
 export default Home;
