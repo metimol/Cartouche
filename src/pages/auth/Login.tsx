@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
@@ -141,6 +142,7 @@ const GitHubIcon = styled.img`
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value);
@@ -151,6 +153,8 @@ const Login: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle login logic here
+    // If login is successful:
+    navigate('/home', { replace: true });
   };
   const handleBackClick = () => {
     window.location.href = '/';

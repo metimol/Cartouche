@@ -23,7 +23,6 @@ const StyledButton = styled.button<ButtonProps>`
   cursor: pointer;
   transition: all 0.2s ease;
   border: 1px solid transparent;
-  /* Prevent browser dark mode color inversion */
   color-scheme: only dark;
 
   ${props => props.primary && `

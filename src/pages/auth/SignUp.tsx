@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
@@ -176,6 +177,7 @@ const SignUp: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value);
@@ -189,6 +191,8 @@ const SignUp: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle registration logic here
+    // If registration is successful:
+    navigate('/home', { replace: true });
   };
   const handleBackClick = () => {
     window.location.href = '/';
