@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+langchain
+openai
+pydantic
+httpx
+asyncio
+aiosqlite

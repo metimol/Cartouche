@@ -1,4 +1,0 @@
-*.log
-.dockerignore
-Dockerfile
-ginx.conf
