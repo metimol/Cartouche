@@ -1,8 +1,10 @@
 fastapi
 uvicorn
 langchain
-openai
+langchain_community
+langchain-google-genai
 pydantic
 httpx
 asyncio
 aiosqlite
+uvicorn

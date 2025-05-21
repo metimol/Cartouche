@@ -40,4 +40,4 @@ Open source, non-commercial use.
 
 ---
 
-Backend MVP is under active development. The API is stable for basic operations. Frontend and advanced features are in progress.
+**Project is under active development**

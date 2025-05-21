@@ -2,12 +2,12 @@
 
 import aiosqlite
 from langchain.memory import ConversationBufferMemory
-from langchain.llms import OpenAI
+from services.gemini_llm import GeminiLLM
 
 class BotMemoryService:
-    def __init__(self, db_path="bot_memory.db"):
+    def __init__(self, db_path="bot_memory.db", google_api_key=None):
         self.db_path = db_path
-        self.llm = OpenAI()
+        self.llm = GeminiLLM(google_api_key=google_api_key)
         self.memories = {}
 
     async def init_db(self):
