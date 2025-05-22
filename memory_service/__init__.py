@@ -1,3 +1,0 @@
-"""
-Memory service package initialization.
-"""

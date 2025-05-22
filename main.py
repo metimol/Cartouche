@@ -1,359 +1,135 @@
 """
-Main application for the Cartouche Bot Service.
+Main application module for the Cartouche Autonomous Service.
+Handles service initialization and orchestration.
 """
+import os
+import asyncio
 import logging
-from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
-from fastapi.middleware.cors import CORSMiddleware
-from typing import Optional, List, Dict, Any
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from fastapi.openapi.utils import get_openapi
+from datetime import datetime
+import signal
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from dotenv import load_dotenv
 
-from models import (
-    Post, Bot, BotCreationRequest, APIResponse, 
-    PostProcessingRequest, FeedRequest
-)
-from api.api_interface import verify_api_key
-from tasks.reaction_tasks import process_post_reactions
-from tasks.bot_tasks import grow_bots, create_bot
-from tasks.post_tasks import generate_bot_posts
-from tasks.subscription_tasks import process_subscriptions
-from bot_manager.bot_manager import BotManager
-from config import settings
+from config import LOG_LEVEL, LOG_FILE, LOG_FORMAT
+from database import Database
+from api_client import APIClient
+from bot_manager import BotManager
+from content_generator import ContentGenerator
+from reaction_engine import ReactionEngine
+from monitor import Monitor
+from memory import Memory
 
 # Configure logging
 logging.basicConfig(
-    level=getattr(logging, settings.LOG_LEVEL),
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    filename=settings.LOG_FILE,
-    filemode='a'
+    level=getattr(logging, LOG_LEVEL),
+    format=LOG_FORMAT,
+    handlers=[
+        logging.FileHandler(LOG_FILE),
+        logging.StreamHandler()
+    ]
 )
 
 logger = logging.getLogger(__name__)
 
-# Create FastAPI app
-app = FastAPI(
-    title="Cartouche Bot Service",
-    description="API for autonomous bot service in Cartouche social network",
-    version="1.1.0",
-)
-
-# Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-security = HTTPBearer()
-
-def custom_openapi():
-    if app.openapi_schema:
-        return app.openapi_schema
-    openapi_schema = get_openapi(
-        title=app.title,
-        version=app.version,
-        description=app.description,
-        routes=app.routes,
-    )
-    openapi_schema["components"]["securitySchemes"] = {
-        "BearerAuth": {
-            "type": "http",
-            "scheme": "bearer",
-            "bearerFormat": "JWT"
-        }
-    }
-    for path in openapi_schema["paths"].values():
-        for method in path.values():
-            method.setdefault("security", []).append({"BearerAuth": []})
-    app.openapi_schema = openapi_schema
-    return app.openapi_schema
-
-app.openapi = custom_openapi
-
-# Health check endpoint
-@app.get("/api/v1/health", response_model=APIResponse)
-async def health_check():
-    """Check if the service is healthy."""
-    return APIResponse(status="success", message="Service is healthy")
-
-# Process post endpoint
-@app.post("/api/v1/posts/process", response_model=APIResponse)
-async def process_post(
-    request: PostProcessingRequest,
-    background_tasks: BackgroundTasks,
-    api_key: str = Depends(verify_api_key)
-):
-    """
-    Process a new post and generate bot reactions.
+class CartoucheService:
+    """Main service class for the Cartouche Autonomous Service."""
     
-    This endpoint accepts a new post and starts an asynchronous task
-    to generate bot reactions (likes, comments, reposts).
-    """
-    try:
-        # Start asynchronous task
-        task = process_post_reactions.delay(request.post.dict())
+    def __init__(self):
+        """Initialize the service."""
+        # Load environment variables
+        load_dotenv()
         
-        return APIResponse(
-            status="success",
-            message="Post processing started",
-            data={"task_id": task.id}
-        )
-    
-    except Exception as e:
-        logger.error(f"Error processing post: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-# Get task status endpoint
-@app.get("/api/v1/tasks/{task_id}", response_model=APIResponse)
-async def get_task_status(
-    task_id: str,
-    api_key: str = Depends(verify_api_key)
-):
-    """
-    Get the status of an asynchronous task.
-    
-    This endpoint returns the status and result of a task.
-    """
-    try:
-        from celery_app import app as celery_app
-        task = celery_app.AsyncResult(task_id)
+        # Initialize components
+        self.database = Database()
+        self.api_client = APIClient()
+        self.content_generator = ContentGenerator()
+        self.memory = Memory()
+        self.bot_manager = BotManager(self.database, self.api_client)
+        self.reaction_engine = ReactionEngine(self.database, self.api_client, self.content_generator)
+        self.monitor = Monitor(self.database, self.api_client, self.reaction_engine)
         
-        if task.state == 'PENDING':
-            response = {
-                "status": "pending",
-                "message": "Task is pending"
-            }
-        elif task.state == 'FAILURE':
-            response = {
-                "status": "error",
-                "error": str(task.info)
-            }
-        else:
-            response = {
-                "status": task.state.lower(),
-                "result": task.result
-            }
+        # Initialize scheduler
+        self.scheduler = AsyncIOScheduler()
         
-        return APIResponse(
-            status="success",
-            data=response
-        )
-    
-    except Exception as e:
-        logger.error(f"Error getting task status: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-# Get bots endpoint
-@app.get("/api/v1/bots", response_model=APIResponse)
-async def get_bots(
-    limit: int = 100,
-    offset: int = 0,
-    category: Optional[str] = None,
-    api_key: str = Depends(verify_api_key)
-):
-    """
-    Get a list of bots.
-    
-    This endpoint returns a list of bots with pagination.
-    """
-    try:
-        bot_manager = BotManager()
+        # Set up signal handlers
+        signal.signal(signal.SIGINT, self._signal_handler)
+        signal.signal(signal.SIGTERM, self._signal_handler)
         
-        if category:
-            bots = bot_manager.get_bots_by_category(category)
-        else:
-            bots = bot_manager.get_all_bots()
-        
-        total = len(bots)
-        bots = bots[offset:offset+limit]
-        
-        return APIResponse(
-            status="success",
-            data={
-                "total": total,
-                "bots": bots
-            }
-        )
+        logger.info("Cartouche Autonomous Service initialized")
     
-    except Exception as e:
-        logger.error(f"Error getting bots: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-# Get bot endpoint
-@app.get("/api/v1/bots/{bot_id}", response_model=APIResponse)
-async def get_bot(
-    bot_id: int,
-    api_key: str = Depends(verify_api_key)
-):
-    """
-    Get a specific bot.
-    
-    This endpoint returns information about a specific bot.
-    """
-    try:
-        bot_manager = BotManager()
-        bot = bot_manager.get_bot(bot_id)
-        
-        if not bot:
-            raise HTTPException(status_code=404, detail=f"Bot {bot_id} not found")
-        
-        return APIResponse(
-            status="success",
-            data=bot
-        )
-    
-    except HTTPException:
-        raise
-    
-    except Exception as e:
-        logger.error(f"Error getting bot {bot_id}: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-# Create bot endpoint
-@app.post("/api/v1/bots", response_model=APIResponse)
-async def create_new_bot(
-    request: BotCreationRequest,
-    background_tasks: BackgroundTasks,
-    api_key: str = Depends(verify_api_key)
-):
-    """
-    Create a new bot.
-    
-    This endpoint creates a new bot with the specified characteristics.
-    """
-    try:
-        # Start asynchronous task
-        task = create_bot.delay(request.dict())
-        
-        return APIResponse(
-            status="success",
-            message="Bot creation started",
-            data={"task_id": task.id}
-        )
-    
-    except Exception as e:
-        logger.error(f"Error creating bot: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-# Initialize bots endpoint
-@app.post("/api/v1/bots/initialize", response_model=APIResponse)
-async def initialize_bots(
-    background_tasks: BackgroundTasks,
-    api_key: str = Depends(verify_api_key)
-):
-    """
-    Initialize bots.
-    
-    This endpoint creates the initial set of bots.
-    """
-    try:
-        bot_manager = BotManager()
-        current_count = bot_manager.count_bots()
-        
-        if current_count > 0:
-            return APIResponse(
-                status="success",
-                message=f"Bots already initialized ({current_count} bots exist)"
+    async def start(self):
+        """Start the service."""
+        try:
+            logger.info("Starting Cartouche Autonomous Service")
+            
+            # Initialize bots
+            await self.bot_manager.initialize_bots()
+            
+            # Schedule bot population growth
+            self.scheduler.add_job(
+                self.bot_manager.grow_bot_population,
+                'cron',
+                hour=3,  # Run at 3 AM
+                id='grow_bot_population'
             )
+            
+            # Schedule subscription processing
+            self.scheduler.add_job(
+                self.bot_manager.process_subscriptions,
+                'interval',
+                hours=4,
+                id='process_subscriptions'
+            )
+            
+            # Start scheduler
+            self.scheduler.start()
+            logger.info("Scheduler started")
+            
+            # Start monitor
+            await self.monitor.start()
+            
+            logger.info("Cartouche Autonomous Service started")
         
-        # Start asynchronous task
-        for _ in range(settings.INITIAL_BOTS_COUNT):
-            create_bot.delay()
-        
-        return APIResponse(
-            status="success",
-            message=f"Bot initialization started ({settings.INITIAL_BOTS_COUNT} bots)"
-        )
+        except Exception as e:
+            logger.error(f"Error starting service: {str(e)}")
     
-    except Exception as e:
-        logger.error(f"Error initializing bots: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+    async def stop(self):
+        """Stop the service."""
+        try:
+            logger.info("Stopping Cartouche Autonomous Service")
+            
+            # Stop monitor
+            await self.monitor.stop()
+            
+            # Shutdown scheduler
+            self.scheduler.shutdown()
+            
+            logger.info("Cartouche Autonomous Service stopped")
+        
+        except Exception as e:
+            logger.error(f"Error stopping service: {str(e)}")
+    
+    def _signal_handler(self, sig, frame):
+        """Handle signals for graceful shutdown."""
+        logger.info(f"Received signal {sig}, shutting down...")
+        asyncio.create_task(self.stop())
 
-# Generate feed endpoint
-@app.get("/api/v1/feed", response_model=APIResponse)
-async def generate_feed(
-    limit: int = 20,
-    user_id: Optional[str] = None,
-    language: str = "en",
-    api_key: str = Depends(verify_api_key)
-):
-    """
-    Generate a feed with bot posts.
+async def main():
+    """Main entry point for the service."""
+    service = CartoucheService()
     
-    This endpoint generates a feed with posts from bots.
-    """
     try:
-        # Start asynchronous task
-        task = generate_bot_posts.delay(limit, user_id, language)
+        await service.start()
         
-        return APIResponse(
-            status="success",
-            message="Feed generation started",
-            data={"task_id": task.id}
-        )
+        # Keep the service running
+        while True:
+            await asyncio.sleep(60)
     
-    except Exception as e:
-        logger.error(f"Error generating feed: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+    except KeyboardInterrupt:
+        logger.info("Keyboard interrupt received, shutting down...")
+    
+    finally:
+        await service.stop()
 
-# Process subscriptions endpoint
-@app.post("/api/v1/subscriptions/process", response_model=APIResponse)
-async def process_bot_subscriptions(
-    background_tasks: BackgroundTasks,
-    api_key: str = Depends(verify_api_key)
-):
-    """
-    Process bot subscriptions.
-    
-    This endpoint starts an asynchronous task to process bot subscriptions.
-    """
-    try:
-        # Start asynchronous task
-        task = process_subscriptions.delay()
-        
-        return APIResponse(
-            status="success",
-            message="Subscription processing started",
-            data={"task_id": task.id}
-        )
-    
-    except Exception as e:
-        logger.error(f"Error processing subscriptions: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-# Grow bots endpoint
-@app.post("/api/v1/bots/grow", response_model=APIResponse)
-async def grow_bot_population(
-    background_tasks: BackgroundTasks,
-    api_key: str = Depends(verify_api_key)
-):
-    """
-    Grow the bot population.
-    
-    This endpoint starts an asynchronous task to grow the bot population.
-    """
-    try:
-        # Start asynchronous task
-        task = grow_bots.delay()
-        
-        return APIResponse(
-            status="success",
-            message="Bot growth started",
-            data={"task_id": task.id}
-        )
-    
-    except Exception as e:
-        logger.error(f"Error growing bots: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-# Run the application
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(
-        "main:app",
-        host=settings.HOST,
-        port=settings.PORT,
-        reload=settings.DEBUG
-    )
+    asyncio.run(main())

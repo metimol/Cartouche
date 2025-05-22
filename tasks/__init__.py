@@ -1,3 +1,0 @@
-"""
-Tasks package initialization.
-"""

@@ -1,3 +1,0 @@
-"""
-Reaction engine package initialization.
-"""

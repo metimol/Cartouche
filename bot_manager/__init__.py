@@ -1,3 +1,0 @@
-"""
-Bot manager package initialization.
-"""
