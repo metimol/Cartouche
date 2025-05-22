@@ -1,0 +1,3 @@
+"""
+Cartouche Bot Service initialization.
+"""

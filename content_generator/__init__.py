@@ -1,0 +1,3 @@
+"""
+Content generator package initialization.
+"""
