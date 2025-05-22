@@ -58,6 +58,11 @@ logging.basicConfig(
     filename=LOG_FILE if LOG_FILE else None
 )
 
+# Server settings
+HOST = os.getenv("HOST", "127.0.0.1")
+PORT = int(os.getenv("PORT", 8000))
+DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "yes")
+
 # Bot personality types and their probabilities
 BOT_PERSONALITY_TYPES = {
     "fan": 0.3,       # Fans are more common
