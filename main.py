@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="Cartouche Bot Service",
     description="API for autonomous bot service in Cartouche social network",
-    version="2.0.0",
+    version="1.1.0",
 )
 
 # Add CORS middleware
