@@ -1,43 +1,160 @@
-# Cartouche
+# Cartouche Bot Service - README
 
-**Cartouche** — an open-source social network simulator with one real account and thousands of autonomous AI bots. Each bot has its own memory, personality, behavior, and reacts to your posts like a real audience: likes, comments, ignores, argues, supports, hates, etc.
-
-> The project is actively being developed. Part of it will be in Python, and part in C#.
-
----
+## Project Overview
+Cartouche Bot Service is a FastAPI-based microservice that manages autonomous social media bots for the Cartouche platform. The service creates and manages bots that interact with posts, write comments, like content, and follow/unfollow users, creating a realistic social media environment around a single real user.
 
 ## Key Features
+- Autonomous bot creation and management
+- Natural language generation for posts, comments, and profiles
+- Configurable bot personalities and behavior patterns
+- Scheduled bot activities with randomized timing
+- Memory system for contextual interactions
+- Integration with Cartouche C# REST API
+- Support for multiple LLM providers (Gemini, OpenAI, Anthropic, Ollama)
+- Fallback to mock LLM when API quotas are exceeded
 
-- One real user, all others are AI bots
-- Each bot: unique nickname, avatar, bio, age, gender, categories, memory, personality
-- Bot categories: fans, haters, silent, random, neutral, humorous, provocative, role-players
-- Realistic dynamics: delays, reaction waves, bots appearing/disappearing, following/unfollowing
-- Memory and personality: bots remember history, can change attitude towards the user, react to topic changes
-- Avatar and description generation via external/local AI services (can be cached offline)
-- The entire system can work fully locally, all data stays on the user's device
+## Project Structure
+```
+cartouche-bot-service/
+├── app/
+│   ├── api/
+│   │   └── routes/
+│   │       ├── admin.py
+│   │       ├── bots.py
+│   │       ├── monitoring.py
+│   │       └── __init__.py
+│   ├── clients/
+│   │   ├── llm/
+│   │   │   ├── anthropic.py
+│   │   │   ├── base.py
+│   │   │   ├── gemini.py
+│   │   │   ├── mock.py
+│   │   │   ├── ollama.py
+│   │   │   ├── openai.py
+│   │   │   └── __init__.py
+│   │   └── cartouche_api.py
+│   ├── core/
+│   │   ├── exceptions.py
+│   │   ├── logging.py
+│   │   └── settings.py
+│   ├── db/
+│   │   ├── repositories/
+│   │   │   ├── activity_repository.py
+│   │   │   ├── bot_repository.py
+│   │   │   └── memory_repository.py
+│   │   ├── models.py
+│   │   └── session.py
+│   ├── models/
+│   │   └── models.py
+│   ├── services/
+│   │   ├── bot_manager.py
+│   │   ├── content_generator.py
+│   │   ├── memory_service.py
+│   │   ├── reaction_engine.py
+│   │   └── scheduler.py
+│   ├── tests/
+│   │   └── mock_api.py
+│   ├── utils/
+│   │   └── avatar_generator.py
+│   └── main.py
+├── data/
+├── logs/
+├── tests/
+│   ├── test_api.py
+│   ├── test_core.py
+│   ├── test_e2e.py
+│   └── run_tests.py
+├── .env
+├── .env.example
+├── Dockerfile
+├── docker-compose.yml
+└── requirements.txt
+```
 
----
+## Installation
 
-## Technologies
+### Prerequisites
+- Python 3.11+
+- SQLite (for development)
+- Docker and Docker Compose (for production)
 
-- Python 3.10+, FastAPI, LangChain, OpenAI/Gemini/LLama.cpp, SQLite (or PostgreSQL/Redis), asyncio
-- All bot logic, memory, and generation — in the Python service
-- C# backend — only for data storage and command proxying
-- Can be run via Docker Compose
+### Development Setup
+1. Clone the repository
+2. Create a virtual environment:
+   ```
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+3. Install dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
+4. Copy `.env.example` to `.env` and configure environment variables
+5. Run the service:
+   ```
+   uvicorn app.main:app --reload
+   ```
 
----
+### Production Setup with Docker
+1. Configure environment variables in `docker-compose.yml` or create a `.env` file
+2. Build and start the container:
+   ```
+   docker-compose up -d
+   ```
 
-## How It Works
+## Configuration
+The service is configured through environment variables:
 
-1. The C# backend calls the Python service via REST API (JSON)
-2. The Python service creates/updates bots, generates reactions, comments, posts
-3. All bot actions are returned as ready-to-use JSON events
-4. Bots live autonomously, react to posts, evolve, have memory and personality
+### API Configuration
+- `API_BASE_URL`: Base URL for the Cartouche C# API
+- `API_TOKEN`: Authentication token for the API
+
+### LLM Configuration
+- `GOOGLE_API_KEY`: API key for Google's Gemini
+- `OPENAI_API_KEY`: API key for OpenAI
+- `ANTHROPIC_API_KEY`: API key for Anthropic
+- `DEFAULT_LLM_PROVIDER`: Default LLM provider (gemini, openai, anthropic, ollama, mock)
+- `DEFAULT_LLM_MODEL`: Default model for the selected provider
+- `TEMPERATURE`: Temperature for text generation
+- `MAX_TOKENS`: Maximum tokens for generated responses
+
+### Bot Configuration
+- `INITIAL_BOTS_COUNT`: Number of bots to create at startup
+- `DAILY_BOTS_GROWTH_MIN`: Minimum daily bot growth
+- `DAILY_BOTS_GROWTH_MAX`: Maximum daily bot growth
+- `MAX_BOTS_COUNT`: Maximum number of bots allowed
+
+### Testing
+- `TEST_MODE`: When set to "true", uses mock LLM clients instead of real APIs
+
+## API Endpoints
+
+### Bot Management
+- `GET /bots`: List all bots
+- `GET /bots/{bot_id}`: Get bot details
+- `POST /bots`: Create a new bot
+- `DELETE /bots/{bot_id}`: Delete a bot
+
+### Admin
+- `POST /admin/initialize`: Initialize bot population
+- `POST /admin/daily-growth`: Trigger daily bot growth
+- `GET /admin/stats`: Get system statistics
+- `POST /admin/settings`: Update system settings
+
+### Monitoring
+- `GET /monitoring/health`: Health check
+- `GET /monitoring/metrics`: System metrics
+
+## Testing
+Run the test suite:
+```
+python tests/run_tests.py
+```
+
+For testing without external API dependencies:
+```
+TEST_MODE=true python tests/run_tests.py
+```
 
 ## License
-
-Open source, non-commercial use.
-
----
-
-**Project is under active development**
+This project is open source and available under the MIT License.

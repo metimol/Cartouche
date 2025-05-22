@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  cartouche-bot-service:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    environment:
+      - API_BASE_URL=https://fraplat.tech/mars/Cartouche
+      - API_TOKEN=123
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - DEFAULT_LLM_PROVIDER=gemini
+      - DEFAULT_LLM_MODEL=gemini-1.5-pro
+      - DB_PATH=data/cartouche.db
+      - VECTOR_DB_PATH=data/vector_store
+      - INITIAL_BOTS_COUNT=20
+      - MAX_BOTS_COUNT=5000
+      - LOG_LEVEL=INFO
+    restart: unless-stopped

@@ -1,6 +1,6 @@
 """
-API interface for the Cartouche Autonomous Service.
-Handles communication with the main C# REST API.
+API client for the Cartouche C# REST API.
+Handles communication with the main C# backend.
 """
 import logging
 import aiohttp
@@ -10,12 +10,13 @@ from typing import Dict, List, Any, Optional, Union
 from urllib.parse import urljoin
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-from config import API_BASE_URL, API_TOKEN
+from app.core.settings import API_BASE_URL, API_TOKEN
+from app.core.exceptions import APIError
 
 logger = logging.getLogger(__name__)
 
-class APIClient:
-    """Client for interacting with the Cartouche REST API."""
+class CartoucheAPIClient:
+    """Client for interacting with the Cartouche C# REST API."""
     
     def __init__(self, base_url: str = API_BASE_URL, token: str = API_TOKEN):
         """
@@ -76,12 +77,11 @@ class APIClient:
                 else:
                     error_text = await response.text()
                     logger.error(f"Error getting posts: {response.status} - {error_text}")
-                    response.raise_for_status()
-                    return []
+                    raise APIError(f"Failed to get posts: {error_text}", response.status)
         
         except aiohttp.ClientError as e:
             logger.error(f"Error in get_posts: {str(e)}")
-            raise
+            raise APIError(f"API client error: {str(e)}")
         
         finally:
             if need_to_close and self.session:
@@ -120,12 +120,11 @@ class APIClient:
                 else:
                     error_text = await response.text()
                     logger.error(f"Error getting users: {response.status} - {error_text}")
-                    response.raise_for_status()
-                    return []
+                    raise APIError(f"Failed to get users: {error_text}", response.status)
         
         except aiohttp.ClientError as e:
             logger.error(f"Error in get_users: {str(e)}")
-            raise
+            raise APIError(f"API client error: {str(e)}")
         
         finally:
             if need_to_close and self.session:
@@ -160,12 +159,11 @@ class APIClient:
                 else:
                     error_text = await response.text()
                     logger.error(f"Error adding bot: {response.status} - {error_text}")
-                    response.raise_for_status()
-                    return {}
+                    raise APIError(f"Failed to add bot: {error_text}", response.status)
         
         except aiohttp.ClientError as e:
             logger.error(f"Error in add_bot: {str(e)}")
-            raise
+            raise APIError(f"API client error: {str(e)}")
         
         finally:
             if need_to_close and self.session:
@@ -200,12 +198,11 @@ class APIClient:
                 else:
                     error_text = await response.text()
                     logger.error(f"Error adding post: {response.status} - {error_text}")
-                    response.raise_for_status()
-                    return {}
+                    raise APIError(f"Failed to add post: {error_text}", response.status)
         
         except aiohttp.ClientError as e:
             logger.error(f"Error in add_post: {str(e)}")
-            raise
+            raise APIError(f"API client error: {str(e)}")
         
         finally:
             if need_to_close and self.session:
@@ -242,12 +239,11 @@ class APIClient:
                 else:
                     error_text = await response.text()
                     logger.error(f"Error liking post: {response.status} - {error_text}")
-                    response.raise_for_status()
-                    return {}
+                    raise APIError(f"Failed to like post: {error_text}", response.status)
         
         except aiohttp.ClientError as e:
             logger.error(f"Error in like_post: {str(e)}")
-            raise
+            raise APIError(f"API client error: {str(e)}")
         
         finally:
             if need_to_close and self.session:
@@ -287,12 +283,11 @@ class APIClient:
                 else:
                     error_text = await response.text()
                     logger.error(f"Error adding comment: {response.status} - {error_text}")
-                    response.raise_for_status()
-                    return {}
+                    raise APIError(f"Failed to add comment: {error_text}", response.status)
         
         except aiohttp.ClientError as e:
             logger.error(f"Error in add_comment: {str(e)}")
-            raise
+            raise APIError(f"API client error: {str(e)}")
         
         finally:
             if need_to_close and self.session:

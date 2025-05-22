@@ -1,0 +1,156 @@
+"""
+Core settings module for the Cartouche Bot Service.
+Loads configuration from environment variables.
+"""
+import os
+from pathlib import Path
+from typing import Optional, Dict, Any, List
+
+from dotenv import load_dotenv
+
+# Load environment variables from .env file if it exists
+env_path = Path(__file__).parent.parent.parent / ".env"
+if env_path.exists():
+    load_dotenv(dotenv_path=str(env_path))
+
+# API Configuration
+API_BASE_URL = os.getenv("API_BASE_URL", "https://fraplat.tech/mars/Cartouche")
+API_TOKEN = os.getenv("API_TOKEN", "123")
+
+# LLM Configuration
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+DEFAULT_LLM_PROVIDER = os.getenv("DEFAULT_LLM_PROVIDER", "gemini")
+DEFAULT_LLM_MODEL = os.getenv("DEFAULT_LLM_MODEL", "gemini-1.5-pro")
+TEMPERATURE = float(os.getenv("TEMPERATURE", "0.7"))
+MAX_TOKENS = int(os.getenv("MAX_TOKENS", "1024"))
+
+# Database Configuration
+DB_PATH = os.getenv("DB_PATH", "data/cartouche.db")
+VECTOR_DB_PATH = os.getenv("VECTOR_DB_PATH", "data/vector_store")
+
+# Bot Configuration
+INITIAL_BOTS_COUNT = int(os.getenv("INITIAL_BOTS_COUNT", "20"))
+DAILY_BOTS_GROWTH_MIN = int(os.getenv("DAILY_BOTS_GROWTH_MIN", "20"))
+DAILY_BOTS_GROWTH_MAX = int(os.getenv("DAILY_BOTS_GROWTH_MAX", "50"))
+MAX_BOTS_COUNT = int(os.getenv("MAX_BOTS_COUNT", "5000"))
+
+# Monitoring Configuration
+MONITORING_INTERVAL = int(os.getenv("MONITORING_INTERVAL", "60"))
+REACTION_DELAY_MIN = int(os.getenv("REACTION_DELAY_MIN", "30"))
+REACTION_DELAY_MAX = int(os.getenv("REACTION_DELAY_MAX", "300"))
+
+# Logging Configuration
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+LOG_FILE = os.getenv("LOG_FILE", "logs/cartouche.log")
+
+# LLM Provider mapping
+LLM_PROVIDERS = {
+    "gemini": {
+        "api_key": GOOGLE_API_KEY,
+        "models": ["gemini-1.5-pro"]
+    },
+    "openai": {
+        "api_key": OPENAI_API_KEY,
+        "models": ["gpt-3.5-turbo", "gpt-4"]
+    },
+    "anthropic": {
+        "api_key": ANTHROPIC_API_KEY,
+        "models": ["claude-3-opus", "claude-3-sonnet", "claude-3-haiku"]
+    },
+    "ollama": {
+        "base_url": OLLAMA_BASE_URL,
+        "models": ["llama2", "mistral"]
+    }
+}
+
+# Bot categories and their base probabilities
+BOT_CATEGORIES = {
+    "fan": {
+        "like_probability": 0.8,
+        "comment_probability": 0.5,
+        "follow_probability": 0.7,
+        "unfollow_probability": 0.1,
+        "repost_probability": 0.2,
+        "description": "Supportive, enthusiastic, positive"
+    },
+    "hater": {
+        "like_probability": 0.1,
+        "comment_probability": 0.4,
+        "follow_probability": 0.2,
+        "unfollow_probability": 0.6,
+        "repost_probability": 0.05,
+        "description": "Critical, negative, provocative"
+    },
+    "silent": {
+        "like_probability": 0.4,
+        "comment_probability": 0.1,
+        "follow_probability": 0.3,
+        "unfollow_probability": 0.2,
+        "repost_probability": 0.05,
+        "description": "Observant, rarely comments, occasional likes"
+    },
+    "random": {
+        "like_probability": 0.5,
+        "comment_probability": 0.3,
+        "follow_probability": 0.4,
+        "unfollow_probability": 0.4,
+        "repost_probability": 0.1,
+        "description": "Unpredictable, varied behavior"
+    },
+    "neutral": {
+        "like_probability": 0.5,
+        "comment_probability": 0.3,
+        "follow_probability": 0.5,
+        "unfollow_probability": 0.3,
+        "repost_probability": 0.1,
+        "description": "Balanced, rational, thoughtful"
+    },
+    "humorous": {
+        "like_probability": 0.7,
+        "comment_probability": 0.6,
+        "follow_probability": 0.6,
+        "unfollow_probability": 0.2,
+        "repost_probability": 0.15,
+        "description": "Funny, sarcastic, meme-oriented"
+    },
+    "provocative": {
+        "like_probability": 0.3,
+        "comment_probability": 0.7,
+        "follow_probability": 0.4,
+        "unfollow_probability": 0.5,
+        "repost_probability": 0.1,
+        "description": "Challenging, questioning, debate-oriented"
+    },
+    "role_player": {
+        "like_probability": 0.6,
+        "comment_probability": 0.5,
+        "follow_probability": 0.5,
+        "unfollow_probability": 0.3,
+        "repost_probability": 0.15,
+        "description": "In-character, consistent persona"
+    }
+}
+
+# Base prompts for bot behavior
+BOT_PROMPTS = {
+    "fan": "You are an enthusiastic fan who loves the content. Your comments are supportive and positive.",
+    "hater": "You are critical of the content. Your comments point out flaws and are sometimes negative.",
+    "silent": "You rarely comment, but when you do, it's thoughtful and concise.",
+    "random": "Your behavior is unpredictable. Sometimes supportive, sometimes critical, sometimes off-topic.",
+    "neutral": "You are balanced and rational. Your comments are thoughtful and objective.",
+    "humorous": "You love humor and memes. Your comments are funny, sometimes sarcastic.",
+    "provocative": "You like to challenge ideas. Your comments ask difficult questions and provoke thought.",
+    "role_player": "You stay in character as {role}. Your comments reflect this persona consistently."
+}
+
+# Avatar generation options
+AVATAR_STYLES = [
+    "adventurer", "adventurer-neutral", "avataaars", "avataaars-neutral",
+    "big-ears", "big-ears-neutral", "big-smile", "bottts", "croodles",
+    "croodles-neutral", "fun-emoji", "icons", "identicon", "initials",
+    "lorelei", "lorelei-neutral", "micah", "miniavs", "notionists",
+    "open-peeps", "personas", "pixel-art", "pixel-art-neutral"
+]
