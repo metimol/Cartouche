@@ -16,12 +16,12 @@ MAIN_APP_API_KEY = os.getenv("MAIN_APP_API_KEY", "test_api_key")
 # LLM settings
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
 LLM_MODEL = os.getenv("LLM_MODEL", "gemini-pro")
-DEFAULT_LLM_MODEL = os.getenv("DEFAULT_LLM_MODEL", "gemini-pro")  # Added for compatibility
-LIGHT_LLM_MODEL = os.getenv("LIGHT_LLM_MODEL", "gemini-pro-vision")  # Added for compatibility
+DEFAULT_LLM_MODEL = os.getenv("DEFAULT_LLM_MODEL", "gemini-pro")
+LIGHT_LLM_MODEL = os.getenv("LIGHT_LLM_MODEL", "gemini-pro-vision")
 LLM_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", "0.7"))
-TEMPERATURE = float(os.getenv("TEMPERATURE", "0.7"))  # Added for compatibility
+TEMPERATURE = float(os.getenv("TEMPERATURE", "0.7"))
 LLM_MAX_TOKENS = int(os.getenv("LLM_MAX_TOKENS", "1024"))
-MAX_TOKENS = int(os.getenv("MAX_TOKENS", "1024"))  # Added for compatibility
+MAX_TOKENS = int(os.getenv("MAX_TOKENS", "1024"))
 LLM_TIMEOUT = int(os.getenv("LLM_TIMEOUT", "30"))
 
 # Bot settings
@@ -29,7 +29,7 @@ MAX_DAILY_NEW_BOTS = int(os.getenv("MAX_DAILY_NEW_BOTS", "30"))
 DEFAULT_LANGUAGE = os.getenv("DEFAULT_LANGUAGE", "en")
 
 # Database settings
-DB_PATH = os.getenv("DB_PATH", "/tmp/cartouche_bots.db")  # Added for BotManager
+DB_PATH = os.getenv("DB_PATH", "/tmp/cartouche_bots.db")
 
 # Language settings
 SUPPORTED_LANGUAGES = ["en", "ru", "es", "fr", "de", "it", "pt", "ja", "zh", "ko"]
