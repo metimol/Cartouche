@@ -15,9 +15,9 @@ MAIN_APP_API_KEY = os.getenv("MAIN_APP_API_KEY", "test_api_key")
 
 # LLM settings
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
-LLM_MODEL = os.getenv("LLM_MODEL", "gemini-pro")
-DEFAULT_LLM_MODEL = os.getenv("DEFAULT_LLM_MODEL", "gemini-pro")
-LIGHT_LLM_MODEL = os.getenv("LIGHT_LLM_MODEL", "gemini-pro-vision")
+LLM_MODEL = os.getenv("LLM_MODEL", "gemini-2.0-flash")
+DEFAULT_LLM_MODEL = os.getenv("DEFAULT_LLM_MODEL", "gemini-2.0-flash")
+LIGHT_LLM_MODEL = os.getenv("LIGHT_LLM_MODEL", "gemini-2.0-flash-lite")
 LLM_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", "0.7"))
 TEMPERATURE = float(os.getenv("TEMPERATURE", "0.7"))
 LLM_MAX_TOKENS = int(os.getenv("LLM_MAX_TOKENS", "1024"))
