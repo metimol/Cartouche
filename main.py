@@ -2,9 +2,11 @@
 Main application for the Cartouche Bot Service.
 """
 import logging
-from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks, Header
+from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional, List, Dict, Any
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.openapi.utils import get_openapi
 
 from models import (
     Post, Bot, BotCreationRequest, APIResponse, 
@@ -44,6 +46,32 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+security = HTTPBearer()
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        description=app.description,
+        routes=app.routes,
+    )
+    openapi_schema["components"]["securitySchemes"] = {
+        "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT"
+        }
+    }
+    for path in openapi_schema["paths"].values():
+        for method in path.values():
+            method.setdefault("security", []).append({"BearerAuth": []})
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi
+
 # Health check endpoint
 @app.get("/api/v1/health", response_model=APIResponse)
 async def health_check():
@@ -55,7 +83,6 @@ async def health_check():
 async def process_post(
     request: PostProcessingRequest,
     background_tasks: BackgroundTasks,
-    authorization: Optional[str] = Header(None),
     api_key: str = Depends(verify_api_key)
 ):
     """
@@ -82,7 +109,6 @@ async def process_post(
 @app.get("/api/v1/tasks/{task_id}", response_model=APIResponse)
 async def get_task_status(
     task_id: str,
-    authorization: Optional[str] = Header(None),
     api_key: str = Depends(verify_api_key)
 ):
     """
@@ -125,7 +151,6 @@ async def get_bots(
     limit: int = 100,
     offset: int = 0,
     category: Optional[str] = None,
-    authorization: Optional[str] = Header(None),
     api_key: str = Depends(verify_api_key)
 ):
     """
@@ -160,7 +185,6 @@ async def get_bots(
 @app.get("/api/v1/bots/{bot_id}", response_model=APIResponse)
 async def get_bot(
     bot_id: int,
-    authorization: Optional[str] = Header(None),
     api_key: str = Depends(verify_api_key)
 ):
     """
@@ -192,7 +216,6 @@ async def get_bot(
 async def create_new_bot(
     request: BotCreationRequest,
     background_tasks: BackgroundTasks,
-    authorization: Optional[str] = Header(None),
     api_key: str = Depends(verify_api_key)
 ):
     """
@@ -218,7 +241,6 @@ async def create_new_bot(
 @app.post("/api/v1/bots/initialize", response_model=APIResponse)
 async def initialize_bots(
     background_tasks: BackgroundTasks,
-    authorization: Optional[str] = Header(None),
     api_key: str = Depends(verify_api_key)
 ):
     """
@@ -255,7 +277,6 @@ async def generate_feed(
     limit: int = 20,
     user_id: Optional[str] = None,
     language: str = "en",
-    authorization: Optional[str] = Header(None),
     api_key: str = Depends(verify_api_key)
 ):
     """
@@ -281,7 +302,6 @@ async def generate_feed(
 @app.post("/api/v1/subscriptions/process", response_model=APIResponse)
 async def process_bot_subscriptions(
     background_tasks: BackgroundTasks,
-    authorization: Optional[str] = Header(None),
     api_key: str = Depends(verify_api_key)
 ):
     """
@@ -307,7 +327,6 @@ async def process_bot_subscriptions(
 @app.post("/api/v1/bots/grow", response_model=APIResponse)
 async def grow_bot_population(
     background_tasks: BackgroundTasks,
-    authorization: Optional[str] = Header(None),
     api_key: str = Depends(verify_api_key)
 ):
     """

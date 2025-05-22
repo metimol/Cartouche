@@ -11,7 +11,7 @@ load_dotenv()
 
 # API settings
 MAIN_APP_URL = os.getenv("MAIN_APP_URL", "http://localhost:8000")
-MAIN_APP_API_KEY = os.getenv("MAIN_APP_API_KEY", "test_api_key")
+MAIN_APP_API_KEY = os.getenv("MAIN_APP_API_KEY", "test")
 
 # LLM settings
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
