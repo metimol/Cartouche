@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class GeminiClient(BaseLLMClient):
     """Client for interacting with Google's Gemini API."""
     
-    def __init__(self, api_key: str, model: str = "gemini-1.5-pro"):
+    def __init__(self, api_key: str, model: str = "gemini-2.0-flash"):
         """
         Initialize the Gemini client.
         

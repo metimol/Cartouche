@@ -50,7 +50,7 @@ class LLMFactory:
         
         try:
             if provider == "gemini":
-                return GeminiClient(api_key=api_key, model=model or "gemini-1.5-pro")
+                return GeminiClient(api_key=api_key, model=model or "gemini-2.0-flash")
             elif provider == "openai":
                 return OpenAIClient(api_key=api_key, model=model or "gpt-3.5-turbo")
             elif provider == "anthropic":

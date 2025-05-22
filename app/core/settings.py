@@ -23,7 +23,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 DEFAULT_LLM_PROVIDER = os.getenv("DEFAULT_LLM_PROVIDER", "gemini")
-DEFAULT_LLM_MODEL = os.getenv("DEFAULT_LLM_MODEL", "gemini-1.5-pro")
+DEFAULT_LLM_MODEL = os.getenv("DEFAULT_LLM_MODEL", "gemini-2.0-flash")
 TEMPERATURE = float(os.getenv("TEMPERATURE", "0.7"))
 MAX_TOKENS = int(os.getenv("MAX_TOKENS", "1024"))
 
@@ -50,7 +50,7 @@ LOG_FILE = os.getenv("LOG_FILE", "logs/cartouche.log")
 LLM_PROVIDERS = {
     "gemini": {
         "api_key": GOOGLE_API_KEY,
-        "models": ["gemini-1.5-pro"]
+        "models": ["gemini-2.0-flash"]
     },
     "openai": {
         "api_key": OPENAI_API_KEY,

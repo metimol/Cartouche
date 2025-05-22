@@ -13,7 +13,7 @@ services:
       - API_TOKEN=123
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - DEFAULT_LLM_PROVIDER=gemini
-      - DEFAULT_LLM_MODEL=gemini-1.5-pro
+      - DEFAULT_LLM_MODEL=gemini-2.0-flash
       - DB_PATH=data/cartouche.db
       - VECTOR_DB_PATH=data/vector_store
       - INITIAL_BOTS_COUNT=20
