@@ -210,7 +210,7 @@ class CartoucheAPIClient:
 
         try:
             async with self.session.post(
-                url, params=params, json=post_data
+                url, json=post_data
             ) as response:
                 if response.status == 200:
                     return await response.json()
