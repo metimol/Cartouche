@@ -58,7 +58,7 @@ class BotResponse(BotBase):
     repost_probability: float
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # Memory Models
@@ -85,6 +85,7 @@ class MemoryResponse(MemoryBase):
 
     class Config:
         orm_mode = True
+        from_attributes = True
 
 
 # Activity Models
@@ -111,6 +112,7 @@ class ActivityResponse(ActivityBase):
 
     class Config:
         orm_mode = True
+        from_attributes = True
 
 
 # Post Models (for interacting with C# API)

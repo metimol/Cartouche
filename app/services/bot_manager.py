@@ -382,7 +382,7 @@ class BotManager:
                 {
                     "bot_id": bot_id,
                     "activity_type": "post",
-                    "target_id": str(response.get("_id", "")),
+                    "target_id": str(response.get("id", "")),
                     "content": post_text,
                 }
             )

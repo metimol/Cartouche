@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 from app.db.session import get_db
 from app.db.repositories.bot_repository import BotRepository
 from app.db.repositories.activity_repository import ActivityRepository
+from app.db.repositories.memory_repository import MemoryRepository
 from app.services.reaction_engine import ReactionEngine
 from app.services.bot_manager import BotManager
 from app.services.content_generator import ContentGenerator

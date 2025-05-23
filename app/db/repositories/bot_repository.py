@@ -4,7 +4,7 @@ Handles database operations for bots.
 """
 
 from typing import List, Optional, Dict, Any
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
@@ -200,7 +200,7 @@ class BotRepository:
         Returns:
             List of bots
         """
-        cutoff = datetime.utcnow() - datetime.timedelta(hours=hours)
+        cutoff = datetime.utcnow() - timedelta(hours=hours)
         return (
             self.db.query(Bot)
             .filter(Bot.last_active >= cutoff)
