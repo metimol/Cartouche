@@ -11,7 +11,6 @@ from app.clients.llm.base import BaseLLMClient
 from app.clients.llm.gemini import GeminiClient
 from app.clients.llm.openai import OpenAIClient
 from app.clients.llm.anthropic import AnthropicClient
-from app.clients.llm.mock import MockLLMClient
 from app.core.settings import DEFAULT_LLM_PROVIDER, LLM_PROVIDERS
 from app.core.exceptions import LLMError
 
@@ -46,27 +45,16 @@ class LLMFactory:
         Raises:
             LLMError: If provider is not supported
         """
-        # Use mock client in test mode or if explicitly requested
-        if TEST_MODE or provider == "mock":
-            logger.info("Using MockLLMClient for testing")
-            return MockLLMClient(model=model or "mock-model")
-
-        try:
-            if provider == "gemini":
-                return GeminiClient(api_key=api_key, model=model or "gemini-2.0-flash")
-            elif provider == "openai":
-                return OpenAIClient(api_key=api_key, model=model or "gpt-3.5-turbo")
-            elif provider == "anthropic":
-                return AnthropicClient(
-                    api_key=api_key, model=model or "claude-3-sonnet"
-                )
-            else:
-                raise LLMError(f"Unsupported LLM provider: {provider}")
-        except Exception as e:
-            logger.warning(
-                f"Error creating {provider} client: {str(e)}. Falling back to mock client."
+        if provider == "gemini":
+            return GeminiClient(api_key=api_key, model=model or "gemini-2.0-flash")
+        elif provider == "openai":
+            return OpenAIClient(api_key=api_key, model=model or "gpt-3.5-turbo")
+        elif provider == "anthropic":
+            return AnthropicClient(
+                api_key=api_key, model=model or "claude-3-sonnet"
             )
-            return MockLLMClient(model=f"mock-{provider}")
+        else:
+            raise LLMError(f"Unsupported LLM provider: {provider}")
 
     @staticmethod
     def get_available_providers() -> List[str]:
@@ -77,7 +65,6 @@ class LLMFactory:
             List of provider names
         """
         providers = list(LLM_PROVIDERS.keys())
-        providers.append("mock")  # Always include mock provider
         return providers
 
     @staticmethod
@@ -94,9 +81,7 @@ class LLMFactory:
         Raises:
             LLMError: If provider is not supported
         """
-        if provider == "mock":
-            return ["mock-model", "mock-model-large", "mock-model-small"]
-        elif provider in LLM_PROVIDERS:
+        if provider in LLM_PROVIDERS:
             return LLM_PROVIDERS[provider]["models"]
         else:
             raise LLMError(f"Unsupported LLM provider: {provider}")

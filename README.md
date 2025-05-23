@@ -11,7 +11,6 @@ Cartouche Bot Service is a FastAPI-based microservice that manages autonomous so
 - Memory system for contextual interactions
 - Integration with Cartouche C# REST API
 - Support for multiple LLM providers (Gemini, OpenAI, Anthropic)
-- Fallback to mock LLM when API quotas are exceeded
 
 ## Project Structure
 ```
@@ -28,7 +27,6 @@ cartouche-bot-service/
 │   │   │   ├── anthropic.py
 │   │   │   ├── base.py
 │   │   │   ├── gemini.py
-│   │   │   ├── mock.py
 │   │   │   ├── openai.py
 │   │   │   └── __init__.py
 │   │   └── cartouche_api.py
@@ -51,8 +49,6 @@ cartouche-bot-service/
 │   │   ├── memory_service.py
 │   │   ├── reaction_engine.py
 │   │   └── scheduler.py
-│   ├── tests/
-│   │   └── mock_api.py
 │   ├── utils/
 │   │   └── avatar_generator.py
 │   └── main.py
@@ -112,7 +108,7 @@ The service is configured through environment variables:
 - `GOOGLE_API_KEY`: API key for Google's Gemini
 - `OPENAI_API_KEY`: API key for OpenAI
 - `ANTHROPIC_API_KEY`: API key for Anthropic
-- `DEFAULT_LLM_PROVIDER`: Default LLM provider (gemini, openai, anthropic, mock)
+- `DEFAULT_LLM_PROVIDER`: Default LLM provider (gemini, openai, anthropic)
 - `DEFAULT_LLM_MODEL`: Default model for the selected provider
 - `TEMPERATURE`: Temperature for text generation
 - `MAX_TOKENS`: Maximum tokens for generated responses
@@ -122,9 +118,6 @@ The service is configured through environment variables:
 - `DAILY_BOTS_GROWTH_MIN`: Minimum daily bot growth
 - `DAILY_BOTS_GROWTH_MAX`: Maximum daily bot growth
 - `MAX_BOTS_COUNT`: Maximum number of bots allowed
-
-### Testing
-- `TEST_MODE`: When set to "true", uses mock LLM clients instead of real APIs
 
 ## API Endpoints
 
