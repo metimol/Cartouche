@@ -47,9 +47,7 @@ class LLMFactory:
         elif provider == "openai":
             return OpenAIClient(api_key=api_key, model=model or "gpt-3.5-turbo")
         elif provider == "anthropic":
-            return AnthropicClient(
-                api_key=api_key, model=model or "claude-3-sonnet"
-            )
+            return AnthropicClient(api_key=api_key, model=model or "claude-3-sonnet")
         else:
             raise LLMError(f"Unsupported LLM provider: {provider}")
 
