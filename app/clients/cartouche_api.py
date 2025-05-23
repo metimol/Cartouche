@@ -5,9 +5,7 @@ Handles communication with the main C# backend.
 import logging
 import aiohttp
 import json
-import asyncio
-from typing import Dict, List, Any, Optional, Union
-from urllib.parse import urljoin
+from typing import Dict, List, Any, Optional
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from app.core.settings import API_BASE_URL, API_TOKEN
@@ -56,12 +54,11 @@ class CartoucheAPIClient:
         Returns:
             List of post dictionaries
         """
-        endpoint = "GetDocuments/Posts/"
+        endpoint = "GetDocuments/Posts"
         if post_id:
             endpoint += f"{post_id}/"
         
-        url = urljoin(self.base_url, endpoint)
-        params = self._get_auth_params()
+        url = f"{self.base_url}/{endpoint}?token={self.token}"
         
         if not self.session:
             self.session = aiohttp.ClientSession()
@@ -70,7 +67,7 @@ class CartoucheAPIClient:
             need_to_close = False
         
         try:
-            async with self.session.get(url, params=params) as response:
+            async with self.session.get(url) as response:
                 if response.status == 200:
                     data = await response.json()
                     return data if isinstance(data, list) else [data]
@@ -99,13 +96,12 @@ class CartoucheAPIClient:
         Returns:
             List of user dictionaries
         """
-        endpoint = "GetDocuments/Users/"
-        url = urljoin(self.base_url, endpoint)
-        params = self._get_auth_params()
+        endpoint = "GetDocuments/Users"
+        url = f"{self.base_url}/{endpoint}?token={self.token}"
         
         if is_bot is not None:
-            params["query"] = json.dumps({"IsBot": is_bot})
-        
+            url += f"&query={json.dumps({'IsBot': is_bot})}"
+
         if not self.session:
             self.session = aiohttp.ClientSession()
             need_to_close = True
@@ -113,7 +109,7 @@ class CartoucheAPIClient:
             need_to_close = False
         
         try:
-            async with self.session.get(url, params=params) as response:
+            async with self.session.get(url) as response:
                 if response.status == 200:
                     data = await response.json()
                     return data
@@ -142,20 +138,24 @@ class CartoucheAPIClient:
         Returns:
             Response data
         """
-        endpoint = "AddDocument/Users/"
-        url = urljoin(self.base_url, endpoint)
-        params = self._get_auth_params()
-        
+        endpoint = "AddDocument/Users"
+        url = f"{self.base_url}/{endpoint}?token={self.token}"
+
         if not self.session:
             self.session = aiohttp.ClientSession()
             need_to_close = True
         else:
             need_to_close = False
-        
+
         try:
-            async with self.session.post(url, params=params, json=bot_data) as response:
+            async with self.session.post(url, json=bot_data) as response:
                 if response.status == 200:
-                    return await response.json()
+                    try:
+                        return await response.json()
+                    except Exception as e:
+                        text = await response.text()
+                        logger.error(f"Failed to decode JSON, got: {text}")
+                        raise APIError(f"Failed to decode JSON: {text}")
                 else:
                     error_text = await response.text()
                     logger.error(f"Error adding bot: {response.status} - {error_text}")
@@ -181,10 +181,9 @@ class CartoucheAPIClient:
         Returns:
             Response data
         """
-        endpoint = "AddDocument/Posts/"
-        url = urljoin(self.base_url, endpoint)
-        params = self._get_auth_params()
-        
+        endpoint = "AddDocument/Posts"
+        url = f"{self.base_url}/{endpoint}?token={self.token}"
+
         if not self.session:
             self.session = aiohttp.ClientSession()
             need_to_close = True
@@ -221,9 +220,8 @@ class CartoucheAPIClient:
         Returns:
             Response data
         """
-        endpoint = f"UpdateDocument/Posts/{post_id}/"
-        url = urljoin(self.base_url, endpoint)
-        params = self._get_auth_params()
+        endpoint = f"UpdateDocument/Posts/{post_id}"
+        url = f"{self.base_url}/{endpoint}?token={self.token}"
         data = {"Likes": ["Add", bot_name]}
         
         if not self.session:
@@ -233,7 +231,7 @@ class CartoucheAPIClient:
             need_to_close = False
         
         try:
-            async with self.session.post(url, params=params, json=data) as response:
+            async with self.session.post(url, json=data) as response:
                 if response.status == 200:
                     return await response.json()
                 else:
@@ -262,9 +260,8 @@ class CartoucheAPIClient:
         Returns:
             Response data
         """
-        endpoint = f"UpdateDocument/Posts/{post_id}/"
-        url = urljoin(self.base_url, endpoint)
-        params = self._get_auth_params()
+        endpoint = f"UpdateDocument/Posts/{post_id}"
+        url = f"{self.base_url}/{endpoint}?token={self.token}"
         
         # Format comment data as a string
         comment_str = str(comment_data).replace("'", "'")
@@ -277,7 +274,7 @@ class CartoucheAPIClient:
             need_to_close = False
         
         try:
-            async with self.session.post(url, params=params, json=data) as response:
+            async with self.session.post(url, json=data) as response:
                 if response.status == 200:
                     return await response.json()
                 else:

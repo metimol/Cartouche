@@ -117,16 +117,16 @@ class BotManager:
             category = random.choice(list(BOT_CATEGORIES.keys()))
             gender = random.choice(["Male", "Female"])
             age = random.randint(18, 65)
-            
-            # Generate name and description
-            name = await self.content_generator.generate_bot_name(category)
+
+            # Generate unique username and description
+            name = await self.content_generator.generate_unique_bot_name(category, self.bot_repository)
             full_name = name.replace("_", " ").title()
             description = await self.content_generator.generate_bot_description(category, age, gender)
-            
+
             # Generate avatar
             avatar_style = random.choice(AVATAR_STYLES)
             avatar = await AvatarGenerator.generate_dicebear_avatar(avatar_style)
-            
+
             # Set probabilities based on category
             category_probs = BOT_CATEGORIES.get(category, {})
             like_probability = category_probs.get("like_probability", 0.5)
@@ -134,21 +134,21 @@ class BotManager:
             follow_probability = category_probs.get("follow_probability", 0.4)
             unfollow_probability = category_probs.get("unfollow_probability", 0.2)
             repost_probability = category_probs.get("repost_probability", 0.1)
-            
+
             # Add some randomness to probabilities
             like_probability += random.uniform(-0.1, 0.1)
             comment_probability += random.uniform(-0.1, 0.1)
             follow_probability += random.uniform(-0.1, 0.1)
             unfollow_probability += random.uniform(-0.1, 0.1)
             repost_probability += random.uniform(-0.05, 0.05)
-            
+
             # Ensure probabilities are within bounds
             like_probability = max(0.1, min(0.9, like_probability))
             comment_probability = max(0.1, min(0.9, comment_probability))
             follow_probability = max(0.1, min(0.9, follow_probability))
             unfollow_probability = max(0.1, min(0.9, unfollow_probability))
             repost_probability = max(0.0, min(0.3, repost_probability))
-            
+
             # Create bot in local database
             bot_data = {
                 "name": name,
@@ -165,9 +165,9 @@ class BotManager:
                 "unfollow_probability": unfollow_probability,
                 "repost_probability": repost_probability
             }
-            
+
             bot = self.bot_repository.create_bot(bot_data)
-            
+
             # Create bot in C# API
             api_bot_data = {
                 "Age": age,
@@ -181,11 +181,11 @@ class BotManager:
                 "Prompt": BOT_PROMPTS.get(category, ""),
                 "Following": []
             }
-            
+
             await self.api_client.add_bot(api_bot_data)
-            
+
             return bot.to_dict()
-        
+
         except Exception as e:
             logger.error(f"Failed to create random bot: {str(e)}")
             raise BotError(f"Failed to create random bot: {str(e)}")

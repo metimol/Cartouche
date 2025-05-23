@@ -224,3 +224,28 @@ class ContentGenerator:
         except Exception as e:
             logger.error(f"Failed to generate bot name: {str(e)}")
             raise LLMError(f"Failed to generate bot name: {str(e)}")
+    
+    async def generate_unique_bot_name(self, category: str, bot_repository) -> str:
+        """
+        Generate a unique username for a bot, ensuring it does not exist in the database.
+        Args:
+            category: Bot category
+            bot_repository: BotRepository instance
+        Returns:
+            Unique username
+        Raises:
+            LLMError: If generation fails
+        """
+        max_attempts = 10
+        for _ in range(max_attempts):
+            username = await self.generate_bot_name(category)
+            if not bot_repository.get_bot_by_name(username):
+                return username
+        # Fallback: add random suffix if all attempts failed
+        import uuid
+        for _ in range(10):
+            username = await self.generate_bot_name(category)
+            username = f"{username[:12]}_{str(uuid.uuid4())[:2]}"
+            if not bot_repository.get_bot_by_name(username):
+                return username
+        raise LLMError("Failed to generate unique bot username after multiple attempts.")
