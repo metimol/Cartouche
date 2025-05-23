@@ -16,9 +16,6 @@ from app.core.exceptions import LLMError
 
 logger = logging.getLogger(__name__)
 
-# Check if we're in test mode
-TEST_MODE = os.getenv("TEST_MODE", "false").lower() == "true"
-
 
 class LLMFactory:
     """Factory for creating LLM clients."""

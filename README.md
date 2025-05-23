@@ -54,11 +54,6 @@ cartouche-bot-service/
 │   └── main.py
 ├── data/
 ├── logs/
-├── tests/
-│   ├── test_api.py
-│   ├── test_core.py
-│   ├── test_e2e.py
-│   └── run_tests.py
 ├── .env
 ├── .env.example
 ├── Dockerfile
@@ -136,16 +131,6 @@ The service is configured through environment variables:
 ### Monitoring
 - `GET /monitoring/health`: Health check
 - `GET /monitoring/metrics`: System metrics
-
-## Testing
-Run the test suite:
-```
-python tests/run_tests.py
-```
-
-For testing without external API dependencies:
-```
-TEST_MODE=true python tests/run_tests.py
 ```
 
 ## License
