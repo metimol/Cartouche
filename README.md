@@ -10,7 +10,7 @@ Cartouche Bot Service is a FastAPI-based microservice that manages autonomous so
 - Scheduled bot activities with randomized timing
 - Memory system for contextual interactions
 - Integration with Cartouche C# REST API
-- Support for multiple LLM providers (Gemini, OpenAI, Anthropic, Ollama)
+- Support for multiple LLM providers (Gemini, OpenAI, Anthropic)
 - Fallback to mock LLM when API quotas are exceeded
 
 ## Project Structure
@@ -29,7 +29,6 @@ cartouche-bot-service/
 │   │   │   ├── base.py
 │   │   │   ├── gemini.py
 │   │   │   ├── mock.py
-│   │   │   ├── ollama.py
 │   │   │   ├── openai.py
 │   │   │   └── __init__.py
 │   │   └── cartouche_api.py
@@ -113,7 +112,7 @@ The service is configured through environment variables:
 - `GOOGLE_API_KEY`: API key for Google's Gemini
 - `OPENAI_API_KEY`: API key for OpenAI
 - `ANTHROPIC_API_KEY`: API key for Anthropic
-- `DEFAULT_LLM_PROVIDER`: Default LLM provider (gemini, openai, anthropic, ollama, mock)
+- `DEFAULT_LLM_PROVIDER`: Default LLM provider (gemini, openai, anthropic, mock)
 - `DEFAULT_LLM_MODEL`: Default model for the selected provider
 - `TEMPERATURE`: Temperature for text generation
 - `MAX_TOKENS`: Maximum tokens for generated responses

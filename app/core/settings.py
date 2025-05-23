@@ -22,7 +22,6 @@ API_TOKEN = os.getenv("API_TOKEN", "123")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
-OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 DEFAULT_LLM_PROVIDER = os.getenv("DEFAULT_LLM_PROVIDER", "gemini")
 DEFAULT_LLM_MODEL = os.getenv("DEFAULT_LLM_MODEL", "gemini-2.0-flash")
 TEMPERATURE = float(os.getenv("TEMPERATURE", "0.7"))
@@ -101,7 +100,6 @@ LLM_PROVIDERS = {
         "api_key": ANTHROPIC_API_KEY,
         "models": ["claude-3-opus", "claude-3-sonnet", "claude-3-haiku"],
     },
-    "ollama": {"base_url": OLLAMA_BASE_URL, "models": ["llama2", "mistral"]},
 }
 
 # Bot categories and their base probabilities

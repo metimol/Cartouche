@@ -11,7 +11,6 @@ from app.clients.llm.base import BaseLLMClient
 from app.clients.llm.gemini import GeminiClient
 from app.clients.llm.openai import OpenAIClient
 from app.clients.llm.anthropic import AnthropicClient
-from app.clients.llm.ollama import OllamaClient
 from app.clients.llm.mock import MockLLMClient
 from app.core.settings import DEFAULT_LLM_PROVIDER, LLM_PROVIDERS
 from app.core.exceptions import LLMError
@@ -38,7 +37,7 @@ class LLMFactory:
         Args:
             provider: LLM provider name
             api_key: Optional API key
-            base_url: Optional base URL (for Ollama)
+            base_url: Optional base URL
             model: Optional model name
 
         Returns:
@@ -61,8 +60,6 @@ class LLMFactory:
                 return AnthropicClient(
                     api_key=api_key, model=model or "claude-3-sonnet"
                 )
-            elif provider == "ollama":
-                return OllamaClient(base_url=base_url, model=model or "llama2")
             else:
                 raise LLMError(f"Unsupported LLM provider: {provider}")
         except Exception as e:
