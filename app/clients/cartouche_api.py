@@ -209,9 +209,7 @@ class CartoucheAPIClient:
             need_to_close = False
 
         try:
-            async with self.session.post(
-                url, json=post_data
-            ) as response:
+            async with self.session.post(url, json=post_data) as response:
                 if response.status == 200:
                     return await response.json()
                 else:
