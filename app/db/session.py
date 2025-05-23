@@ -2,6 +2,7 @@
 Database session management for the Cartouche Bot Service.
 Sets up SQLAlchemy connection and session handling.
 """
+
 import os
 from pathlib import Path
 from sqlalchemy import create_engine
@@ -19,8 +20,8 @@ SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_PATH}"
 
 # Create SQLAlchemy engine
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, 
-    connect_args={"check_same_thread": False}  # Needed for SQLite
+    SQLALCHEMY_DATABASE_URL,
+    connect_args={"check_same_thread": False},  # Needed for SQLite
 )
 
 # Create sessionmaker
@@ -28,6 +29,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Create base class for models
 Base = declarative_base()
+
 
 def get_db():
     """

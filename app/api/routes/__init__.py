@@ -1,6 +1,7 @@
 """
 API routes initialization for the Cartouche Bot Service.
 """
+
 from fastapi import APIRouter
 
 from app.api.routes import admin, bots, monitoring
