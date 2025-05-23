@@ -153,38 +153,6 @@ async def delete_bot(bot_id: int, db: Session = Depends(get_db)):
     return {"message": f"Bot {bot_id} deleted successfully"}
 
 
-@router.post("/bots/{bot_id}/post")
-async def create_bot_post(
-    bot_id: int, background_tasks: BackgroundTasks, db: Session = Depends(get_db)
-):
-    """
-    Create a post for a specific bot.
-    """
-    bot_repository = BotRepository(db)
-    memory_repository = MemoryRepository(db)
-    activity_repository = ActivityRepository(db)
-    content_generator = ContentGenerator()
-    api_client = CartoucheAPIClient()
-
-    bot = bot_repository.get_bot_by_id(bot_id)
-    if not bot:
-        raise HTTPException(status_code=404, detail="Bot not found")
-
-    bot_manager = BotManager(
-        bot_repository=bot_repository,
-        memory_repository=memory_repository,
-        activity_repository=activity_repository,
-        content_generator=content_generator,
-        api_client=api_client,
-    )
-
-    # Create post
-    async with api_client:
-        result = await bot_manager.create_bot_post(bot_id)
-
-    return result
-
-
 @router.get("/activities", response_model=List[ActivityResponse])
 async def get_recent_activities(
     limit: int = Query(20, ge=1, le=100), db: Session = Depends(get_db)
