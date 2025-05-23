@@ -19,7 +19,6 @@ from app.models.models import (
     BotCreate,
     BotUpdate,
     ActivityResponse,
-    AdminBotStats,
     AdminSystemStats,
 )
 
@@ -197,29 +196,3 @@ async def get_recent_activities(
     activities = activity_repository.get_recent_activities(limit=limit)
 
     return [ActivityResponse.from_orm(activity) for activity in activities]
-
-
-@router.get("/config")
-async def get_system_config(db: Session = Depends(get_db)):
-    """
-    Get system configuration.
-    """
-    # This would need to be implemented with a config repository
-    return {
-        "initial_bots_count": 20,
-        "daily_bots_growth_min": 20,
-        "daily_bots_growth_max": 50,
-        "max_bots_count": 5000,
-        "monitoring_interval": 60,
-        "reaction_delay_min": 30,
-        "reaction_delay_max": 300,
-    }
-
-
-@router.put("/config")
-async def update_system_config(config: Dict[str, Any], db: Session = Depends(get_db)):
-    """
-    Update system configuration.
-    """
-    # This would need to be implemented with a config repository
-    return {"message": "Configuration updated successfully", "config": config}

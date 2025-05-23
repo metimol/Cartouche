@@ -212,16 +212,6 @@ class SystemConfigResponse(SystemConfigBase):
         orm_mode = True
 
 
-# Admin Models
-class AdminBotStats(BaseModel):
-    """Model for bot statistics."""
-
-    total_bots: int
-    active_bots: int
-    categories: Dict[str, int]
-    recent_activities: List[ActivityResponse]
-
-
 class AdminSystemStats(BaseModel):
     """Model for system statistics."""
 
