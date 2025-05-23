@@ -12,6 +12,7 @@ from app.db.repositories.bot_repository import BotRepository
 from app.db.repositories.memory_repository import MemoryRepository
 from app.db.repositories.activity_repository import ActivityRepository
 from app.services.content_generator import ContentGenerator
+from app.utils.avatar_generator import AvatarGenerator
 from app.clients.cartouche_api import CartoucheAPIClient
 from app.core.settings import (
     BOT_CATEGORIES, INITIAL_BOTS_COUNT, DAILY_BOTS_GROWTH_MIN,
@@ -114,7 +115,7 @@ class BotManager:
         try:
             # Generate random attributes
             category = random.choice(list(BOT_CATEGORIES.keys()))
-            gender = random.choice(["Male", "Female", "Non-binary"])
+            gender = random.choice(["Male", "Female"])
             age = random.randint(18, 65)
             
             # Generate name and description
@@ -124,7 +125,7 @@ class BotManager:
             
             # Generate avatar
             avatar_style = random.choice(AVATAR_STYLES)
-            avatar = f"{name}.png"  # In a real system, this would be generated
+            avatar = await AvatarGenerator.generate_dicebear_avatar(avatar_style)
             
             # Set probabilities based on category
             category_probs = BOT_CATEGORIES.get(category, {})
