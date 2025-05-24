@@ -242,7 +242,7 @@ class CartoucheAPIClient:
         url = f"{self.base_url}/{endpoint}?token={self.token}"
 
         # Format comment data as a string
-        comment_str = str(comment_data).replace("'", "'")
+        comment_str = str(comment_data)
         data = {"Comments": ["Add", comment_str]}
 
         if not self.session:

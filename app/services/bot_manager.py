@@ -337,8 +337,6 @@ class BotManager:
                     # Create comment data
                     comment_data = {
                         "Name": bot.name,
-                        "FullName": bot.full_name,
-                        "Avatar": bot.avatar,
                         "Text": comment_text,
                         "OnDate": datetime.utcnow().strftime("%m/%d/%Y"),
                     }
@@ -397,14 +395,8 @@ class BotManager:
             # Create post data
             post_data = {
                 "Name": bot.name,
-                "FullName": bot.full_name,
-                "Avatar": bot.avatar,
                 "Text": post_text,
                 "OnDate": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S"),
-                "Follow": "Follow",
-                "Unfollow": "Unfollow",
-                "LikePost": "Like Post",
-                "NewComment": "New Comment",
             }
 
             # Add post to API
