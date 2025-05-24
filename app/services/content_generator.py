@@ -195,7 +195,7 @@ Write ONLY a short memory (1 sentence) about how you feel about this {context_ty
             logger.error(f"Failed to generate memory: {str(e)}")
             raise LLMError(f"Failed to generate memory: {str(e)}")
 
-    async def generate_bot_name(self, category: str) -> str:
+    async def generate_bot_username(self, category: str) -> str:
         """
         Generate a username for a bot.
 
@@ -214,7 +214,7 @@ Write ONLY a short memory (1 sentence) about how you feel about this {context_ty
 You are a bot that creates usernames. Write ONLY the username. Do not write anything else. Do not write explanations, greetings, or extra words.
 
 Create a unique social media username for someone who is {category_desc}.
-The username must be a single word or words connected with underscores. No spaces, no special characters, no numbers. The username must be short (max 15 characters) and memorable. Only output the username itself.
+The username must be a single word or words connected with underscores. No spaces, no special characters, no numbers. The username must be short (max 20 characters) and memorable. Only output the username itself.
 Examples:
 funny_friend
 musiclover
@@ -235,7 +235,7 @@ happycat
             logger.error(f"Failed to generate bot name: {str(e)}")
             raise LLMError(f"Failed to generate bot name: {str(e)}")
 
-    async def generate_unique_bot_name(self, category: str, bot_repository) -> str:
+    async def generate_unique_bot_username(self, category: str, bot_repository) -> str:
         """
         Generate a unique username for a bot, ensuring it does not exist in the database.
         Args:
@@ -248,17 +248,49 @@ happycat
         """
         max_attempts = 10
         for _ in range(max_attempts):
-            username = await self.generate_bot_name(category)
+            username = await self.generate_bot_username(category)
             if not bot_repository.get_bot_by_name(username):
                 return username
         # Fallback: add random suffix if all attempts failed
         import uuid
 
         for _ in range(10):
-            username = await self.generate_bot_name(category)
             username = f"{username[:12]}_{str(uuid.uuid4())[:2]}"
             if not bot_repository.get_bot_by_name(username):
                 return username
         raise LLMError(
             "Failed to generate unique bot username after multiple attempts."
         )
+
+    async def generate_full_name(self, gender: str, age: int) -> str:
+        """
+        Generate a realistic full name for a bot based on gender and age.
+
+        Args:
+            gender: Gender of the person (e.g., 'male', 'female', 'non-binary')
+            age: Age of the person
+
+        Returns:
+            Generated full name (first and last name)
+
+        Raises:
+            LLMError: If generation fails
+        """
+        try:
+            prompt = f"""
+You are a bot that creates realistic full names for people. Write ONLY the full name (first and last name). Do not write anything else. Do not write explanations, greetings, or extra words.
+
+Create a realistic full name for a {age}-year-old {gender}.
+The name should be common, natural, and appropriate for the gender and age. Only output the full name itself.
+Examples:
+Emily Carter
+James Lee
+Ava Johnson
+"""
+            full_name = await self.llm_client.generate_text(
+                prompt=prompt, max_tokens=20, temperature=0.8
+            )
+            return full_name.strip()
+        except Exception as e:
+            logger.error(f"Failed to generate full name: {str(e)}")
+            raise LLMError(f"Failed to generate full name: {str(e)}")

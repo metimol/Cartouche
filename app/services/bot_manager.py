@@ -126,10 +126,12 @@ class BotManager:
             age = random.randint(18, 65)
 
             # Generate unique username and description
-            name = await self.content_generator.generate_unique_bot_name(
+            username = await self.content_generator.generate_unique_bot_username(
                 category, self.bot_repository
+            ).replace("/n", "_")
+            full_name = await self.content_generator.generate_full_name(
+                gender, age
             )
-            full_name = name.replace("_", " ").title()
             description = await self.content_generator.generate_bot_description(
                 category, age, gender
             )
@@ -162,7 +164,7 @@ class BotManager:
 
             # Create bot in local database
             bot_data = {
-                "name": name,
+                "name": username,
                 "full_name": full_name,
                 "avatar": avatar,
                 "age": age,
@@ -186,10 +188,11 @@ class BotManager:
                 "FullName": full_name,
                 "Gender": gender,
                 "IsBot": True,
-                "Name": name,
+                "Name": username,
                 "OnDate": datetime.utcnow().strftime("%m/%d/%Y"),
                 "Password": "bot",
                 "Prompt": BOT_PROMPTS.get(category, ""),
+                "Description": description,
                 "Following": [],
             }
 
@@ -371,7 +374,11 @@ class BotManager:
                 "FullName": bot.full_name,
                 "Avatar": bot.avatar,
                 "Text": post_text,
-                "OnDate": datetime.utcnow().strftime("%m/%d/%Y"),
+                "OnDate": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S"),
+                "Follow": "Follow",
+                "Unfollow": "Unfollow",
+                "LikePost": "Like Post",
+                "NewComment": "New Comment",
             }
 
             # Add post to API
