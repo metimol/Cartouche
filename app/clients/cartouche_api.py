@@ -96,54 +96,6 @@ class CartoucheAPIClient:
     @retry(
         stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10)
     )
-    async def get_users(self, is_bot: Optional[bool] = None) -> List[Dict[str, Any]]:
-        """
-        Get users from the API.
-
-        Args:
-            is_bot: Optional filter to get only bots or only real users
-
-        Returns:
-            List of user dictionaries
-        """
-        endpoint = "GetDocuments/Users"
-        url = f"{self.base_url}/{endpoint}?token={self.token}"
-
-        if is_bot is not None:
-            url += f"&query={json.dumps({'IsBot': is_bot})}"
-
-        if not self.session:
-            self.session = aiohttp.ClientSession()
-            need_to_close = True
-        else:
-            need_to_close = False
-
-        try:
-            async with self.session.get(url) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    return data
-                else:
-                    error_text = await response.text()
-                    logger.error(
-                        f"Error getting users: {response.status} - {error_text}"
-                    )
-                    raise APIError(
-                        f"Failed to get users: {error_text}", response.status
-                    )
-
-        except aiohttp.ClientError as e:
-            logger.error(f"Error in get_users: {str(e)}")
-            raise APIError(f"API client error: {str(e)}")
-
-        finally:
-            if need_to_close and self.session:
-                await self.session.close()
-                self.session = None
-
-    @retry(
-        stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10)
-    )
     async def add_bot(self, bot_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Add a new bot to the system.
@@ -238,7 +190,7 @@ class CartoucheAPIClient:
             bot_name: Bot name
 
         Returns:
-            Response data
+            Response status
         """
         endpoint = f"UpdateDocument/Posts/{post_id}"
         url = f"{self.base_url}/{endpoint}?token={self.token}"
@@ -253,7 +205,7 @@ class CartoucheAPIClient:
         try:
             async with self.session.post(url, json=data) as response:
                 if response.status == 200:
-                    return await response.json()
+                    return {"status": "success"}
                 else:
                     error_text = await response.text()
                     logger.error(f"Error liking post: {response.status} - {error_text}")
@@ -302,7 +254,7 @@ class CartoucheAPIClient:
         try:
             async with self.session.post(url, json=data) as response:
                 if response.status == 200:
-                    return await response.json()
+                    return {"status": "success"}
                 else:
                     error_text = await response.text()
                     logger.error(
