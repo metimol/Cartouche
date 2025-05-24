@@ -60,7 +60,7 @@ class CartoucheAPIClient:
         """
         endpoint = "GetDocuments/Posts"
         if post_id:
-            endpoint += f"{post_id}/"
+            endpoint += f"/{post_id}"
 
         url = f"{self.base_url}/{endpoint}?token={self.token}"
 

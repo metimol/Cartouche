@@ -248,9 +248,33 @@ class BotManager:
                 logger.info(f"No posts available for bot {bot.name} to react to")
                 return {"status": "no_posts", "bot_id": bot_id}
 
-            # Select a random post
-            post = random.choice(posts)
-            post_id = post.get("_id")
+            # Filter posts from the last 3 days (including today)
+            now = datetime.utcnow()
+            three_days_ago = now - timedelta(days=2)
+            recent_posts = []
+            for post in posts:
+                # Try to get date from post['json']['OnDate']
+                post_json = post.get("json", {})
+                on_date_str = post_json.get("OnDate")
+                post_date = None
+                if on_date_str:
+                    # Try several date formats
+                    for fmt in ("%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%S.%f", "%m/%d/%Y", "%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S.%f%z"):
+                        try:
+                            post_date = datetime.strptime(on_date_str, fmt)
+                            break
+                        except Exception:
+                            continue
+                if post_date and three_days_ago.date() <= post_date.date() <= now.date():
+                    recent_posts.append(post)
+
+            if not recent_posts:
+                logger.info(f"No recent posts (last 3 days) for bot {bot.name} to react to")
+                return {"status": "no_recent_posts", "bot_id": bot_id}
+
+            # Select a random recent post
+            post = random.choice(recent_posts)
+            post_id = post.get("docID")
 
             # Check if bot has already interacted with this post
             has_liked = self.activity_repository.check_activity_exists(
