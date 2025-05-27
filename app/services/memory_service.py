@@ -3,19 +3,20 @@ Memory service for the Cartouche Bot Service.
 Handles vector storage and retrieval of bot memories.
 """
 
-from typing import Dict, List, Any, Optional
-import logging
+from typing import Dict, List, Any
 import os
 from pathlib import Path
 
 from langchain_community.vectorstores import Qdrant
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from sentence_transformers import SentenceTransformer
 
 from app.core.settings import VECTOR_DB_PATH
 from app.core.exceptions import DatabaseError
 
-logger = logging.getLogger(__name__)
+from app.core.logging import setup_logging
+
+# Setup logging
+logger = setup_logging()
 
 
 class MemoryService:

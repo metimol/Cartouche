@@ -3,18 +3,18 @@ Reaction engine service for the Cartouche Bot Service.
 Handles scheduling and processing of bot reactions to posts.
 """
 
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 import random
-import logging
-import asyncio
 from datetime import datetime, timedelta
 
 from app.db.repositories.bot_repository import BotRepository
 from app.services.bot_manager import BotManager
 from app.core.settings import REACTION_DELAY_MIN, REACTION_DELAY_MAX
-from app.core.exceptions import BotError
 
-logger = logging.getLogger(__name__)
+from app.core.logging import setup_logging
+
+# Setup logging
+logger = setup_logging()
 
 
 class ReactionEngine:

@@ -4,10 +4,11 @@ Handles special formatting requirements for API requests.
 """
 
 import json
-import logging
 from typing import Dict, Any
+from app.core.logging import setup_logging
 
-logger = logging.getLogger(__name__)
+# Setup logging
+logger = setup_logging()
 
 
 class JSONToStringConverter:
@@ -29,8 +30,6 @@ class JSONToStringConverter:
             Output: {"Comments": [Add, {"Name": "Bot", "Text": "Hello"}]}
         """
         try:
-            logger.info(f"[JSON_TO_STRING][convert_to_api_string] Input: {data}")
-
             # Convert to JSON string first
             json_str = json.dumps(data, ensure_ascii=False, separators=(",", ": "))
 
@@ -41,8 +40,6 @@ class JSONToStringConverter:
             for operation in special_operations:
                 # Replace "Add" with Add (remove quotes around operation names)
                 json_str = json_str.replace(f'"{operation}"', operation)
-
-            logger.info(f"[JSON_TO_STRING][convert_to_api_string] Output: {json_str}")
 
             return json_str
 
@@ -62,14 +59,10 @@ class JSONToStringConverter:
             Formatted string for API
         """
         try:
-            logger.info(f"[JSON_TO_STRING][format_comment_data] Input: {comment_data}")
-
             # Insert the comment_data dict directly, not as a string
             data = {"Comments": ["Add", comment_data]}
 
             result = JSONToStringConverter.convert_to_api_string(data)
-
-            logger.info(f"[JSON_TO_STRING][format_comment_data] Output: {result}")
 
             return result
 
@@ -89,12 +82,8 @@ class JSONToStringConverter:
             Formatted string for API
         """
         try:
-            logger.info(f"[JSON_TO_STRING][format_like_data] Input: {bot_name}")
-
             data = {"Likes": ["Add", bot_name]}
             result = JSONToStringConverter.convert_to_api_string(data)
-
-            logger.info(f"[JSON_TO_STRING][format_like_data] Output: {result}")
 
             return result
 
@@ -114,11 +103,7 @@ class JSONToStringConverter:
             Formatted string for API
         """
         try:
-            logger.info(f"[JSON_TO_STRING][format_post_data] Input: {post_data}")
-
             result = json.dumps(post_data, ensure_ascii=False, separators=(",", ": "))
-
-            logger.info(f"[JSON_TO_STRING][format_post_data] Output: {result}")
 
             return result
 
@@ -138,11 +123,7 @@ class JSONToStringConverter:
             Formatted string for API
         """
         try:
-            logger.info(f"[JSON_TO_STRING][format_bot_data] Input: {bot_data}")
-
             result = json.dumps(bot_data, ensure_ascii=False, separators=(",", ": "))
-
-            logger.info(f"[JSON_TO_STRING][format_bot_data] Output: {result}")
 
             return result
 
@@ -163,14 +144,29 @@ class JSONToStringConverter:
             Formatted string for API
         """
         try:
-            logger.info(f"[JSON_TO_STRING][format_update_data] Input: {update_data}")
-
             result = JSONToStringConverter.convert_to_api_string(update_data)
-
-            logger.info(f"[JSON_TO_STRING][format_update_data] Output: {result}")
 
             return result
 
         except Exception as e:
             logger.error(f"Failed to format update data: {str(e)}")
             raise ValueError(f"Failed to format update data: {str(e)}")
+
+    @staticmethod
+    def format_follow_data(bot_name: str) -> str:
+        """
+        Format follow (subscribe) data for API consumption.
+
+        Args:
+            bot_name: Name of the bot who follows
+
+        Returns:
+            Formatted string for API
+        """
+        try:
+            data = {"Following": ["Add", bot_name]}
+            result = JSONToStringConverter.convert_to_api_string(data)
+            return result
+        except Exception as e:
+            logger.error(f"Failed to format follow data: {str(e)}")
+            raise ValueError(f"Failed to format follow data: {str(e)}")

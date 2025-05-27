@@ -3,10 +3,11 @@ Avatar generator utility for the Cartouche Bot Service.
 Handles generation of bot avatars.
 """
 
-import logging
 import uuid
+from app.core.logging import setup_logging
 
-logger = logging.getLogger(__name__)
+# Setup logging
+logger = setup_logging()
 
 
 class AvatarGenerator:

@@ -19,8 +19,12 @@ from app.services.bot_manager import BotManager
 from app.services.content_generator import ContentGenerator
 from app.clients.cartouche_api import CartoucheAPIClient
 
+from app.core.logging import setup_logging
+
+# Setup logging
+logger = setup_logging()
+
 router = APIRouter()
-logger = logging.getLogger(__name__)
 
 # Track service start time
 SERVICE_START_TIME = time.time()

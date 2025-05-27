@@ -3,14 +3,16 @@ Gemini LLM client for the Cartouche Bot Service.
 Handles text generation using Google's Gemini API.
 """
 
-import logging
 import google.generativeai as genai
-from typing import Optional, Dict, Any, List
+from typing import Dict, List
 
 from app.clients.llm.base import BaseLLMClient
 from app.core.exceptions import LLMError
 
-logger = logging.getLogger(__name__)
+from app.core.logging import setup_logging
+
+# Setup logging
+logger = setup_logging()
 
 
 class GeminiClient(BaseLLMClient):

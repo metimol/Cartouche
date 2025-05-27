@@ -5,10 +5,12 @@ Handles scheduling and execution of background tasks.
 
 from typing import Dict, List, Any, Optional, Callable
 import asyncio
-import logging
 from datetime import datetime, timedelta
 
-logger = logging.getLogger(__name__)
+from app.core.logging import setup_logging
+
+# Setup logging
+logger = setup_logging()
 
 
 class Scheduler:

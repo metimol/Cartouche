@@ -2,7 +2,6 @@
 Main FastAPI application for the Cartouche Bot Service.
 """
 
-import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -19,13 +18,13 @@ logger = setup_logging()
 app = FastAPI(
     title="Cartouche Bot Service",
     description="API for managing autonomous AI bots in the Cartouche social network simulator",
-    version="1.0.0",
+    version="1.1.0",
 )
 
 # Setup CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For development, restrict in production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

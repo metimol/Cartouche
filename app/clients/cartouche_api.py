@@ -13,7 +13,10 @@ from app.core.settings import API_BASE_URL, API_TOKEN
 from app.core.exceptions import APIError
 from app.utils.json_to_string import JSONToStringConverter
 
-logger = logging.getLogger(__name__)
+from app.core.logging import setup_logging
+
+# Setup logging
+logger = setup_logging()
 
 
 class CartoucheAPIClient:
@@ -74,9 +77,6 @@ class CartoucheAPIClient:
         try:
             async with self.session.get(url) as response:
                 response_text = await response.text()
-                logger.info(
-                    f"[API][GET_POSTS] Status: {response.status}, Response: {response_text}"
-                )
                 if response.status == 200:
                     try:
                         data = json.loads(response_text)
@@ -130,9 +130,6 @@ class CartoucheAPIClient:
                 url, data=formatted_data, headers=headers
             ) as response:
                 response_text = await response.text()
-                logger.info(
-                    f"[API][ADD_BOT] Status: {response.status}, Response: {response_text}"
-                )
                 if response.status == 200:
                     return {"status": "success"}
                 else:
@@ -179,9 +176,6 @@ class CartoucheAPIClient:
                 url, data=formatted_data, headers=headers
             ) as response:
                 response_text = await response.text()
-                logger.info(
-                    f"[API][ADD_POST] Status: {response.status}, Response: {response_text}"
-                )
                 if response.status == 200:
                     try:
                         return json.loads(response_text)
@@ -235,9 +229,6 @@ class CartoucheAPIClient:
                 url, data=formatted_data, headers=headers
             ) as response:
                 response_text = await response.text()
-                logger.info(
-                    f"[API][LIKE_POST] Status: {response.status}, Response: {response_text}"
-                )
                 if response.status == 200:
                     return {"status": "success"}
                 else:
@@ -287,9 +278,6 @@ class CartoucheAPIClient:
                 url, data=formatted_data, headers=headers
             ) as response:
                 response_text = await response.text()
-                logger.info(
-                    f"[API][ADD_COMMENT] Status: {response.status}, Response: {response_text}"
-                )
                 if response.status == 200:
                     return {"status": "success"}
                 else:
@@ -301,6 +289,59 @@ class CartoucheAPIClient:
                     )
         except aiohttp.ClientError as e:
             logger.error(f"Error in add_comment: {str(e)}")
+            raise APIError(f"API client error: {str(e)}")
+
+        finally:
+            if need_to_close and self.session:
+                await self.session.close()
+                self.session = None
+
+    async def follow_user(self, user_id: int, bot_name: str) -> Dict[str, Any]:
+        """
+        Subscribe (follow) a user as a bot.
+
+        Args:
+            user_id: ID of the user to follow
+            bot_name: Name of the bot who follows
+
+        Returns:
+            Response data
+        """
+        endpoint = f"GetDocuments/Users/{user_id}"
+        url = f"{self.base_url}/{endpoint}?token={self.token}"
+
+        # Convert follow data to API format
+        formatted_data = JSONToStringConverter.format_follow_data(bot_name)
+
+        if not self.session:
+            self.session = aiohttp.ClientSession()
+            need_to_close = True
+        else:
+            need_to_close = False
+
+        try:
+            headers = {"Content-Type": "text/plain; charset=utf-8"}
+            async with self.session.post(
+                url, data=formatted_data, headers=headers
+            ) as response:
+                response_text = await response.text()
+                if response.status == 200:
+                    try:
+                        return json.loads(response_text)
+                    except Exception as e:
+                        logger.error(
+                            f"[API][FOLLOW_USER] JSON decode error: {e}, Raw: {response_text}"
+                        )
+                        raise APIError(f"Failed to decode JSON: {response_text}")
+                else:
+                    logger.error(
+                        f"[API][FOLLOW_USER] Error: {response.status} - {response_text}"
+                    )
+                    raise APIError(
+                        f"Failed to follow user: {response_text}", response.status
+                    )
+        except aiohttp.ClientError as e:
+            logger.error(f"Error in follow_user: {str(e)}")
             raise APIError(f"API client error: {str(e)}")
 
         finally:

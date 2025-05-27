@@ -3,10 +3,9 @@ Bot manager service for the Cartouche Bot Service.
 Handles creation, management, and scheduling of bots.
 """
 
-from typing import Dict, List, Any, Optional
+from typing import Dict, Any
 import random
 import logging
-import asyncio
 from datetime import datetime, timedelta
 
 from app.db.repositories.bot_repository import BotRepository
@@ -24,11 +23,11 @@ from app.core.settings import (
     AVATAR_STYLES,
     BOT_PROMPTS,
 )
-from app.core.exceptions import BotError, APIError, LLMError
+from app.core.exceptions import BotError
+from app.core.logging import setup_logging
 
-logging.basicConfig(level=logging.INFO)
-
-logger = logging.getLogger(__name__)
+# Setup logging
+logger = setup_logging()
 
 
 class BotManager:

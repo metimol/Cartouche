@@ -3,9 +3,7 @@ LLM factory for the Cartouche Bot Service.
 Creates and manages LLM clients based on configuration.
 """
 
-from typing import Dict, Optional, List, Any
-import os
-import logging
+from typing import Optional, List
 
 from app.clients.llm.base import BaseLLMClient
 from app.clients.llm.gemini import GeminiClient
@@ -14,7 +12,10 @@ from app.clients.llm.anthropic import AnthropicClient
 from app.core.settings import DEFAULT_LLM_PROVIDER, LLM_PROVIDERS
 from app.core.exceptions import LLMError
 
-logger = logging.getLogger(__name__)
+from app.core.logging import setup_logging
+
+# Setup logging
+logger = setup_logging()
 
 
 class LLMFactory:

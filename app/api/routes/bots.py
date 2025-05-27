@@ -2,10 +2,9 @@
 Bot API routes for the Cartouche Bot Service.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List, Dict, Any, Optional
-import logging
+from typing import List, Optional
 
 from app.db.session import get_db
 from app.db.repositories.bot_repository import BotRepository
@@ -19,12 +18,14 @@ from app.models.models import (
     BotResponse,
     ActivityResponse,
     MemoryResponse,
-    Post,
-    Comment,
 )
 
+from app.core.logging import setup_logging
+
+# Setup logging
+logger = setup_logging()
+
 router = APIRouter()
-logger = logging.getLogger(__name__)
 
 
 @router.get("/", response_model=List[BotResponse])

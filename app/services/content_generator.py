@@ -5,7 +5,6 @@ Handles generation of bot content using LLM.
 
 from typing import List
 import random
-import logging
 import re
 import uuid
 
@@ -20,7 +19,10 @@ from app.core.settings import (
 )
 from app.core.exceptions import LLMError
 
-logger = logging.getLogger(__name__)
+from app.core.logging import setup_logging
+
+# Setup logging
+logger = setup_logging()
 
 
 class ContentGenerator:
