@@ -52,6 +52,36 @@ async def get_bot(bot_id: int, db: Session = Depends(get_db)):
     return BotResponse.from_orm(bot)
 
 
+@router.delete("/{bot_id}")
+async def delete_bot(bot_id: int, db: Session = Depends(get_db)):
+    """
+    Delete a specific bot.
+    """
+    bot_repository = BotRepository(db)
+    bot = bot_repository.get_bot_by_id(bot_id)
+
+    if not bot:
+        raise HTTPException(status_code=404, detail="Bot not found")
+
+    # Delete bot
+    bot_repository.delete_bot(bot_id)
+
+    return {"message": f"Bot {bot_id} deleted successfully"}
+
+
+@router.get("/activities", response_model=List[ActivityResponse])
+async def get_recent_activities(
+    limit: int = Query(20, ge=1, le=100), db: Session = Depends(get_db)
+):
+    """
+    Get recent activities from all bots.
+    """
+    activity_repository = ActivityRepository(db)
+    activities = activity_repository.get_recent_activities(limit=limit)
+
+    return [ActivityResponse.from_orm(activity) for activity in activities]
+
+
 @router.get("/{bot_id}/activities", response_model=List[ActivityResponse])
 async def get_bot_activities(
     bot_id: int,
@@ -100,9 +130,7 @@ async def get_bot_memories(
 
 
 @router.post("/{bot_id}/react")
-async def trigger_bot_reaction(
-    bot_id: int, post_id: str, db: Session = Depends(get_db)
-):
+async def trigger_bot_reaction(bot_id: int, db: Session = Depends(get_db)):
     """
     Trigger a reaction from a specific bot to a post.
     """

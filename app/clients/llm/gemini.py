@@ -34,7 +34,6 @@ class GeminiClient(BaseLLMClient):
         try:
             models = genai.list_models()
             model_names = [model.name for model in models]
-            logger.info(f"Available Gemini models: {model_names}")
         except Exception as e:
             logger.warning(f"Failed to list Gemini models: {str(e)}")
 

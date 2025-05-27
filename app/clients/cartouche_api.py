@@ -11,6 +11,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 
 from app.core.settings import API_BASE_URL, API_TOKEN
 from app.core.exceptions import APIError
+from app.utils.json_to_string import JSONToStringConverter
 
 logger = logging.getLogger(__name__)
 
@@ -72,18 +73,26 @@ class CartoucheAPIClient:
 
         try:
             async with self.session.get(url) as response:
+                response_text = await response.text()
+                logger.info(
+                    f"[API][GET_POSTS] Status: {response.status}, Response: {response_text}"
+                )
                 if response.status == 200:
-                    data = await response.json()
-                    return data if isinstance(data, list) else [data]
+                    try:
+                        data = json.loads(response_text)
+                        return data if isinstance(data, list) else [data]
+                    except Exception as e:
+                        logger.error(
+                            f"[API][GET_POSTS] JSON decode error: {e}, Raw: {response_text}"
+                        )
+                        raise APIError(f"Failed to decode JSON: {response_text}")
                 else:
-                    error_text = await response.text()
                     logger.error(
-                        f"Error getting posts: {response.status} - {error_text}"
+                        f"[API][GET_POSTS] Error: {response.status} - {response_text}"
                     )
                     raise APIError(
-                        f"Failed to get posts: {error_text}", response.status
+                        f"Failed to get posts: {response_text}", response.status
                     )
-
         except aiohttp.ClientError as e:
             logger.error(f"Error in get_posts: {str(e)}")
             raise APIError(f"API client error: {str(e)}")
@@ -93,9 +102,6 @@ class CartoucheAPIClient:
                 await self.session.close()
                 self.session = None
 
-    @retry(
-        stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10)
-    )
     async def add_bot(self, bot_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Add a new bot to the system.
@@ -109,6 +115,9 @@ class CartoucheAPIClient:
         endpoint = "AddDocument/Users"
         url = f"{self.base_url}/{endpoint}?token={self.token}"
 
+        # Convert bot data to API format
+        formatted_data = JSONToStringConverter.format_bot_data(bot_data)
+
         if not self.session:
             self.session = aiohttp.ClientSession()
             need_to_close = True
@@ -116,19 +125,23 @@ class CartoucheAPIClient:
             need_to_close = False
 
         try:
-            async with self.session.post(url, json=bot_data) as response:
+            headers = {"Content-Type": "text/plain; charset=utf-8"}
+            async with self.session.post(
+                url, data=formatted_data, headers=headers
+            ) as response:
+                response_text = await response.text()
+                logger.info(
+                    f"[API][ADD_BOT] Status: {response.status}, Response: {response_text}"
+                )
                 if response.status == 200:
-                    try:
-                        return await response.json()
-                    except Exception as e:
-                        text = await response.text()
-                        logger.error(f"Failed to decode JSON, got: {text}")
-                        raise APIError(f"Failed to decode JSON: {text}")
+                    return {"status": "success"}
                 else:
-                    error_text = await response.text()
-                    logger.error(f"Error adding bot: {response.status} - {error_text}")
-                    raise APIError(f"Failed to add bot: {error_text}", response.status)
-
+                    logger.error(
+                        f"[API][ADD_BOT] Error: {response.status} - {response_text}"
+                    )
+                    raise APIError(
+                        f"Failed to add bot: {response_text}", response.status
+                    )
         except aiohttp.ClientError as e:
             logger.error(f"Error in add_bot: {str(e)}")
             raise APIError(f"API client error: {str(e)}")
@@ -138,9 +151,6 @@ class CartoucheAPIClient:
                 await self.session.close()
                 self.session = None
 
-    @retry(
-        stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10)
-    )
     async def add_post(self, post_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Add a new post to the system.
@@ -154,6 +164,9 @@ class CartoucheAPIClient:
         endpoint = "AddDocument/Posts"
         url = f"{self.base_url}/{endpoint}?token={self.token}"
 
+        # Convert post data to API format
+        formatted_data = JSONToStringConverter.format_post_data(post_data)
+
         if not self.session:
             self.session = aiohttp.ClientSession()
             need_to_close = True
@@ -161,14 +174,29 @@ class CartoucheAPIClient:
             need_to_close = False
 
         try:
-            async with self.session.post(url, json=post_data) as response:
+            headers = {"Content-Type": "text/plain; charset=utf-8"}
+            async with self.session.post(
+                url, data=formatted_data, headers=headers
+            ) as response:
+                response_text = await response.text()
+                logger.info(
+                    f"[API][ADD_POST] Status: {response.status}, Response: {response_text}"
+                )
                 if response.status == 200:
-                    return await response.json()
+                    try:
+                        return json.loads(response_text)
+                    except Exception as e:
+                        logger.error(
+                            f"[API][ADD_POST] JSON decode error: {e}, Raw: {response_text}"
+                        )
+                        raise APIError(f"Failed to decode JSON: {response_text}")
                 else:
-                    error_text = await response.text()
-                    logger.error(f"Error adding post: {response.status} - {error_text}")
-                    raise APIError(f"Failed to add post: {error_text}", response.status)
-
+                    logger.error(
+                        f"[API][ADD_POST] Error: {response.status} - {response_text}"
+                    )
+                    raise APIError(
+                        f"Failed to add post: {response_text}", response.status
+                    )
         except aiohttp.ClientError as e:
             logger.error(f"Error in add_post: {str(e)}")
             raise APIError(f"API client error: {str(e)}")
@@ -178,9 +206,6 @@ class CartoucheAPIClient:
                 await self.session.close()
                 self.session = None
 
-    @retry(
-        stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10)
-    )
     async def like_post(self, post_id: int, bot_name: str) -> Dict[str, Any]:
         """
         Like a post.
@@ -194,7 +219,9 @@ class CartoucheAPIClient:
         """
         endpoint = f"UpdateDocument/Posts/{post_id}"
         url = f"{self.base_url}/{endpoint}?token={self.token}"
-        data = {"Likes": ["Add", bot_name]}
+
+        # Convert like data to API format
+        formatted_data = JSONToStringConverter.format_like_data(bot_name)
 
         if not self.session:
             self.session = aiohttp.ClientSession()
@@ -203,16 +230,23 @@ class CartoucheAPIClient:
             need_to_close = False
 
         try:
-            async with self.session.post(url, json=data) as response:
+            headers = {"Content-Type": "text/plain; charset=utf-8"}
+            async with self.session.post(
+                url, data=formatted_data, headers=headers
+            ) as response:
+                response_text = await response.text()
+                logger.info(
+                    f"[API][LIKE_POST] Status: {response.status}, Response: {response_text}"
+                )
                 if response.status == 200:
                     return {"status": "success"}
                 else:
-                    error_text = await response.text()
-                    logger.error(f"Error liking post: {response.status} - {error_text}")
-                    raise APIError(
-                        f"Failed to like post: {error_text}", response.status
+                    logger.error(
+                        f"[API][LIKE_POST] Error: {response.status} - {response_text}"
                     )
-
+                    raise APIError(
+                        f"Failed to like post: {response_text}", response.status
+                    )
         except aiohttp.ClientError as e:
             logger.error(f"Error in like_post: {str(e)}")
             raise APIError(f"API client error: {str(e)}")
@@ -222,9 +256,6 @@ class CartoucheAPIClient:
                 await self.session.close()
                 self.session = None
 
-    @retry(
-        stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10)
-    )
     async def add_comment(
         self, post_id: int, comment_data: Dict[str, Any]
     ) -> Dict[str, Any]:
@@ -241,9 +272,8 @@ class CartoucheAPIClient:
         endpoint = f"UpdateDocument/Posts/{post_id}"
         url = f"{self.base_url}/{endpoint}?token={self.token}"
 
-        # Format comment data as a string
-        comment_str = str(comment_data)
-        data = {"Comments": ["Add", comment_str]}
+        # Convert comment data to API format
+        formatted_data = JSONToStringConverter.format_comment_data(comment_data)
 
         if not self.session:
             self.session = aiohttp.ClientSession()
@@ -252,18 +282,23 @@ class CartoucheAPIClient:
             need_to_close = False
 
         try:
-            async with self.session.post(url, json=data) as response:
+            headers = {"Content-Type": "text/plain; charset=utf-8"}
+            async with self.session.post(
+                url, data=formatted_data, headers=headers
+            ) as response:
+                response_text = await response.text()
+                logger.info(
+                    f"[API][ADD_COMMENT] Status: {response.status}, Response: {response_text}"
+                )
                 if response.status == 200:
                     return {"status": "success"}
                 else:
-                    error_text = await response.text()
                     logger.error(
-                        f"Error adding comment: {response.status} - {error_text}"
+                        f"[API][ADD_COMMENT] Error: {response.status} - {response_text}"
                     )
                     raise APIError(
-                        f"Failed to add comment: {error_text}", response.status
+                        f"Failed to add comment: {response_text}", response.status
                     )
-
         except aiohttp.ClientError as e:
             logger.error(f"Error in add_comment: {str(e)}")
             raise APIError(f"API client error: {str(e)}")

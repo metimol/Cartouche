@@ -26,6 +26,8 @@ from app.core.settings import (
 )
 from app.core.exceptions import BotError, APIError, LLMError
 
+logging.basicConfig(level=logging.INFO)
+
 logger = logging.getLogger(__name__)
 
 
@@ -126,14 +128,10 @@ class BotManager:
             age = random.randint(18, 65)
 
             # Generate unique username and description
-            username = (
-                await self.content_generator.generate_unique_bot_username(
-                    category, self.bot_repository
-                )
-            ).replace("/n", "_").replace(" ", "_")
-            full_name = await self.content_generator.generate_full_name(
-                gender, age
+            username = await self.content_generator.generate_unique_bot_username(
+                category, self.bot_repository
             )
+            full_name = await self.content_generator.generate_full_name(gender, age)
             description = await self.content_generator.generate_bot_description(
                 category, age, gender
             )
@@ -259,17 +257,28 @@ class BotManager:
                 post_date = None
                 if on_date_str:
                     # Try several date formats
-                    for fmt in ("%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%S.%f", "%m/%d/%Y", "%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S.%f%z"):
+                    for fmt in (
+                        "%Y-%m-%dT%H:%M:%S",
+                        "%Y-%m-%dT%H:%M:%S.%f",
+                        "%m/%d/%Y",
+                        "%Y-%m-%dT%H:%M:%S%z",
+                        "%Y-%m-%dT%H:%M:%S.%f%z",
+                    ):
                         try:
                             post_date = datetime.strptime(on_date_str, fmt)
                             break
                         except Exception:
                             continue
-                if post_date and three_days_ago.date() <= post_date.date() <= now.date():
+                if (
+                    post_date
+                    and three_days_ago.date() <= post_date.date() <= now.date()
+                ):
                     recent_posts.append(post)
 
             if not recent_posts:
-                logger.info(f"No recent posts (last 3 days) for bot {bot.name} to react to")
+                logger.info(
+                    f"No recent posts (last 3 days) for bot {bot.name} to react to"
+                )
                 return {"status": "no_recent_posts", "bot_id": bot_id}
 
             # Select a random recent post

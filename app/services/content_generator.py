@@ -6,6 +6,8 @@ Handles generation of bot content using LLM.
 from typing import List
 import random
 import logging
+import re
+import uuid
 
 from app.clients.llm import LLMFactory
 from app.core.settings import (
@@ -36,7 +38,6 @@ class ContentGenerator:
         provider = llm_provider or DEFAULT_LLM_PROVIDER
         key = api_key or GOOGLE_API_KEY
 
-        logger.info(f"Initializing ContentGenerator with provider: {provider}")
         self.llm_client = LLMFactory.create_client(provider=provider, api_key=key)
 
     async def generate_bot_description(
@@ -225,10 +226,11 @@ happycat
                 prompt=prompt, max_tokens=50, temperature=0.8
             )
 
-            # Clean up the username
-            username = username.strip().replace(" ", "_").replace("@", "")
-            if len(username) > 15:
-                username = username[:15]
+            # Allow Latin letters (any case), digits, underscores, and hyphens
+            username = username.strip()
+            username = re.sub(r"[^a-zA-Z0-9_-]", "", username)
+            if len(username) > 20:
+                username = username[:20]
 
             return username
         except Exception as e:
@@ -251,11 +253,10 @@ happycat
             username = await self.generate_bot_username(category)
             if not bot_repository.get_bot_by_name(username):
                 return username
-        # Fallback: add random suffix if all attempts failed
-        import uuid
 
+        # Fallback: add random suffix if all attempts failed
         for _ in range(10):
-            username = f"{username[:12]}_{str(uuid.uuid4())[:2]}"
+            username = f"{username[:15]}_{str(uuid.uuid4())[:2]}"
             if not bot_repository.get_bot_by_name(username):
                 return username
         raise LLMError(
@@ -290,7 +291,7 @@ Ava Johnson
             full_name = await self.llm_client.generate_text(
                 prompt=prompt, max_tokens=20, temperature=0.8
             )
-            return full_name.strip()
+            return full_name
         except Exception as e:
             logger.error(f"Failed to generate full name: {str(e)}")
             raise LLMError(f"Failed to generate full name: {str(e)}")

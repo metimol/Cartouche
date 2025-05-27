@@ -3,17 +3,14 @@ Main FastAPI application for the Cartouche Bot Service.
 """
 
 import logging
-from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
-import asyncio
 
 from app.core.logging import setup_logging
 from app.core.exceptions import setup_exception_handlers
 from app.db.session import get_db, engine, Base
-from app.db.models import Bot, BotMemory, BotActivity, LLMConfig, SystemConfig
 from app.services.scheduler import Scheduler
-from app.api.routes import admin, bots, monitoring
+from app.api.routes import router
 
 # Setup logging
 logger = setup_logging()
@@ -41,9 +38,7 @@ setup_exception_handlers(app)
 scheduler = Scheduler()
 
 # Include routers
-app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
-app.include_router(bots.router, prefix="/api/bots", tags=["bots"])
-app.include_router(monitoring.router, prefix="/api/monitoring", tags=["monitoring"])
+app.include_router(router, prefix="/api")
 
 
 @app.on_event("startup")
@@ -267,9 +262,3 @@ async def schedule_bot_activities():
 async def root():
     """Root endpoint."""
     return {"message": "Welcome to Cartouche Bot Service"}
-
-
-@app.get("/health")
-async def health_check():
-    """Health check endpoint."""
-    return {"status": "healthy", "version": "1.0.0"}

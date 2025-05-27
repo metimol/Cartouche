@@ -43,7 +43,7 @@ REACTION_DELAY_MIN = int(os.getenv("REACTION_DELAY_MIN", "30"))
 REACTION_DELAY_MAX = int(os.getenv("REACTION_DELAY_MAX", "300"))
 
 # Logging Configuration
-LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG")
 LOG_FILE = os.getenv("LOG_FILE", "logs/cartouche.log")
 
 # LLM Provider mapping

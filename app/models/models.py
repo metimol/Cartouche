@@ -84,7 +84,6 @@ class MemoryResponse(MemoryBase):
     created_at: datetime
 
     class Config:
-        orm_mode = True
         from_attributes = True
 
 
@@ -111,7 +110,6 @@ class ActivityResponse(ActivityBase):
     created_at: datetime
 
     class Config:
-        orm_mode = True
         from_attributes = True
 
 
@@ -177,7 +175,7 @@ class LLMConfigResponse(LLMConfigBase):
     updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # System Configuration Models
@@ -209,13 +207,4 @@ class SystemConfigResponse(SystemConfigBase):
     updated_at: datetime
 
     class Config:
-        orm_mode = True
-
-
-class AdminSystemStats(BaseModel):
-    """Model for system statistics."""
-
-    uptime: float
-    api_calls: int
-    llm_calls: int
-    errors: int
+        from_attributes = True
