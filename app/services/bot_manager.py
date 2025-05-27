@@ -5,7 +5,6 @@ Handles creation, management, and scheduling of bots.
 
 from typing import Dict, Any
 import random
-import logging
 from datetime import datetime, timedelta
 
 from app.db.repositories.bot_repository import BotRepository
@@ -255,19 +254,8 @@ class BotManager:
                 on_date_str = post_json.get("OnDate")
                 post_date = None
                 if on_date_str:
-                    # Try several date formats
-                    for fmt in (
-                        "%Y-%m-%dT%H:%M:%S",
-                        "%Y-%m-%dT%H:%M:%S.%f",
-                        "%m/%d/%Y",
-                        "%Y-%m-%dT%H:%M:%S%z",
-                        "%Y-%m-%dT%H:%M:%S.%f%z",
-                    ):
-                        try:
-                            post_date = datetime.strptime(on_date_str, fmt)
-                            break
-                        except Exception:
-                            continue
+                    fmt = "%Y-%m-%dT%H:%M:%S"
+                    post_date = datetime.strptime(on_date_str, fmt)
                 if (
                     post_date
                     and three_days_ago.date() <= post_date.date() <= now.date()
