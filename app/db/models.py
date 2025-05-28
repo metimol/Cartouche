@@ -52,26 +52,6 @@ class Bot(Base):
         "BotActivity", back_populates="bot", cascade="all, delete-orphan"
     )
 
-    def to_dict(self):
-        """Convert bot to dictionary for API responses."""
-        return {
-            "id": self.id,
-            "name": self.name,
-            "full_name": self.full_name,
-            "avatar": self.avatar,
-            "age": self.age,
-            "gender": self.gender,
-            "category": self.category,
-            "description": self.description,
-            "created_at": self.created_at.isoformat(),
-            "last_active": self.last_active.isoformat(),
-            "like_probability": self.like_probability,
-            "comment_probability": self.comment_probability,
-            "follow_probability": self.follow_probability,
-            "unfollow_probability": self.unfollow_probability,
-            "repost_probability": self.repost_probability,
-        }
-
 
 class BotMemory(Base):
     """Memory entries for bots to remember past interactions."""

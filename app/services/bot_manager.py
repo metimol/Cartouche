@@ -22,6 +22,7 @@ from app.core.settings import (
     AVATAR_STYLES,
     BOT_PROMPTS,
 )
+from app.models.models import BotResponse
 from app.core.exceptions import BotError
 from app.core.logging import setup_logging
 
@@ -196,7 +197,7 @@ class BotManager:
 
             await self.api_client.add_bot(api_bot_data)
 
-            return bot.to_dict()
+            return BotResponse.from_orm(bot)
 
         except Exception as e:
             logger.error(f"Failed to create random bot: {str(e)}")
