@@ -178,6 +178,7 @@ class CartoucheAPIClient:
                 response_text = await response.text()
                 if response.status == 200:
                     try:
+                        logger.info(f"[API][ADD_POST] Created post")
                         return json.loads(response_text)
                     except Exception as e:
                         logger.error(
@@ -230,6 +231,7 @@ class CartoucheAPIClient:
             ) as response:
                 response_text = await response.text()
                 if response.status == 200:
+                    logger.info(f"[API][LIKE_POST] Liked post {post_id} by {bot_name}")
                     return {"status": "success"}
                 else:
                     logger.error(
@@ -279,6 +281,9 @@ class CartoucheAPIClient:
             ) as response:
                 response_text = await response.text()
                 if response.status == 200:
+                    logger.info(
+                        f"[API][ADD_COMMENT] Comment added to post {post_id}"
+                    )
                     return {"status": "success"}
                 else:
                     logger.error(

@@ -21,6 +21,7 @@ from app.core.settings import (
     MAX_BOTS_COUNT,
     AVATAR_STYLES,
     BOT_PROMPTS,
+    POST_POSIBILITY,
 )
 from app.models.models import BotResponse
 from app.core.exceptions import BotError
@@ -220,7 +221,7 @@ class BotManager:
 
         for bot in bots:
             # Schedule next activity time
-            hours_delay = random.uniform(0.5, 24)  # Between 30 minutes and 24 hours
+            hours_delay = random.uniform(0.1, 3)  # Between 6 minutes and 3 hours
             next_activity = datetime.utcnow() + timedelta(hours=hours_delay)
 
             # Update bot's last active time
@@ -424,3 +425,25 @@ class BotManager:
         except Exception as e:
             logger.error(f"Failed to create bot post: {str(e)}")
             raise BotError(f"Failed to create bot post: {str(e)}")
+
+    async def run_due_bot_activities(self) -> None:
+        """
+        Run activities for all bots whose scheduled activity time has come.
+        This should be called periodically to make bots act autonomously.
+        """
+        now = datetime.utcnow()
+        bots = self.bot_repository.get_all_bots(limit=MAX_BOTS_COUNT)
+        for bot in bots:
+            # If the activity time has come or is not set
+            if not getattr(bot, 'last_active', None) or bot.last_active <= now:
+                try:
+                    await self.process_bot_activity(bot.id)
+                    # Occasionally the bot makes a post
+                    if random.random() < POST_POSIBILITY:
+                        await self.create_bot_post(bot.id)
+                except Exception as e:
+                    logger.error(f"Failed to run activity for bot {getattr(bot, 'name', bot.id)}: {str(e)}")
+                # Reschedule the next activity time
+                hours_delay = random.uniform(0.5, 24)
+                next_activity = now + timedelta(hours=hours_delay)
+                self.bot_repository.update_bot(bot.id, {"last_active": next_activity})

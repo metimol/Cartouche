@@ -2,22 +2,15 @@
 Monitoring API routes for the Cartouche Bot Service.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from typing import List, Dict, Any, Optional
-import logging
 import psutil
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from app.db.session import get_db
 from app.db.repositories.bot_repository import BotRepository
 from app.db.repositories.activity_repository import ActivityRepository
-from app.db.repositories.memory_repository import MemoryRepository
-from app.services.reaction_engine import ReactionEngine
-from app.services.bot_manager import BotManager
-from app.services.content_generator import ContentGenerator
-from app.clients.cartouche_api import CartoucheAPIClient
 
 from app.core.logging import setup_logging
 
@@ -74,36 +67,6 @@ async def get_stats(db: Session = Depends(get_db)):
             "disk_percent": disk_info.percent,
         },
     }
-
-
-@router.get("/reactions")
-async def get_pending_reactions(db: Session = Depends(get_db)):
-    """
-    Get pending reactions.
-    """
-    bot_repository = BotRepository(db)
-    memory_repository = MemoryRepository(db)
-    activity_repository = ActivityRepository(db)
-    content_generator = ContentGenerator()
-    api_client = CartoucheAPIClient()
-
-    bot_manager = BotManager(
-        bot_repository=bot_repository,
-        memory_repository=memory_repository,
-        activity_repository=activity_repository,
-        content_generator=content_generator,
-        api_client=api_client,
-    )
-
-    reaction_engine = ReactionEngine(
-        bot_repository=bot_repository, bot_manager=bot_manager
-    )
-
-    # Get scheduled reactions
-    scheduled_reactions = reaction_engine.get_scheduled_reactions()
-    pending_count = reaction_engine.get_pending_reactions_count()
-
-    return {"pending_count": pending_count, "scheduled_reactions": scheduled_reactions}
 
 
 @router.get("/logs")

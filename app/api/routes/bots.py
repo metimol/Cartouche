@@ -11,7 +11,6 @@ from app.db.repositories.bot_repository import BotRepository
 from app.db.repositories.memory_repository import MemoryRepository
 from app.db.repositories.activity_repository import ActivityRepository
 from app.services.bot_manager import BotManager
-from app.services.reaction_engine import ReactionEngine
 from app.services.content_generator import ContentGenerator
 from app.clients.cartouche_api import CartoucheAPIClient
 from app.models.models import (
@@ -186,36 +185,5 @@ async def create_bot_post(bot_id: int, db: Session = Depends(get_db)):
     # Create post
     async with api_client:
         result = await bot_manager.create_bot_post(bot_id)
-
-    return result
-
-
-@router.post("/react-to-post")
-async def schedule_reactions_to_post(
-    post_id: str, post_author: str, db: Session = Depends(get_db)
-):
-    """
-    Schedule bot reactions to a new post.
-    """
-    bot_repository = BotRepository(db)
-    memory_repository = MemoryRepository(db)
-    activity_repository = ActivityRepository(db)
-    content_generator = ContentGenerator()
-    api_client = CartoucheAPIClient()
-
-    bot_manager = BotManager(
-        bot_repository=bot_repository,
-        memory_repository=memory_repository,
-        activity_repository=activity_repository,
-        content_generator=content_generator,
-        api_client=api_client,
-    )
-
-    reaction_engine = ReactionEngine(
-        bot_repository=bot_repository, bot_manager=bot_manager
-    )
-
-    # Schedule reactions
-    result = await reaction_engine.schedule_reactions_for_post(post_id, post_author)
 
     return result

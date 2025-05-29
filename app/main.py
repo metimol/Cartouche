@@ -10,6 +10,14 @@ from app.core.exceptions import setup_exception_handlers
 from app.db.session import get_db, engine, Base
 from app.services.scheduler import Scheduler
 from app.api.routes import router
+from app.core.settings import MONITORING_INTERVAL
+
+from app.services.bot_manager import BotManager
+from app.services.content_generator import ContentGenerator
+from app.clients.cartouche_api import CartoucheAPIClient
+from app.db.repositories.bot_repository import BotRepository
+from app.db.repositories.memory_repository import MemoryRepository
+from app.db.repositories.activity_repository import ActivityRepository
 
 # Setup logging
 logger = setup_logging()
@@ -82,32 +90,17 @@ async def initialize_background_tasks():
         task_id="daily_bot_growth",
     )
 
-    # Schedule reaction processing
+    # Schedule autonomous bot actions
     scheduler.schedule_task(
-        process_reactions,
-        delay=30,  # Start after 30 seconds
-        interval=60,  # Run every minute
-        task_id="process_reactions",
-    )
-
-    # Schedule bot activity
-    scheduler.schedule_task(
-        schedule_bot_activities,
-        delay=300,  # Start after 5 minutes
-        interval=3600,  # Run hourly
-        task_id="schedule_bot_activities",
+        run_due_bot_activities,
+        delay=MONITORING_INTERVAL,  # Start after MONITORING_INTERVAL seconds
+        interval=MONITORING_INTERVAL,  # Run every MONITORING_INTERVAL seconds
+        task_id="run_due_bot_activities",
     )
 
 
 async def initialize_bots():
     """Initialize bot population."""
-    from app.services.bot_manager import BotManager
-    from app.services.content_generator import ContentGenerator
-    from app.clients.cartouche_api import CartoucheAPIClient
-    from app.db.repositories.bot_repository import BotRepository
-    from app.db.repositories.memory_repository import MemoryRepository
-    from app.db.repositories.activity_repository import ActivityRepository
-
     try:
         # Get database session
         db = next(get_db())
@@ -139,13 +132,6 @@ async def initialize_bots():
 
 async def daily_bot_growth():
     """Handle daily growth of bot population."""
-    from app.services.bot_manager import BotManager
-    from app.services.content_generator import ContentGenerator
-    from app.clients.cartouche_api import CartoucheAPIClient
-    from app.db.repositories.bot_repository import BotRepository
-    from app.db.repositories.memory_repository import MemoryRepository
-    from app.db.repositories.activity_repository import ActivityRepository
-
     try:
         # Get database session
         db = next(get_db())
@@ -175,28 +161,16 @@ async def daily_bot_growth():
         logger.error(f"Failed to handle daily bot growth: {str(e)}")
 
 
-async def process_reactions():
-    """Process due reactions."""
-    from app.services.reaction_engine import ReactionEngine
-    from app.services.bot_manager import BotManager
-    from app.services.content_generator import ContentGenerator
-    from app.clients.cartouche_api import CartoucheAPIClient
-    from app.db.repositories.bot_repository import BotRepository
-    from app.db.repositories.memory_repository import MemoryRepository
-    from app.db.repositories.activity_repository import ActivityRepository
-
+async def run_due_bot_activities():
+    """Run due bot activities for all bots whose time has come."""
     try:
-        # Get database session
         db = next(get_db())
-
-        # Create services
         content_generator = ContentGenerator()
         api_client = CartoucheAPIClient()
         bot_repository = BotRepository(db)
         memory_repository = MemoryRepository(db)
         activity_repository = ActivityRepository(db)
 
-        # Create bot manager
         bot_manager = BotManager(
             bot_repository=bot_repository,
             memory_repository=memory_repository,
@@ -205,56 +179,11 @@ async def process_reactions():
             api_client=api_client,
         )
 
-        # Create reaction engine
-        reaction_engine = ReactionEngine(
-            bot_repository=bot_repository, bot_manager=bot_manager
-        )
-
-        # Process reactions
         async with api_client:
-            results = await reaction_engine.process_due_reactions()
-            if results:
-                logger.info(f"Processed {len(results)} reactions")
-
+            await bot_manager.run_due_bot_activities()
+            logger.info("Ran due bot activities for all bots")
     except Exception as e:
-        logger.error(f"Failed to process reactions: {str(e)}")
-
-
-async def schedule_bot_activities():
-    """Schedule activities for all bots."""
-    from app.services.bot_manager import BotManager
-    from app.services.content_generator import ContentGenerator
-    from app.clients.cartouche_api import CartoucheAPIClient
-    from app.db.repositories.bot_repository import BotRepository
-    from app.db.repositories.memory_repository import MemoryRepository
-    from app.db.repositories.activity_repository import ActivityRepository
-
-    try:
-        # Get database session
-        db = next(get_db())
-
-        # Create services
-        content_generator = ContentGenerator()
-        api_client = CartoucheAPIClient()
-        bot_repository = BotRepository(db)
-        memory_repository = MemoryRepository(db)
-        activity_repository = ActivityRepository(db)
-
-        # Create bot manager
-        bot_manager = BotManager(
-            bot_repository=bot_repository,
-            memory_repository=memory_repository,
-            activity_repository=activity_repository,
-            content_generator=content_generator,
-            api_client=api_client,
-        )
-
-        # Schedule activities
-        await bot_manager.schedule_bot_activities()
-        logger.info("Scheduled bot activities")
-
-    except Exception as e:
-        logger.error(f"Failed to schedule bot activities: {str(e)}")
+        logger.error(f"Failed to run due bot activities: {str(e)}")
 
 
 @app.get("/")
