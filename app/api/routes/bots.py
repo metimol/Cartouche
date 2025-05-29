@@ -28,6 +28,19 @@ logger = setup_logging()
 router = APIRouter()
 
 
+@router.get("/activities", response_model=List[ActivityResponse])
+async def get_recent_activities(
+    limit: int = Query(20, ge=1, le=100), db: Session = Depends(get_db)
+):
+    """
+    Get recent activities from all bots.
+    """
+    activity_repository = ActivityRepository(db)
+    activities = activity_repository.get_recent_activities(limit=limit)
+
+    return [ActivityResponse.from_orm(activity) for activity in activities]
+
+
 @router.get("/", response_model=List[BotResponse])
 async def get_bots(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """
@@ -68,19 +81,6 @@ async def delete_bot(bot_id: int, db: Session = Depends(get_db)):
     bot_repository.delete_bot(bot_id)
 
     return {"message": f"Bot {bot_id} deleted successfully"}
-
-
-@router.get("/activities", response_model=List[ActivityResponse])
-async def get_recent_activities(
-    limit: int = Query(20, ge=1, le=100), db: Session = Depends(get_db)
-):
-    """
-    Get recent activities from all bots.
-    """
-    activity_repository = ActivityRepository(db)
-    activities = activity_repository.get_recent_activities(limit=limit)
-
-    return [ActivityResponse.from_orm(activity) for activity in activities]
 
 
 @router.get("/{bot_id}/activities", response_model=List[ActivityResponse])

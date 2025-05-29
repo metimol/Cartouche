@@ -192,7 +192,15 @@ class BotManager:
                 "Password": "bot",
                 "Prompt": BOT_PROMPTS.get(category, ""),
                 "Description": description,
+                "Category": category,
                 "Following": [],
+                "Settings": {
+                    "like_probability": like_probability,
+                    "comment_probability": comment_probability,
+                    "follow_probability": follow_probability,
+                    "unfollow_probability": unfollow_probability,
+                    "repost_probability": repost_probability,
+                },
             }
 
             await self.api_client.add_bot(api_bot_data)
