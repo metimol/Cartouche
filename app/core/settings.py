@@ -5,8 +5,6 @@ Loads configuration from environment variables.
 
 import os
 from pathlib import Path
-from typing import Optional, Dict, Any, List
-
 from dotenv import load_dotenv
 
 # Load environment variables from .env file if it exists
@@ -20,10 +18,11 @@ API_TOKEN = os.getenv("API_TOKEN", "123")
 
 # LLM Configuration
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
+GOOGLE_MODEL = os.getenv("GOOGLE_MODEL", "gemini-2.0-flash")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+OPENAI_API_BASE = os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
 DEFAULT_LLM_PROVIDER = os.getenv("DEFAULT_LLM_PROVIDER", "gemini")
-DEFAULT_LLM_MODEL = os.getenv("DEFAULT_LLM_MODEL", "gemini-2.0-flash")
 TEMPERATURE = float(os.getenv("TEMPERATURE", "0.7"))
 MAX_TOKENS = int(os.getenv("MAX_TOKENS", "1024"))
 
@@ -45,95 +44,6 @@ REACTION_DELAY_MAX = int(os.getenv("REACTION_DELAY_MAX", "300"))
 # Logging Configuration
 LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG")
 LOG_FILE = os.getenv("LOG_FILE", "logs/cartouche.log")
-
-# LLM Provider mapping
-LLM_PROVIDERS = {
-    "gemini": {
-        "api_key": GOOGLE_API_KEY,
-        "models": [
-            "gemini-1.0-pro-vision-latest",
-            "gemini-pro-vision",
-            "gemini-1.5-pro-latest",
-            "gemini-1.5-pro-001",
-            "gemini-1.5-pro-002",
-            "gemini-1.5-pro",
-            "gemini-1.5-flash-latest",
-            "gemini-1.5-flash-001",
-            "gemini-1.5-flash-001-tuning",
-            "gemini-1.5-flash",
-            "gemini-1.5-flash-002",
-            "gemini-1.5-flash-8b",
-            "gemini-1.5-flash-8b-001",
-            "gemini-1.5-flash-8b-latest",
-            "gemini-1.5-flash-8b-exp-0827",
-            "gemini-1.5-flash-8b-exp-0924",
-            "gemini-2.5-pro-exp-03-25",
-            "gemini-2.5-pro-preview-03-25",
-            "gemini-2.5-flash-preview-04-17",
-            "gemini-2.5-flash-preview-05-20",
-            "gemini-2.5-flash-preview-04-17-thinking",
-            "gemini-2.5-pro-preview-05-06",
-            "gemini-2.0-flash-exp",
-            "gemini-2.0-flash",
-            "gemini-2.0-flash-001",
-            "gemini-2.0-flash-lite-001",
-            "gemini-2.0-flash-lite",
-            "gemini-2.0-flash-lite-preview-02-05",
-            "gemini-2.0-flash-lite-preview",
-            "gemini-2.0-pro-exp",
-            "gemini-2.0-pro-exp-02-05",
-            "gemini-exp-1206",
-            "gemini-2.0-flash-thinking-exp-01-21",
-            "gemini-2.0-flash-thinking-exp",
-            "gemini-2.0-flash-thinking-exp-1219",
-            "gemini-2.5-flash-preview-tts",
-            "gemini-2.5-pro-preview-tts",
-            "gemma-3-1b-it",
-            "gemma-3-4b-it",
-            "gemma-3-12b-it",
-            "gemma-3-27b-it",
-            "gemma-3n-e4b-it",
-        ],
-    },
-    "openai": {
-        "api_key": OPENAI_API_KEY,
-        "models": [
-            "gpt-4o",
-            "chatgpt-4o-latest",
-            "gpt-4o-mini",
-            "gpt-4.1",
-            "gpt-4.1-mini",
-            "gpt-4.1-nano",
-            "gpt-3.5-turbo",
-            "gpt-3.5-turbo-16k",
-            "gpt-4",
-            "gpt-4-32k",
-            "gpt-4-1106-preview",
-            "gpt-4-0125-preview",
-            "gpt-4-turbo-2024-04-09",
-            "gpt-4-turbo",
-            "gpt-4.5-preview-2025-02-27",
-            "gpt-4.5-preview",
-            "o1",
-            "o1-2024-12-17",
-            "o1-preview",
-            "o1-mini",
-            "o3-mini",
-            "o3",
-            "o4-mini",
-            "gpt-3.5-turbo-instruct",
-        ],
-    },
-    "anthropic": {
-        "api_key": ANTHROPIC_API_KEY,
-        "models": [
-            "claude-3-7-sonnet-latest",
-            "claude-3-5-haiku-latest",
-            "claude-3-5-sonnet-latest",
-            "claude-3-opus-latest",
-        ],
-    },
-}
 
 # Bot categories and their base probabilities
 BOT_CATEGORIES = {

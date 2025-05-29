@@ -10,7 +10,7 @@ Cartouche Bot Service is a FastAPI-based microservice that manages autonomous so
 - Scheduled bot activities with randomized timing
 - Memory system for contextual interactions
 - Integration with Cartouche C# REST API
-- Support for multiple LLM providers (Gemini, OpenAI, Anthropic)
+- Support for multiple LLM providers (Gemini, OpenAI)
 
 ## License
 This project is open source and available under the MIT License.

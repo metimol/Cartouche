@@ -38,9 +38,8 @@ class ContentGenerator:
         """
         # Use environment variables as defaults if not provided
         provider = llm_provider or DEFAULT_LLM_PROVIDER
-        key = api_key or GOOGLE_API_KEY
 
-        self.llm_client = LLMFactory.create_client(provider=provider, api_key=key)
+        self.llm_client = LLMFactory.create_client(provider=provider)
 
     async def generate_bot_description(
         self, category: str, age: int, gender: str
