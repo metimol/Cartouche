@@ -85,7 +85,7 @@ async def initialize_background_tasks():
     # Schedule bot initialization
     scheduler.schedule_task(
         initialize_bots,
-        delay=40,  # Start after 10 seconds
+        delay=40,  # Start after 40 seconds
         interval=None,  # Run once
         task_id="initialize_bots",
     )
@@ -101,7 +101,7 @@ async def initialize_background_tasks():
     # Schedule autonomous bot actions
     scheduler.schedule_task(
         run_due_bot_activities,
-        delay=MONITORING_INTERVAL,  # Start after MONITORING_INTERVAL seconds
+        delay=200,  # Start after 200 seconds
         interval=MONITORING_INTERVAL,  # Run every MONITORING_INTERVAL seconds
         task_id="run_due_bot_activities",
     )
