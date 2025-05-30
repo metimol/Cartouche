@@ -42,7 +42,7 @@ class BotUpdate(BaseModel):
     comment_probability: Optional[float] = None
     follow_probability: Optional[float] = None
     unfollow_probability: Optional[float] = None
-    repost_probability: Optional[float] = None
+    post_probability: Optional[float] = None
 
 
 class BotResponse(BotBase):
@@ -55,7 +55,7 @@ class BotResponse(BotBase):
     comment_probability: float
     follow_probability: float
     unfollow_probability: float
-    repost_probability: float
+    post_probability: float
 
     class Config:
         from_attributes = True

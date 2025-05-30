@@ -51,7 +51,7 @@ BOT_CATEGORIES = {
         "comment_probability": 0.5,
         "follow_probability": 0.7,
         "unfollow_probability": 0.1,
-        "repost_probability": 0.2,
+        "post_probability": 0.4,
         "description": "Supportive, enthusiastic, positive",
     },
     "hater": {
@@ -59,7 +59,7 @@ BOT_CATEGORIES = {
         "comment_probability": 0.4,
         "follow_probability": 0.2,
         "unfollow_probability": 0.6,
-        "repost_probability": 0.05,
+        "post_probability": 0.2,
         "description": "Critical, negative, provocative",
     },
     "silent": {
@@ -67,7 +67,7 @@ BOT_CATEGORIES = {
         "comment_probability": 0.1,
         "follow_probability": 0.3,
         "unfollow_probability": 0.2,
-        "repost_probability": 0.05,
+        "post_probability": 0.1,
         "description": "Observant, rarely comments, occasional likes",
     },
     "random": {
@@ -75,7 +75,7 @@ BOT_CATEGORIES = {
         "comment_probability": 0.3,
         "follow_probability": 0.4,
         "unfollow_probability": 0.4,
-        "repost_probability": 0.1,
+        "post_probability": 0.15,
         "description": "Unpredictable, varied behavior",
     },
     "neutral": {
@@ -83,7 +83,7 @@ BOT_CATEGORIES = {
         "comment_probability": 0.3,
         "follow_probability": 0.5,
         "unfollow_probability": 0.3,
-        "repost_probability": 0.1,
+        "post_probability": 0.1,
         "description": "Balanced, rational, thoughtful",
     },
     "humorous": {
@@ -91,7 +91,7 @@ BOT_CATEGORIES = {
         "comment_probability": 0.6,
         "follow_probability": 0.6,
         "unfollow_probability": 0.2,
-        "repost_probability": 0.15,
+        "post_probability": 0.4,
         "description": "Funny, sarcastic, meme-oriented",
     },
     "provocative": {
@@ -99,7 +99,7 @@ BOT_CATEGORIES = {
         "comment_probability": 0.7,
         "follow_probability": 0.4,
         "unfollow_probability": 0.5,
-        "repost_probability": 0.1,
+        "post_probability": 0.2,
         "description": "Challenging, questioning, debate-oriented",
     },
     "role_player": {
@@ -107,7 +107,7 @@ BOT_CATEGORIES = {
         "comment_probability": 0.5,
         "follow_probability": 0.5,
         "unfollow_probability": 0.3,
-        "repost_probability": 0.15,
+        "post_probability": 0.15,
         "description": "In-character, consistent persona",
     },
 }

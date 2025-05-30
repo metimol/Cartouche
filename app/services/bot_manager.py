@@ -146,21 +146,21 @@ class BotManager:
             comment_probability = category_probs.get("comment_probability", 0.3)
             follow_probability = category_probs.get("follow_probability", 0.4)
             unfollow_probability = category_probs.get("unfollow_probability", 0.2)
-            repost_probability = category_probs.get("repost_probability", 0.1)
+            post_probability = category_probs.get("post_probability", 0.1)
 
             # Add some randomness to probabilities
             like_probability += random.uniform(-0.1, 0.1)
             comment_probability += random.uniform(-0.1, 0.1)
             follow_probability += random.uniform(-0.1, 0.1)
             unfollow_probability += random.uniform(-0.1, 0.1)
-            repost_probability += random.uniform(-0.05, 0.05)
+            post_probability += random.uniform(-0.05, 0.05)
 
             # Ensure probabilities are within bounds
             like_probability = max(0.1, min(0.9, like_probability))
             comment_probability = max(0.1, min(0.9, comment_probability))
             follow_probability = max(0.1, min(0.9, follow_probability))
             unfollow_probability = max(0.1, min(0.9, unfollow_probability))
-            repost_probability = max(0.0, min(0.3, repost_probability))
+            post_probability = max(0.0, min(0.3, repost_probability))
 
             # Create bot in local database
             bot_data = {
@@ -176,7 +176,7 @@ class BotManager:
                 "comment_probability": comment_probability,
                 "follow_probability": follow_probability,
                 "unfollow_probability": unfollow_probability,
-                "repost_probability": repost_probability,
+                "post_probability": post_probability,
             }
 
             bot = self.bot_repository.create_bot(bot_data)
@@ -200,7 +200,7 @@ class BotManager:
                     "comment_probability": comment_probability,
                     "follow_probability": follow_probability,
                     "unfollow_probability": unfollow_probability,
-                    "repost_probability": repost_probability,
+                    "post_probability": post_probability,
                 },
             }
 
@@ -439,7 +439,7 @@ class BotManager:
                 try:
                     await self.process_bot_activity(bot.id)
                     # Occasionally the bot makes a post
-                    if random.random() < POST_POSIBILITY:
+                    if random.random() < bot.post_probability:
                         await self.create_bot_post(bot.id)
                 except Exception as e:
                     logger.error(f"Failed to run activity for bot {getattr(bot, 'name', bot.id)}: {str(e)}")

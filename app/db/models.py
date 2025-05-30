@@ -42,7 +42,7 @@ class Bot(Base):
     comment_probability = Column(Float)
     follow_probability = Column(Float)
     unfollow_probability = Column(Float)
-    repost_probability = Column(Float)
+    post_probability = Column(Float)
 
     # Relationships
     memories = relationship(
