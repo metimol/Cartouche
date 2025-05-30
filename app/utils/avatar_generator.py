@@ -29,6 +29,6 @@ class AvatarGenerator:
         seed = uuid.uuid4()
 
         # Generate url for avatar
-        url = f"https://api.dicebear.com/7.x/{style}/svg?seed={seed}"
+        url = f"https://api.dicebear.com/9.x/{style}/png?seed={seed}"
 
         return url
