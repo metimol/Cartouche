@@ -85,7 +85,7 @@ async def initialize_background_tasks():
     # Schedule bot initialization
     scheduler.schedule_task(
         initialize_bots,
-        delay=10,  # Start after 10 seconds
+        delay=40,  # Start after 10 seconds
         interval=None,  # Run once
         task_id="initialize_bots",
     )
