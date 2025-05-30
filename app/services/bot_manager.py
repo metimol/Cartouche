@@ -344,7 +344,7 @@ class BotManager:
                     comment_data = {
                         "Name": bot.name,
                         "Text": comment_text,
-                        "OnDate": datetime.utcnow().strftime("%m/%d/%Y"),
+                        "OnDate": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S"),
                     }
 
                     # Add comment to post
