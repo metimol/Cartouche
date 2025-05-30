@@ -161,7 +161,7 @@ class BotManager:
             comment_probability = max(0.1, min(0.9, comment_probability))
             follow_probability = max(0.1, min(0.9, follow_probability))
             unfollow_probability = max(0.1, min(0.9, unfollow_probability))
-            post_probability = max(0.0, min(0.3, repost_probability))
+            post_probability = max(0.0, min(0.3, post_probability))
 
             # Create bot in local database
             bot_data = {
