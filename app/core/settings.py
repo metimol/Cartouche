@@ -38,7 +38,8 @@ MAX_BOTS_COUNT = int(os.getenv("MAX_BOTS_COUNT", "5000"))
 
 # Monitoring Configuration
 MONITORING_INTERVAL = int(os.getenv("MONITORING_INTERVAL", "60"))
-POST_POSIBILITY = float(os.getenv("POST_POSIBILITY", "0.5"))
+REACTION_DELAY_MIN = int(os.getenv("REACTION_DELAY_MIN", "5"))
+REACTION_DELAY_MAX = int(os.getenv("REACTION_DELAY_MAX", "30"))
 
 # Logging Configuration
 LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG")

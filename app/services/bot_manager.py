@@ -21,7 +21,8 @@ from app.core.settings import (
     MAX_BOTS_COUNT,
     AVATAR_STYLES,
     BOT_PROMPTS,
-    POST_POSIBILITY,
+    REACTION_DELAY_MIN,
+    REACTION_DELAY_MAX,
 )
 from app.models.models import BotResponse
 from app.core.exceptions import BotError
@@ -444,6 +445,6 @@ class BotManager:
                 except Exception as e:
                     logger.error(f"Failed to run activity for bot {getattr(bot, 'name', bot.id)}: {str(e)}")
                 # Reschedule the next activity time
-                hours_delay = random.uniform(0.5, 24)
-                next_activity = now + timedelta(hours=hours_delay)
+                minutes_delay = random.uniform(REACTION_DELAY_MIN, REACTION_DELAY_MAX)
+                next_activity = now + timedelta(minutes=minutes_delay)
                 self.bot_repository.update_bot(bot.id, {"last_active": next_activity})
