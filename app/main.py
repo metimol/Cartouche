@@ -85,7 +85,7 @@ async def initialize_background_tasks():
     # Schedule bot initialization
     scheduler.schedule_task(
         initialize_bots,
-        delay=5,  # Start after 5 seconds
+        delay=10,  # Start after 10 seconds
         interval=None,  # Run once
         task_id="initialize_bots",
     )
@@ -93,7 +93,7 @@ async def initialize_background_tasks():
     # Schedule daily bot growth
     scheduler.schedule_task(
         daily_bot_growth,
-        delay=3600,  # Start after 1 hour
+        delay=86400,  # Start after 1 day
         interval=86400,  # Run daily
         task_id="daily_bot_growth",
     )
