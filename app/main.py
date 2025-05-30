@@ -74,6 +74,14 @@ async def shutdown_event():
 
 async def initialize_background_tasks():
     """Initialize background tasks."""
+    # Schedule bot synchronization with external API
+    scheduler.schedule_task(
+        sync_bots_with_external_api_task,
+        delay=2,  # Start almost immediately after startup
+        interval=1800,  # Every 30 minutes
+        task_id="sync_bots_with_external_api",
+    )
+
     # Schedule bot initialization
     scheduler.schedule_task(
         initialize_bots,
@@ -184,6 +192,33 @@ async def run_due_bot_activities():
             logger.info("Ran due bot activities for all bots")
     except Exception as e:
         logger.error(f"Failed to run due bot activities: {str(e)}")
+
+
+async def sync_bots_with_external_api_task():
+    """
+    Background task for syncing bots with external API.
+    """
+    try:
+        db = next(get_db())
+        content_generator = ContentGenerator()
+        api_client = CartoucheAPIClient()
+        bot_repository = BotRepository(db)
+        memory_repository = MemoryRepository(db)
+        activity_repository = ActivityRepository(db)
+
+        bot_manager = BotManager(
+            bot_repository=bot_repository,
+            memory_repository=memory_repository,
+            activity_repository=activity_repository,
+            content_generator=content_generator,
+            api_client=api_client,
+        )
+
+        async with api_client:
+            synced = await bot_manager.sync_bots_with_external_api()
+            logger.info(f"Synchronized {synced} bots with external API")
+    except Exception as e:
+        logger.error(f"Failed to sync bots with external API: {str(e)}")
 
 
 @app.get("/")

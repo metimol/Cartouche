@@ -6,6 +6,8 @@ Handles creation, management, and scheduling of bots.
 from typing import Dict, Any
 import random
 from datetime import datetime, timedelta
+import aiohttp
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.db.repositories.bot_repository import BotRepository
 from app.db.repositories.memory_repository import MemoryRepository
@@ -14,6 +16,8 @@ from app.services.content_generator import ContentGenerator
 from app.utils.avatar_generator import AvatarGenerator
 from app.clients.cartouche_api import CartoucheAPIClient
 from app.core.settings import (
+    API_BASE_URL,
+    API_TOKEN,
     BOT_CATEGORIES,
     INITIAL_BOTS_COUNT,
     DAILY_BOTS_GROWTH_MIN,
@@ -448,3 +452,69 @@ class BotManager:
                 minutes_delay = random.uniform(REACTION_DELAY_MIN, REACTION_DELAY_MAX)
                 next_activity = now + timedelta(minutes=minutes_delay)
                 self.bot_repository.update_bot(bot.id, {"last_active": next_activity})
+
+    async def sync_bots_with_external_api(self) -> int:
+        """
+        Synchronize bots with the main API (fetch all bots with IsBot=true and update local DB).
+        Returns:
+            Number of bots synchronized
+        """
+
+        url = f"{API_BASE_URL}/GetDocuments/Users/?token={API_TOKEN}&query={{\"IsBot\":true}}"
+        logger.info("Starting bot synchronization with external API...")
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as response:
+                    if response.status != 200:
+                        logger.error(f"Failed to fetch bots from API: {response.status}")
+                        return 0
+                    data = await response.json()
+        except Exception as e:
+            logger.error(f"Error fetching bots from API: {str(e)}")
+            return 0
+
+        # Map by name for quick lookup
+        external_bots = {item['json']['Name']: item for item in data if 'json' in item and item['json'].get('IsBot')}
+        local_bots = {b.name: b for b in self.bot_repository.get_all_bots(limit=10000)}
+
+        updated = 0
+        # Add or update bots
+        for name, ext in external_bots.items():
+            ext_json = ext['json']
+            bot_data = {
+                'name': ext_json['Name'],
+                'full_name': ext_json.get('FullName', ''),
+                'avatar': ext_json.get('Avatar', ''),
+                'age': ext_json.get('Age', 0),
+                'gender': ext_json.get('Gender', ''),
+                'prompt': ext_json.get('Prompt', ''),
+                'category': ext_json.get('Category', ''),
+                'description': ext_json.get('Description', ''),
+                'like_probability': ext_json.get('Settings', {}).get('like_probability', 0.0),
+                'comment_probability': ext_json.get('Settings', {}).get('comment_probability', 0.0),
+                'follow_probability': ext_json.get('Settings', {}).get('follow_probability', 0.0),
+                'unfollow_probability': ext_json.get('Settings', {}).get('unfollow_probability', 0.0),
+                'post_probability': ext_json.get('Settings', {}).get('post_probability', 0.0),
+            }
+            if name in local_bots:
+                # Update existing bot
+                try:
+                    self.bot_repository.update_bot(local_bots[name].id, bot_data)
+                    updated += 1
+                except SQLAlchemyError as e:
+                    logger.error(f"Failed to update bot {name}: {str(e)}")
+            else:
+                # Create new bot
+                try:
+                    self.bot_repository.create_bot(bot_data)
+                    updated += 1
+                except SQLAlchemyError as e:
+                    logger.error(f"Failed to create bot {name}: {str(e)}")
+
+        # Remove local bots not present in external (strict sync needed)
+        for name, bot in local_bots.items():
+            if name not in external_bots:
+                self.bot_repository.delete_bot(bot.id)
+
+        logger.info(f"Bot synchronization complete. Synced {updated} bots.")
+        return updated
