@@ -112,7 +112,7 @@ async def get_bot_activities(
 
 @router.get("/{bot_id}/memories", response_model=List[MemoryResponse])
 async def get_bot_memories(
-    bot_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
+    bot_id: int, limit: int = 100, db: Session = Depends(get_db)
 ):
     """
     Get memories for a specific bot.
@@ -122,19 +122,15 @@ async def get_bot_memories(
     if not bot:
         raise HTTPException(status_code=404, detail="Bot not found")
 
-    # Используем MemoryService для поиска воспоминаний (можно реализовать простой вывод последних N, если нужно)
+    # Use MemoryService to search for memories
     memory_service = MemoryService()
-    # Здесь можно реализовать поиск по пустому запросу, чтобы получить последние N воспоминаний
     memories = await memory_service.search_memories(bot_id, query="", limit=limit)
 
-    # Приводим к MemoryResponse
     return [MemoryResponse(
-        id=-1,  # Векторная память не имеет id, можно оставить -1 или сгенерировать
         bot_id=bot_id,
         content=m["text"],
         context_type=m["metadata"].get("context_type", ""),
         context_id=m["metadata"].get("context_id", ""),
-        created_at=None  # Нет даты, если не хранить в metadata
     ) for m in memories]
 
 
