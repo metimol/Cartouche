@@ -73,36 +73,37 @@ async def shutdown_event():
 
 
 async def initialize_background_tasks():
-    """Initialize background tasks."""
-    # Schedule bot synchronization with external API
+    """Initialize background tasks with sequential startup, then schedule periodic tasks."""
+    # 1. First, synchronize with the external API
+    await sync_bots_with_external_api_task()
+    # 2. Then initialize bots
+    await initialize_bots()
+    # 3. Then run pending activities
+    await run_due_bot_activities()
+
+    # After the initial run, schedule tasks as periodic
     scheduler.schedule_task(
         sync_bots_with_external_api_task,
-        delay=2,  # Start almost immediately after startup
+        delay=1800,  # In 30 minutes
         interval=1800,  # Every 30 minutes
         task_id="sync_bots_with_external_api",
     )
-
-    # Schedule bot initialization
     scheduler.schedule_task(
         initialize_bots,
-        delay=40,  # Start after 40 seconds
-        interval=None,  # Run once
+        delay=86400,  # In 24 hours
+        interval=None,  # Only once
         task_id="initialize_bots",
     )
-
-    # Schedule daily bot growth
     scheduler.schedule_task(
         daily_bot_growth,
-        delay=86400,  # Start after 1 day
-        interval=86400,  # Run daily
+        delay=86400,  # In 24 hours
+        interval=86400,  # Every day
         task_id="daily_bot_growth",
     )
-
-    # Schedule autonomous bot actions
     scheduler.schedule_task(
         run_due_bot_activities,
-        delay=200,  # Start after 200 seconds
-        interval=MONITORING_INTERVAL,  # Run every MONITORING_INTERVAL seconds
+        delay=MONITORING_INTERVAL,  # In MONITORING_INTERVAL seconds
+        interval=MONITORING_INTERVAL,  # Every MONITORING_INTERVAL seconds
         task_id="run_due_bot_activities",
     )
 
