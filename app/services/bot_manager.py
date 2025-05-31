@@ -134,7 +134,7 @@ class BotManager:
             age = random.randint(18, 65)
 
             # Generate unique username and description
-            username = UsernameGenerator.generate_username(self.bot_repository)
+            username = await UsernameGenerator.generate_username(self.bot_repository)
             full_name = await self.content_generator.generate_full_name(gender, age)
             description = await self.content_generator.generate_bot_description(
                 category, age, gender
