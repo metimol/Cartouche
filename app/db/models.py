@@ -45,28 +45,9 @@ class Bot(Base):
     post_probability = Column(Float)
 
     # Relationships
-    memories = relationship(
-        "BotMemory", back_populates="bot", cascade="all, delete-orphan"
-    )
     activities = relationship(
         "BotActivity", back_populates="bot", cascade="all, delete-orphan"
     )
-
-
-class BotMemory(Base):
-    """Memory entries for bots to remember past interactions."""
-
-    __tablename__ = "bot_memories"
-
-    id = Column(Integer, primary_key=True, index=True)
-    bot_id = Column(Integer, ForeignKey("bots.id"))
-    content = Column(Text)
-    context_type = Column(String)  # post, comment, user, etc.
-    context_id = Column(String)  # ID of the related entity
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-    # Relationships
-    bot = relationship("Bot", back_populates="memories")
 
 
 class BotActivity(Base):

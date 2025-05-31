@@ -10,7 +10,6 @@ import aiohttp
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.db.repositories.bot_repository import BotRepository
-from app.db.repositories.memory_repository import MemoryRepository
 from app.db.repositories.activity_repository import ActivityRepository
 from app.services.content_generator import ContentGenerator
 from app.utils.avatar_generator import AvatarGenerator
@@ -32,6 +31,7 @@ from app.core.settings import (
 from app.models.models import BotResponse
 from app.core.exceptions import BotError
 from app.core.logging import setup_logging
+from app.services.memory_service import MemoryService
 
 # Setup logging
 logger = setup_logging()
@@ -43,26 +43,25 @@ class BotManager:
     def __init__(
         self,
         bot_repository: BotRepository,
-        memory_repository: MemoryRepository,
         activity_repository: ActivityRepository,
         content_generator: ContentGenerator,
         api_client: CartoucheAPIClient,
+        memory_service: MemoryService,
     ):
         """
         Initialize the bot manager.
 
         Args:
             bot_repository: Bot repository
-            memory_repository: Memory repository
             activity_repository: Activity repository
             content_generator: Content generator
             api_client: API client
         """
         self.bot_repository = bot_repository
-        self.memory_repository = memory_repository
         self.activity_repository = activity_repository
         self.content_generator = content_generator
         self.api_client = api_client
+        self.memory_service = memory_service
 
     async def initialize_bots(self) -> int:
         """
@@ -316,13 +315,11 @@ class BotManager:
                         bot.category, post.get("Text", ""), "post"
                     )
 
-                    self.memory_repository.create_memory(
-                        {
-                            "bot_id": bot_id,
-                            "content": memory_text,
-                            "context_type": "post",
-                            "context_id": str(post_id),
-                        }
+                    # Add memory to MemoryService
+                    await self.memory_service.add_memory(
+                        bot_id,
+                        memory_text,
+                        {"context_type": "post", "context_id": str(post_id)}
                     )
 
                     action_taken = True
@@ -333,11 +330,11 @@ class BotManager:
             # Try to comment
             if not has_commented and random.random() < bot.comment_probability:
                 try:
-                    # Get bot memories related to this post
-                    memories = self.memory_repository.get_memories_by_context(
-                        bot_id, "post", str(post_id)
+                    # Get relevant memories from MemoryService
+                    search_results = await self.memory_service.search_memories(
+                        bot_id, post.get("Text", ""), limit=3
                     )
-                    memory_texts = [memory.content for memory in memories]
+                    memory_texts = [m["text"] for m in search_results]
 
                     # Generate comment
                     comment_text = await self.content_generator.generate_comment(

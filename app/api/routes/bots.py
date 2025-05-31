@@ -8,11 +8,11 @@ from typing import List, Optional
 
 from app.db.session import get_db
 from app.db.repositories.bot_repository import BotRepository
-from app.db.repositories.memory_repository import MemoryRepository
 from app.db.repositories.activity_repository import ActivityRepository
 from app.services.bot_manager import BotManager
 from app.services.content_generator import ContentGenerator
 from app.clients.cartouche_api import CartoucheAPIClient
+from app.services.memory_service import MemoryService
 from app.models.models import (
     BotResponse,
     ActivityResponse,
@@ -118,15 +118,24 @@ async def get_bot_memories(
     Get memories for a specific bot.
     """
     bot_repository = BotRepository(db)
-    memory_repository = MemoryRepository(db)
-
     bot = bot_repository.get_bot_by_id(bot_id)
     if not bot:
         raise HTTPException(status_code=404, detail="Bot not found")
 
-    memories = memory_repository.get_memories_by_bot_id(bot_id, skip, limit)
+    # Используем MemoryService для поиска воспоминаний (можно реализовать простой вывод последних N, если нужно)
+    memory_service = MemoryService()
+    # Здесь можно реализовать поиск по пустому запросу, чтобы получить последние N воспоминаний
+    memories = await memory_service.search_memories(bot_id, query="", limit=limit)
 
-    return [MemoryResponse.from_orm(memory) for memory in memories]
+    # Приводим к MemoryResponse
+    return [MemoryResponse(
+        id=-1,  # Векторная память не имеет id, можно оставить -1 или сгенерировать
+        bot_id=bot_id,
+        content=m["text"],
+        context_type=m["metadata"].get("context_type", ""),
+        context_id=m["metadata"].get("context_id", ""),
+        created_at=None  # Нет даты, если не хранить в metadata
+    ) for m in memories]
 
 
 @router.post("/{bot_id}/react")
@@ -135,10 +144,10 @@ async def trigger_bot_reaction(bot_id: int, db: Session = Depends(get_db)):
     Trigger a reaction from a specific bot to a post.
     """
     bot_repository = BotRepository(db)
-    memory_repository = MemoryRepository(db)
     activity_repository = ActivityRepository(db)
     content_generator = ContentGenerator()
     api_client = CartoucheAPIClient()
+    memory_service = MemoryService()
 
     bot = bot_repository.get_bot_by_id(bot_id)
     if not bot:
@@ -146,10 +155,10 @@ async def trigger_bot_reaction(bot_id: int, db: Session = Depends(get_db)):
 
     bot_manager = BotManager(
         bot_repository=bot_repository,
-        memory_repository=memory_repository,
         activity_repository=activity_repository,
         content_generator=content_generator,
         api_client=api_client,
+        memory_service=memory_service,
     )
 
     # Process bot activity
@@ -165,10 +174,10 @@ async def create_bot_post(bot_id: int, db: Session = Depends(get_db)):
     Create a post for a specific bot.
     """
     bot_repository = BotRepository(db)
-    memory_repository = MemoryRepository(db)
     activity_repository = ActivityRepository(db)
     content_generator = ContentGenerator()
     api_client = CartoucheAPIClient()
+    memory_service = MemoryService()
 
     bot = bot_repository.get_bot_by_id(bot_id)
     if not bot:
@@ -176,10 +185,10 @@ async def create_bot_post(bot_id: int, db: Session = Depends(get_db)):
 
     bot_manager = BotManager(
         bot_repository=bot_repository,
-        memory_repository=memory_repository,
         activity_repository=activity_repository,
         content_generator=content_generator,
         api_client=api_client,
+        memory_service=memory_service,
     )
 
     # Create post

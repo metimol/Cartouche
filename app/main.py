@@ -16,8 +16,8 @@ from app.services.bot_manager import BotManager
 from app.services.content_generator import ContentGenerator
 from app.clients.cartouche_api import CartoucheAPIClient
 from app.db.repositories.bot_repository import BotRepository
-from app.db.repositories.memory_repository import MemoryRepository
 from app.db.repositories.activity_repository import ActivityRepository
+from app.services.memory_service import MemoryService
 
 # Setup logging
 logger = setup_logging()
@@ -118,16 +118,16 @@ async def initialize_bots():
         content_generator = ContentGenerator()
         api_client = CartoucheAPIClient()
         bot_repository = BotRepository(db)
-        memory_repository = MemoryRepository(db)
         activity_repository = ActivityRepository(db)
+        memory_service = MemoryService()
 
         # Create bot manager
         bot_manager = BotManager(
             bot_repository=bot_repository,
-            memory_repository=memory_repository,
             activity_repository=activity_repository,
             content_generator=content_generator,
             api_client=api_client,
+            memory_service=memory_service,
         )
 
         # Initialize bots
@@ -149,16 +149,16 @@ async def daily_bot_growth():
         content_generator = ContentGenerator()
         api_client = CartoucheAPIClient()
         bot_repository = BotRepository(db)
-        memory_repository = MemoryRepository(db)
         activity_repository = ActivityRepository(db)
+        memory_service = MemoryService()
 
         # Create bot manager
         bot_manager = BotManager(
             bot_repository=bot_repository,
-            memory_repository=memory_repository,
             activity_repository=activity_repository,
             content_generator=content_generator,
             api_client=api_client,
+            memory_service=memory_service,
         )
 
         # Handle daily growth
@@ -177,15 +177,15 @@ async def run_due_bot_activities():
         content_generator = ContentGenerator()
         api_client = CartoucheAPIClient()
         bot_repository = BotRepository(db)
-        memory_repository = MemoryRepository(db)
         activity_repository = ActivityRepository(db)
+        memory_service = MemoryService()
 
         bot_manager = BotManager(
             bot_repository=bot_repository,
-            memory_repository=memory_repository,
             activity_repository=activity_repository,
             content_generator=content_generator,
             api_client=api_client,
+            memory_service=memory_service,
         )
 
         async with api_client:
@@ -204,15 +204,15 @@ async def sync_bots_with_external_api_task():
         content_generator = ContentGenerator()
         api_client = CartoucheAPIClient()
         bot_repository = BotRepository(db)
-        memory_repository = MemoryRepository(db)
         activity_repository = ActivityRepository(db)
+        memory_service = MemoryService()
 
         bot_manager = BotManager(
             bot_repository=bot_repository,
-            memory_repository=memory_repository,
             activity_repository=activity_repository,
             content_generator=content_generator,
             api_client=api_client,
+            memory_service=memory_service,
         )
 
         async with api_client:
