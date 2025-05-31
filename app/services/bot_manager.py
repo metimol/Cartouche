@@ -14,6 +14,7 @@ from app.db.repositories.memory_repository import MemoryRepository
 from app.db.repositories.activity_repository import ActivityRepository
 from app.services.content_generator import ContentGenerator
 from app.utils.avatar_generator import AvatarGenerator
+from app.utils.username_generator import UsernameGenerator
 from app.clients.cartouche_api import CartoucheAPIClient
 from app.core.settings import (
     API_BASE_URL,
@@ -133,9 +134,7 @@ class BotManager:
             age = random.randint(18, 65)
 
             # Generate unique username and description
-            username = await self.content_generator.generate_unique_bot_username(
-                category, self.bot_repository
-            )
+            username = UsernameGenerator.generate_username(self.bot_repository)
             full_name = await self.content_generator.generate_full_name(gender, age)
             description = await self.content_generator.generate_bot_description(
                 category, age, gender
