@@ -8,7 +8,7 @@ class UsernameGenerator:
     @staticmethod
     async def generate() -> str:
         """Generate a random username."""
-        username = '-'.join(coolname.generate(2)) + '-' + str(coolname.random.randint(0, 9999))
+        username = '-'.join(coolname.generate(2)) + '-' + str(random.randint(0, 9999))
         if len(username) > 20:
             username = username[:20]
         return username
