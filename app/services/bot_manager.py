@@ -285,6 +285,28 @@ class BotManager:
             post = random.choice(recent_posts)
             post_id = post.get("docID")
 
+            # Split the post into parts
+            post_json = post.get("json", {})
+            text = post_json.get("Text", "")
+            author = post_json.get("FullName", "")
+            date = post_json.get("OnDate", "")
+            comments = post_json.get("Comments", [])
+            likes = len(post_json.get("Likes", []))
+
+            # Format comments for LLM
+            if comments and isinstance(comments, list):
+                formatted_comments = "\n".join(
+                    f"- [{c.get('OnDate', '')}] {c.get('FullName', '')}: {c.get('Text', '')}"
+                    for c in comments
+                )
+            else:
+                formatted_comments = "No comments"
+
+            # Prepare post info for llm models
+            post_info = (
+                f"Author: {author}\nDate: {date}\nText: {text}\nComments:\n{formatted_comments}\nLikes: {likes}"
+            )
+
             # Check if bot has already interacted with this post
             has_liked = self.activity_repository.check_activity_exists(
                 bot_id, "like", post_id
@@ -312,7 +334,7 @@ class BotManager:
 
                     # Create memory
                     memory_text = await self.content_generator.generate_memory(
-                        bot.category, post.get("Text", ""), "post"
+                        bot.category, text, "post"
                     )
 
                     # Add memory to MemoryService
@@ -332,13 +354,13 @@ class BotManager:
                 try:
                     # Get relevant memories from MemoryService
                     search_results = await self.memory_service.search_memories(
-                        bot_id, post.get("Text", ""), limit=3
+                        bot_id, text, limit=3
                     )
                     memory_texts = [m["text"] for m in search_results]
 
                     # Generate comment
                     comment_text = await self.content_generator.generate_comment(
-                        bot.category, post.get("Text", ""), memory_texts
+                        bot.category, post_info, memory_texts
                     )
 
                     # Create comment data
