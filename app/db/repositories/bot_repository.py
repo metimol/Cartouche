@@ -8,8 +8,8 @@ from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
-from app.db.models import Bot, BotMemory, BotActivity
 from app.core.exceptions import DatabaseError
+from app.db.models import Bot
 
 
 class BotRepository:

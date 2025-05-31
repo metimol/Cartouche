@@ -1,7 +1,6 @@
 import coolname
-from db.repositories.bot_repository import BotRepository
+from app.db.repositories.bot_repository import BotRepository
 import random
-import asyncio
 
 class UsernameGenerator:
     """Generates a random username using the coolname library."""

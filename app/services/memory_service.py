@@ -7,8 +7,9 @@ from typing import Dict, List, Any
 import os
 from pathlib import Path
 
-from langchain_community.vectorstores import Qdrant
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_qdrant import QdrantVectorStore
+from langchain_huggingface import HuggingFaceEmbeddings
+from qdrant_client import QdrantClient
 
 from app.core.settings import VECTOR_DB_PATH
 from app.core.exceptions import DatabaseError
@@ -37,8 +38,9 @@ class MemoryService:
 
         # Initialize vector stores for each bot as needed
         self.vector_stores = {}
+        self.qdrant_clients = {}  # Cache QdrantClient per bot
 
-    def _get_bot_vector_store(self, bot_id: int) -> Qdrant:
+    def _get_bot_vector_store(self, bot_id: int) -> QdrantVectorStore:
         """
         Get or create vector store for a specific bot.
 
@@ -50,16 +52,31 @@ class MemoryService:
         """
         if bot_id not in self.vector_stores:
             try:
-                # Check if collection exists
                 collection_path = os.path.join(self.vector_db_path, f"bot_{bot_id}")
                 Path(collection_path).mkdir(parents=True, exist_ok=True)
 
-                # Create vector store
-                self.vector_stores[bot_id] = Qdrant.from_documents(
-                    documents=[],  # Empty initial documents
+                # Use cached QdrantClient if available
+                if bot_id not in self.qdrant_clients:
+                    self.qdrant_clients[bot_id] = QdrantClient(path=collection_path)
+                client = self.qdrant_clients[bot_id]
+
+                collection_name = f"bot_{bot_id}"
+                if collection_name not in [
+                    c.name for c in client.get_collections().collections
+                ]:
+                    client.create_collection(
+                        collection_name=collection_name,
+                        vectors_config={
+                            "size": len(self.embeddings.embed_query("test")),
+                            "distance": "Cosine",
+                        },
+                    )
+
+                # Create or load vector store
+                self.vector_stores[bot_id] = QdrantVectorStore(
+                    client=client,
                     embedding=self.embeddings,
-                    path=collection_path,
-                    collection_name=f"bot_{bot_id}",
+                    collection_name=collection_name,
                 )
             except Exception as e:
                 logger.error(
@@ -151,6 +168,8 @@ class MemoryService:
             # Remove from cache
             if bot_id in self.vector_stores:
                 del self.vector_stores[bot_id]
+            if bot_id in self.qdrant_clients:
+                del self.qdrant_clients[bot_id]
 
             # Delete collection directory
             collection_path = os.path.join(self.vector_db_path, f"bot_{bot_id}")
