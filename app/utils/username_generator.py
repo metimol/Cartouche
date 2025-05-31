@@ -17,7 +17,7 @@ class UsernameGenerator:
     async def generate_username(bot_repository: BotRepository) -> str:
         """Generate a unique username. If taken, mutate one character to a digit until unique."""
         username = await UsernameGenerator.generate()
-        while await bot_repository.get_bot_by_name(username):
+        while bot_repository.get_bot_by_name(username):
             username_list = list(username)
             for i in range(len(username_list)):
                 if not username_list[i].isdigit():
