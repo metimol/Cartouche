@@ -313,7 +313,7 @@ class CartoucheAPIClient:
         url = f"{self.base_url}/{endpoint}/?query={query}&token={self.token}"
 
         # Prepare request body
-        formatted_data = await JSONToStringConverter.format_follow_data(bot_name)
+        formatted_data = JSONToStringConverter.format_follow_data(bot_name)
 
         if not self.session:
             self.session = aiohttp.ClientSession()
