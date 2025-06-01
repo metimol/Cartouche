@@ -303,9 +303,7 @@ class BotManager:
                 formatted_comments = "No comments"
 
             # Prepare post info for llm models
-            post_info = (
-                f"Author: {author}\nDate: {date}\nText: {text}\nComments:\n{formatted_comments}\nLikes: {likes}"
-            )
+            post_info = f"Author: {author}\nDate: {date}\nText: {text}\nComments:\n{formatted_comments}\nLikes: {likes}"
 
             # Check if bot has already interacted with this post
             has_liked = self.activity_repository.check_activity_exists(
@@ -341,7 +339,7 @@ class BotManager:
                     await self.memory_service.add_memory(
                         bot_id,
                         memory_text,
-                        {"context_type": "post", "context_id": str(post_id)}
+                        {"context_type": "post", "context_id": str(post_id)},
                     )
 
                     action_taken = True
@@ -458,14 +456,16 @@ class BotManager:
         bots = self.bot_repository.get_all_bots(limit=MAX_BOTS_COUNT)
         for bot in bots:
             # If the activity time has come or is not set
-            if not getattr(bot, 'last_active', None) or bot.last_active <= now:
+            if not getattr(bot, "last_active", None) or bot.last_active <= now:
                 try:
                     await self.process_bot_activity(bot.id)
                     # Occasionally the bot makes a post
                     if random.random() < bot.post_probability:
                         await self.create_bot_post(bot.id)
                 except Exception as e:
-                    logger.error(f"Failed to run activity for bot {getattr(bot, 'name', bot.id)}: {str(e)}")
+                    logger.error(
+                        f"Failed to run activity for bot {getattr(bot, 'name', bot.id)}: {str(e)}"
+                    )
                 # Reschedule the next activity time
                 minutes_delay = random.uniform(REACTION_DELAY_MIN, REACTION_DELAY_MAX)
                 next_activity = now + timedelta(minutes=minutes_delay)
@@ -478,13 +478,15 @@ class BotManager:
             Number of bots synchronized
         """
 
-        url = f"{API_BASE_URL}/GetDocuments/Users/?token={API_TOKEN}&query={{\"IsBot\":true}}"
+        url = f'{API_BASE_URL}/GetDocuments/Users/?token={API_TOKEN}&query={{"IsBot":true}}'
         logger.info("Starting bot synchronization with external API...")
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(url) as response:
                     if response.status != 200:
-                        logger.error(f"Failed to fetch bots from API: {response.status}")
+                        logger.error(
+                            f"Failed to fetch bots from API: {response.status}"
+                        )
                         return 0
                     data = await response.json()
         except Exception as e:
@@ -492,27 +494,41 @@ class BotManager:
             return 0
 
         # Map by name for quick lookup
-        external_bots = {item['json']['Name']: item for item in data if 'json' in item and item['json'].get('IsBot')}
+        external_bots = {
+            item["json"]["Name"]: item
+            for item in data
+            if "json" in item and item["json"].get("IsBot")
+        }
         local_bots = {b.name: b for b in self.bot_repository.get_all_bots(limit=10000)}
 
         updated = 0
         # Add or update bots
         for name, ext in external_bots.items():
-            ext_json = ext['json']
+            ext_json = ext["json"]
             bot_data = {
-                'name': ext_json['Name'],
-                'full_name': ext_json.get('FullName', ''),
-                'avatar': ext_json.get('Avatar', ''),
-                'age': ext_json.get('Age', 0),
-                'gender': ext_json.get('Gender', ''),
-                'prompt': ext_json.get('Prompt', ''),
-                'category': ext_json.get('Category', ''),
-                'description': ext_json.get('Description', ''),
-                'like_probability': ext_json.get('Settings', {}).get('like_probability', 0.0),
-                'comment_probability': ext_json.get('Settings', {}).get('comment_probability', 0.0),
-                'follow_probability': ext_json.get('Settings', {}).get('follow_probability', 0.0),
-                'unfollow_probability': ext_json.get('Settings', {}).get('unfollow_probability', 0.0),
-                'post_probability': ext_json.get('Settings', {}).get('post_probability', 0.0),
+                "name": ext_json["Name"],
+                "full_name": ext_json.get("FullName", ""),
+                "avatar": ext_json.get("Avatar", ""),
+                "age": ext_json.get("Age", 0),
+                "gender": ext_json.get("Gender", ""),
+                "prompt": ext_json.get("Prompt", ""),
+                "category": ext_json.get("Category", ""),
+                "description": ext_json.get("Description", ""),
+                "like_probability": ext_json.get("Settings", {}).get(
+                    "like_probability", 0.0
+                ),
+                "comment_probability": ext_json.get("Settings", {}).get(
+                    "comment_probability", 0.0
+                ),
+                "follow_probability": ext_json.get("Settings", {}).get(
+                    "follow_probability", 0.0
+                ),
+                "unfollow_probability": ext_json.get("Settings", {}).get(
+                    "unfollow_probability", 0.0
+                ),
+                "post_probability": ext_json.get("Settings", {}).get(
+                    "post_probability", 0.0
+                ),
             }
             if name in local_bots:
                 # Update existing bot

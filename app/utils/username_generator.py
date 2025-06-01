@@ -2,13 +2,14 @@ import coolname
 from app.db.repositories.bot_repository import BotRepository
 import random
 
+
 class UsernameGenerator:
     """Generates a random username using the coolname library."""
 
     @staticmethod
     async def generate() -> str:
         """Generate a random username."""
-        username = '-'.join(coolname.generate(2)) + '-' + str(random.randint(0, 9999))
+        username = "-".join(coolname.generate(2)) + "-" + str(random.randint(0, 9999))
         if len(username) > 20:
             username = username[:20]
         return username
@@ -23,5 +24,5 @@ class UsernameGenerator:
                 if not username_list[i].isdigit():
                     username_list[i] = str(random.randint(0, 9))
                     break
-            username = ''.join(username_list)
+            username = "".join(username_list)
         return username

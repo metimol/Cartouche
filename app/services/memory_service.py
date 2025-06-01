@@ -130,7 +130,9 @@ class MemoryService:
                 vector_store = self._get_bot_vector_store(bot_id)
 
                 # Search vector store
-                results = vector_store.similarity_search_with_score(query=query, k=limit)
+                results = vector_store.similarity_search_with_score(
+                    query=query, k=limit
+                )
 
                 # Format results
                 memories = []

@@ -4,18 +4,13 @@ Handles generation of bot content using LLM.
 """
 
 from typing import List
-import random
-import re
-import uuid
 
 from app.clients.llm import LLMFactory
 from app.core.settings import (
     BOT_PROMPTS,
     BOT_CATEGORIES,
     TEMPERATURE,
-    MAX_TOKENS,
     DEFAULT_LLM_PROVIDER,
-    GOOGLE_API_KEY,
 )
 from app.core.exceptions import LLMError
 
@@ -61,12 +56,12 @@ class ContentGenerator:
         try:
             category_desc = BOT_CATEGORIES.get(category, {}).get("description", "")
             prompt = f"""
-You are a bot that writes social media bios. Write ONLY the bio. Do not write anything else. Do not write explanations, greetings, or extra words. 
+You are a social media user. Your profile: {age} years old, {gender}, {category_desc}.
 
-Write a short social media bio for a {age}-year-old {gender} who is {category_desc}.
-The bio must be 1 to 3 sentences. The style is casual. The bio must reflect the personality. Do NOT use hashtags. Do NOT use emojis. Do NOT add any extra text. Only output the bio itself.
+You are about to write your social media bio.
+
+Write ONLY a short, authentic bio (1-3 sentences) that reflects your personality. Do not write anything else. Do not use hashtags, emojis, or extra words. Only output the bio itself.
 """
-
             return await self.llm_client.generate_text(
                 prompt=prompt, max_tokens=100, temperature=0.7
             )
@@ -93,27 +88,22 @@ The bio must be 1 to 3 sentences. The style is casual. The bio must reflect the 
         """
         try:
             base_prompt = BOT_PROMPTS.get(bot_category, BOT_PROMPTS["neutral"])
-
-            # Include memories if available
             memory_context = ""
             if bot_memories and len(bot_memories) > 0:
-                memory_context = (
-                    "Here are some of your past interactions and thoughts:\n"
-                )
-                for memory in bot_memories[:3]:  # Limit to 3 memories
+                memory_context = "Here are some of your past thoughts and experiences related to this topic:\n"
+                for memory in bot_memories[:3]:
                     memory_context += f"- {memory}\n"
-
             prompt = f"""
 {base_prompt}
 
-{memory_context}
+You are about to comment on a social media post.
 
-Someone posted this on social media:
+{memory_context}
+This is the post you see:
 "{post_text}"
 
-Write ONLY a short, realistic comment as a response. Do not write anything else. Do not write explanations, greetings, or extra words. The comment must be 1 or 2 sentences. Be authentic and match the tone of your character. Only output the comment itself.
+Based on your memories and your personality, write ONLY a short, authentic comment (1-2 sentences) as your reaction. Do not write anything else. Do not include explanations, greetings, or extra words. Your comment should reflect your character and your past experiences. Only output the comment itself.
 """
-
             return await self.llm_client.generate_text(
                 prompt=prompt, max_tokens=150, temperature=TEMPERATURE
             )
@@ -121,15 +111,13 @@ Write ONLY a short, realistic comment as a response. Do not write anything else.
             logger.error(f"Failed to generate comment: {str(e)}")
             raise LLMError(f"Failed to generate comment: {str(e)}")
 
-    async def generate_post(
-        self, bot_category: str, bot_interests: List[str] = None
-    ) -> str:
+    async def generate_post(self, bot_category: str) -> str:
         """
         Generate a post for a bot.
 
         Args:
             bot_category: Bot category
-            bot_interests: List of bot interests
+            bot_interests: (ignored, for backward compatibility)
 
         Returns:
             Generated post
@@ -139,21 +127,13 @@ Write ONLY a short, realistic comment as a response. Do not write anything else.
         """
         try:
             base_prompt = BOT_PROMPTS.get(bot_category, BOT_PROMPTS["neutral"])
-
-            # Include interests if available
-            interest_context = ""
-            if bot_interests and len(bot_interests) > 0:
-                interest = random.choice(bot_interests)
-                interest_context = f"You're interested in {interest}."
-
             prompt = f"""
 {base_prompt}
 
-{interest_context}
+You are about to write a new post on your social media page. Think about your mood, your day, or anything you want to share with your followers. Your post should reflect your unique personality and current feelings.
 
-Write ONLY a short, realistic social media post. Do not write anything else. Do not write explanations, greetings, or extra words. The post must be 1 to 3 sentences. Be authentic and match the tone of your character. Only output the post itself.
+Write ONLY a short, authentic social media post (1-3 sentences). Do not write anything else. Do not include explanations, greetings, or extra words. Only output the post itself.
 """
-
             return await self.llm_client.generate_text(
                 prompt=prompt, max_tokens=200, temperature=TEMPERATURE
             )
@@ -180,16 +160,14 @@ Write ONLY a short, realistic social media post. Do not write anything else. Do 
         """
         try:
             base_prompt = BOT_PROMPTS.get(bot_category, BOT_PROMPTS["neutral"])
-
             prompt = f"""
 {base_prompt}
 
-You just saw this {context_type}:
+You are a social media user. You just saw this {context_type}:
 "{content}"
 
-Write ONLY a short memory (1 sentence) about how you feel about this {context_type}. This is your internal thought, not something you would say publicly. Do not write anything else. Do not write explanations, greetings, or extra words. Only output the memory itself.
+Write ONLY a short, private memory (1-3 sentences) about how you feel about this {context_type}. This is your internal thought, not something you would say publicly. Do not write anything else. Do not include explanations, greetings, or extra words. Only output the memory itself.
 """
-
             return await self.llm_client.generate_text(
                 prompt=prompt, max_tokens=100, temperature=TEMPERATURE
             )
@@ -213,10 +191,9 @@ Write ONLY a short memory (1 sentence) about how you feel about this {context_ty
         """
         try:
             prompt = f"""
-You are a bot that creates realistic full names for people. Write ONLY the full name (first and last name). Do not write anything else. Do not write explanations, greetings, or extra words.
+You are a social media user. Your profile: {age} years old, {gender}.
 
-Create a realistic full name for a {age}-year-old {gender}.
-The name should be common, natural, and appropriate for the gender and age. Only output the full name itself.
+You need a realistic full name (first and last) for your profile. The name should be natural and common for your gender and age. Only output the name.
 Examples:
 Emily Carter
 James Lee

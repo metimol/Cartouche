@@ -126,12 +126,15 @@ async def get_bot_memories(
     memory_service = MemoryService()
     memories = await memory_service.search_memories(bot_id, query="", limit=limit)
 
-    return [MemoryResponse(
-        bot_id=bot_id,
-        content=m["text"],
-        context_type=m["metadata"].get("context_type", ""),
-        context_id=m["metadata"].get("context_id", ""),
-    ) for m in memories]
+    return [
+        MemoryResponse(
+            bot_id=bot_id,
+            content=m["text"],
+            context_type=m["metadata"].get("context_type", ""),
+            context_id=m["metadata"].get("context_id", ""),
+        )
+        for m in memories
+    ]
 
 
 @router.post("/{bot_id}/react")

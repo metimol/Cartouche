@@ -13,7 +13,12 @@ from app.core.exceptions import LLMError
 class OpenAIClient(BaseLLMClient):
     """Client for OpenAI's API."""
 
-    def __init__(self, api_key: str = OPENAI_API_KEY, api_base: str = OPENAI_API_BASE, model: str = OPENAI_MODEL):
+    def __init__(
+        self,
+        api_key: str = OPENAI_API_KEY,
+        api_base: str = OPENAI_API_BASE,
+        model: str = OPENAI_MODEL,
+    ):
         """
         Initialize the OpenAI client.
 
