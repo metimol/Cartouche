@@ -289,6 +289,7 @@ class BotManager:
             post_json = post.get("json", {})
             text = post_json.get("Text", "")
             author = post_json.get("FullName", "")
+            author_name = post_json.get("Name", None)
             date = post_json.get("OnDate", "")
             comments = post_json.get("Comments", [])
             likes = len(post_json.get("Likes", []))
@@ -311,6 +312,9 @@ class BotManager:
             )
             has_commented = self.activity_repository.check_activity_exists(
                 bot_id, "comment", post_id
+            )
+            has_followed = self.activity_repository.check_activity_exists(
+                bot_id, "follow", author_name
             )
 
             # Decide on action based on probabilities
@@ -385,6 +389,33 @@ class BotManager:
                     logger.info(f"Bot {bot.name} commented on post {post_id}")
                 except Exception as e:
                     logger.error(f"Failed to comment on post: {str(e)}")
+
+                # Try to follow the post author (if not self, and not already followed)
+                if (
+                    not has_followed
+                    and author_name
+                    and author_name != bot.name
+                    and random.random() < bot.follow_probability
+                ):
+                    try:
+                        await self.api_client.follow_user(author_name, bot.name)
+                        self.activity_repository.create_activity(
+                            {
+                                "bot_id": bot_id,
+                                "activity_type": "follow",
+                                "target_id": str(author_name),
+                            }
+                        )
+                        logger.info(
+                            f"Bot {bot.name} followed user {author_name} (id={author_name})"
+                        )
+                        return {
+                            "status": "followed",
+                            "bot_id": bot_id,
+                            "user_id": author_name,
+                        }
+                    except Exception as e:
+                        logger.error(f"Failed to follow user: {str(e)}")
 
             if not action_taken:
                 logger.info(

@@ -296,22 +296,24 @@ class CartoucheAPIClient:
                 await self.session.close()
                 self.session = None
 
-    async def follow_user(self, user_id: int, bot_name: str) -> Dict[str, Any]:
+    async def follow_user(self, user_name: str, bot_name: str) -> Dict[str, Any]:
         """
         Subscribe (follow) a user as a bot.
 
         Args:
-            user_id: ID of the user to follow
+            user_name: Name of the user to follow
             bot_name: Name of the bot who follows
 
         Returns:
             Response data
         """
-        endpoint = f"GetDocuments/Users/{user_id}"
-        url = f"{self.base_url}/{endpoint}?token={self.token}"
+        # Build the endpoint and query
+        endpoint = "UpdateDocument/Users"
+        query = json.dumps({"Name": user_name})
+        url = f"{self.base_url}/{endpoint}/?query={query}&token={self.token}"
 
-        # Convert follow data to API format
-        formatted_data = JSONToStringConverter.format_follow_data(bot_name)
+        # Prepare request body
+        formatted_data = await JSONToStringConverter.format_follow_data(bot_name)
 
         if not self.session:
             self.session = aiohttp.ClientSession()
@@ -326,13 +328,7 @@ class CartoucheAPIClient:
             ) as response:
                 response_text = await response.text()
                 if response.status == 200:
-                    try:
-                        return json.loads(response_text)
-                    except Exception as e:
-                        logger.error(
-                            f"[API][FOLLOW_USER] JSON decode error: {e}, Raw: {response_text}"
-                        )
-                        raise APIError(f"Failed to decode JSON: {response_text}")
+                    return {"status": "success"}
                 else:
                     logger.error(
                         f"[API][FOLLOW_USER] Error: {response.status} - {response_text}"
