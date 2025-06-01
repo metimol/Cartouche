@@ -6,6 +6,7 @@ Handles vector storage and retrieval of bot memories.
 from typing import Dict, List, Any
 import os
 from pathlib import Path
+import asyncio
 
 from langchain_qdrant import QdrantVectorStore
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -39,6 +40,7 @@ class MemoryService:
         # Initialize vector stores for each bot as needed
         self.vector_stores = {}
         self.qdrant_clients = {}  # Cache QdrantClient per bot
+        self._bot_locks: Dict[int, asyncio.Lock] = {}  # Lock per bot for queueing
 
     def _get_bot_vector_store(self, bot_id: int) -> QdrantVectorStore:
         """
@@ -86,31 +88,24 @@ class MemoryService:
 
         return self.vector_stores[bot_id]
 
+    def _get_bot_lock(self, bot_id: int) -> asyncio.Lock:
+        if bot_id not in self._bot_locks:
+            self._bot_locks[bot_id] = asyncio.Lock()
+        return self._bot_locks[bot_id]
+
     async def add_memory(self, bot_id: int, text: str, metadata: Dict[str, Any]) -> str:
-        """
-        Add a memory to the vector store.
+        lock = self._get_bot_lock(bot_id)
+        async with lock:
+            try:
+                vector_store = self._get_bot_vector_store(bot_id)
 
-        Args:
-            bot_id: Bot ID
-            text: Memory text
-            metadata: Memory metadata
+                # Add document to vector store
+                ids = vector_store.add_texts(texts=[text], metadatas=[metadata])
 
-        Returns:
-            Memory ID
-
-        Raises:
-            DatabaseError: If memory addition fails
-        """
-        try:
-            vector_store = self._get_bot_vector_store(bot_id)
-
-            # Add document to vector store
-            ids = vector_store.add_texts(texts=[text], metadatas=[metadata])
-
-            return ids[0]
-        except Exception as e:
-            logger.error(f"Failed to add memory for bot {bot_id}: {str(e)}")
-            raise DatabaseError(f"Failed to add memory: {str(e)}")
+                return ids[0]
+            except Exception as e:
+                logger.error(f"Failed to add memory for bot {bot_id}: {str(e)}")
+                raise DatabaseError(f"Failed to add memory: {str(e)}")
 
     async def search_memories(
         self, bot_id: int, query: str, limit: int = 5
@@ -129,27 +124,29 @@ class MemoryService:
         Raises:
             DatabaseError: If search fails
         """
-        try:
-            vector_store = self._get_bot_vector_store(bot_id)
+        lock = self._get_bot_lock(bot_id)
+        async with lock:
+            try:
+                vector_store = self._get_bot_vector_store(bot_id)
 
-            # Search vector store
-            results = vector_store.similarity_search_with_score(query=query, k=limit)
+                # Search vector store
+                results = vector_store.similarity_search_with_score(query=query, k=limit)
 
-            # Format results
-            memories = []
-            for doc, score in results:
-                memories.append(
-                    {
-                        "text": doc.page_content,
-                        "metadata": doc.metadata,
-                        "relevance": float(score),
-                    }
-                )
+                # Format results
+                memories = []
+                for doc, score in results:
+                    memories.append(
+                        {
+                            "text": doc.page_content,
+                            "metadata": doc.metadata,
+                            "relevance": float(score),
+                        }
+                    )
 
-            return memories
-        except Exception as e:
-            logger.error(f"Failed to search memories for bot {bot_id}: {str(e)}")
-            raise DatabaseError(f"Failed to search memories: {str(e)}")
+                return memories
+            except Exception as e:
+                logger.error(f"Failed to search memories for bot {bot_id}: {str(e)}")
+                raise DatabaseError(f"Failed to search memories: {str(e)}")
 
     async def delete_bot_memories(self, bot_id: int) -> bool:
         """
@@ -164,21 +161,23 @@ class MemoryService:
         Raises:
             DatabaseError: If deletion fails
         """
-        try:
-            # Remove from cache
-            if bot_id in self.vector_stores:
-                del self.vector_stores[bot_id]
-            if bot_id in self.qdrant_clients:
-                del self.qdrant_clients[bot_id]
+        lock = self._get_bot_lock(bot_id)
+        async with lock:
+            try:
+                # Remove from cache
+                if bot_id in self.vector_stores:
+                    del self.vector_stores[bot_id]
+                if bot_id in self.qdrant_clients:
+                    del self.qdrant_clients[bot_id]
 
-            # Delete collection directory
-            collection_path = os.path.join(self.vector_db_path, f"bot_{bot_id}")
-            if os.path.exists(collection_path):
-                import shutil
+                # Delete collection directory
+                collection_path = os.path.join(self.vector_db_path, f"bot_{bot_id}")
+                if os.path.exists(collection_path):
+                    import shutil
 
-                shutil.rmtree(collection_path)
+                    shutil.rmtree(collection_path)
 
-            return True
-        except Exception as e:
-            logger.error(f"Failed to delete memories for bot {bot_id}: {str(e)}")
-            raise DatabaseError(f"Failed to delete memories: {str(e)}")
+                return True
+            except Exception as e:
+                logger.error(f"Failed to delete memories for bot {bot_id}: {str(e)}")
+                raise DatabaseError(f"Failed to delete memories: {str(e)}")

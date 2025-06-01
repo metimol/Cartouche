@@ -9,14 +9,15 @@ services:
       - ./data:/app/data
       - ./logs:/app/logs
     environment:
-      - API_BASE_URL=https://fraplat.tech/mars/Cartouche
-      - API_TOKEN=123
-      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
-      - DEFAULT_LLM_PROVIDER=gemini
-      - DEFAULT_LLM_MODEL=gemini-2.0-flash
-      - DB_PATH=data/cartouche.db
-      - VECTOR_DB_PATH=data/vector_store
-      - INITIAL_BOTS_COUNT=20
-      - MAX_BOTS_COUNT=5000
-      - LOG_LEVEL=INFO
+      - API_BASE_URL=${API_BASE_URL}
+      - API_TOKEN=${API_TOKEN}
+      - DEFAULT_LLM_PROVIDER=${DEFAULT_LLM_PROVIDER}
+      - OPENAI_MODEL=${OPENAI_MODEL}
+      - OPENAI_API_BASE=${OPENAI_API_BASE}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DB_PATH=${DB_PATH}
+      - VECTOR_DB_PATH=${VECTOR_DB_PATH}
+      - INITIAL_BOTS_COUNT=${INITIAL_BOTS_COUNT}
+      - MAX_BOTS_COUNT=${MAX_BOTS_COUNT}
+      - LOG_LEVEL=${LOG_LEVEL}
     restart: unless-stopped
