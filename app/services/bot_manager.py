@@ -407,7 +407,7 @@ class BotManager:
                             }
                         )
                         logger.info(
-                            f"Bot {bot.name} followed user {author_name} (id={author_name})"
+                            f"Bot {bot.name} followed user {author_name}"
                         )
                         return {
                             "status": "followed",
