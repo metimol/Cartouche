@@ -1,41 +1,87 @@
-version: '3'
+version: '3.8'
 
 services:
   cartouche-bot-service:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: cartouche-bot-service
     ports:
       - "8000:8000"
     volumes:
-      - ./data:/app/data
-      - ./logs:/app/logs
+      - data:/app/data
     environment:
-      - API_BASE_URL=${API_BASE_URL}
+      # API Configuration
+      - API_BASE_URL=${API_BASE_URL:-https://fraplat.tech/mars/Cartouche}
       - API_TOKEN=${API_TOKEN}
-      - DEFAULT_LLM_PROVIDER=${DEFAULT_LLM_PROVIDER}
-      - OPENAI_MODEL=${OPENAI_MODEL}
-      - OPENAI_API_BASE=${OPENAI_API_BASE}
+      
+      # LLM Configuration
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - GOOGLE_MODEL=${GOOGLE_MODEL:-gemini-2.0-flash}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - TEMPERATURE=${TEMPERATURE}
-      - MAX_TOKENS=${MAX_TOKENS}
-      - DB_PATH=${DB_PATH}
-      - INITIAL_BOTS_COUNT=${INITIAL_BOTS_COUNT}
-      - DAILY_BOTS_GROWTH_MIN=${DAILY_BOTS_GROWTH_MIN}
-      - DAILY_BOTS_GROWTH_MAX=${DAILY_BOTS_GROWTH_MAX}
-      - MAX_BOTS_COUNT=${MAX_BOTS_COUNT}
-      - REACTION_DELAY_MIN=${REACTION_DELAY_MIN}
-      - REACTION_DELAY_MAX=${REACTION_DELAY_MAX}
-      - LOG_LEVEL=${LOG_LEVEL}
-      - LOG_FILE=${LOG_FILE}
-      - QDRANT_HOST=qdrant
+      - OPENAI_API_BASE=${OPENAI_API_BASE:-https://api.openai.com/v1}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
+      - DEFAULT_LLM_PROVIDER=${DEFAULT_LLM_PROVIDER:-gemini}
+      - TEMPERATURE=${TEMPERATURE:-0.7}
+      - MAX_TOKENS=${MAX_TOKENS:-1024}
+      
+      # Database Configuration
+      - DB_PATH=${DB_PATH:-data/database/cartouche.db}
+      
+      # Vector Database Configuration
+      - QDRANT_HOST=http://qdrant
       - QDRANT_PORT=6333
+      
+      # Bot Configuration
+      - INITIAL_BOTS_COUNT=${INITIAL_BOTS_COUNT:-20}
+      - DAILY_BOTS_GROWTH_MIN=${DAILY_BOTS_GROWTH_MIN:-20}
+      - DAILY_BOTS_GROWTH_MAX=${DAILY_BOTS_GROWTH_MAX:-50}
+      - MAX_BOTS_COUNT=${MAX_BOTS_COUNT:-5000}
+      - MAX_COMMENTS_PER_POST=${MAX_COMMENTS_PER_POST:-3}
+      
+      # Content Theme Configuration
+      - SOCIAL_NETWORK_THEMES=${SOCIAL_NETWORK_THEMES:-technology,programming,artificial intelligence,science,news,entertainment,sports,politics,memes,personal,random}
+      - MAIN_THEME_FOCUS=${MAIN_THEME_FOCUS:-Everything and anything, just like Twitter}
+      - THEME_DIVERSITY_LEVEL=${THEME_DIVERSITY_LEVEL:-0.7}
+      
+      # Monitoring Configuration
+      - REACTION_DELAY_MIN=${REACTION_DELAY_MIN:-5}
+      - REACTION_DELAY_MAX=${REACTION_DELAY_MAX:-30}
+      
+      # Logging Configuration
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - LOG_FILE=${LOG_FILE:-data/logs/cartouche.log}
     depends_on:
-      - qdrant
+      qdrant:
+        condition: service_healthy
+    networks:
+      - cartouche-network
     restart: unless-stopped
 
   qdrant:
-    image: qdrant/qdrant:latest
+    image: qdrant/qdrant:v1.7.3
+    container_name: cartouche-qdrant
     ports:
       - "6333:6333"
+      - "6334:6334"
     volumes:
-      - ./data/qdrant:/qdrant/storage
+      - qdrant_storage:/qdrant/storage
+    networks:
+      - cartouche-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  qdrant_storage:
+    driver: local
+  data:
+    driver: local
+
+networks:
+  cartouche-network:
+    driver: bridge

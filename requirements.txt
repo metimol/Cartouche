@@ -1,16 +1,39 @@
+# Core FastAPI and server dependencies
 fastapi>=0.95.0
-uvicorn>=0.21.1
+uvicorn[standard]>=0.21.1
 pydantic>=2.0.0
+
+# Database and ORM
 sqlalchemy>=2.0.0
+
+# HTTP client
 aiohttp>=3.8.4
+
+# Retry and resilience
 tenacity>=8.2.2
+
+# Configuration
 python-dotenv>=1.0.0
+
+# Logging
 loguru>=0.7.0
+
+# LLM providers
 google-generativeai>=0.3.0
 openai>=1.0.0
+
+# Vector database and embeddings
 langchain-huggingface>=0.2.0
 langchain-qdrant>=0.2.0
+qdrant-client>=1.7.0
+
+# Testing
 pytest>=7.3.1
 pytest-asyncio>=0.21.0
+
+# Utilities
 psutil>=7.0.0
 coolname>=2.2.0
+
+# Additional dependencies for production
+gunicorn>=21.2.0
