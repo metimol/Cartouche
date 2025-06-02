@@ -38,6 +38,7 @@ INITIAL_BOTS_COUNT = int(os.getenv("INITIAL_BOTS_COUNT", "20"))
 DAILY_BOTS_GROWTH_MIN = int(os.getenv("DAILY_BOTS_GROWTH_MIN", "20"))
 DAILY_BOTS_GROWTH_MAX = int(os.getenv("DAILY_BOTS_GROWTH_MAX", "50"))
 MAX_BOTS_COUNT = int(os.getenv("MAX_BOTS_COUNT", "5000"))
+MAX_COMMENTS_PER_POST = int(os.getenv("MAX_COMMENTS_PER_POST", "3"))
 
 # Monitoring Configuration
 MONITORING_INTERVAL = 60  # in seconds

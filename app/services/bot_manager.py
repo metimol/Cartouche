@@ -27,6 +27,7 @@ from app.core.settings import (
     BOT_PROMPTS,
     REACTION_DELAY_MIN,
     REACTION_DELAY_MAX,
+    MAX_COMMENTS_PER_POST,
 )
 from app.models.models import BotResponse
 from app.core.exceptions import BotError
@@ -310,9 +311,15 @@ class BotManager:
             has_liked = self.activity_repository.check_activity_exists(
                 bot_id, "like", post_id
             )
-            has_commented = self.activity_repository.check_activity_exists(
-                bot_id, "comment", post_id
+            # Get existing comment activities for this post
+            # Limit to 1000 comments for performance
+            comment_activities = self.activity_repository.get_activities_by_type(
+                bot_id, "comment", 0, 1000
             )
+            comment_count_on_post = sum(1 for a in comment_activities if a.target_id == str(post_id))
+
+            # Calculate comment probability based on existing comments
+            comment_probability = bot.comment_probability * (0.5 ** comment_count_on_post)
             has_followed = self.activity_repository.check_activity_exists(
                 bot_id, "follow", author_name
             )
@@ -352,7 +359,7 @@ class BotManager:
                     logger.error(f"Failed to like post: {str(e)}")
 
             # Try to comment
-            if not has_commented and random.random() < bot.comment_probability:
+            if comment_count_on_post < MAX_COMMENTS_PER_POST and random.random() < comment_probability:
                 try:
                     # Get relevant memories from MemoryService
                     search_results = await self.memory_service.search_memories(
