@@ -26,7 +26,7 @@ services:
       - REACTION_DELAY_MAX=${REACTION_DELAY_MAX}
       - LOG_LEVEL=${LOG_LEVEL}
       - LOG_FILE=${LOG_FILE}
-      - QDRANT_HOST=http://qdrant:6333
+      - QDRANT_HOST=qdrant
       - QDRANT_PORT=6333
     depends_on:
       - qdrant
