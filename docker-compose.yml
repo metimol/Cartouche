@@ -80,7 +80,6 @@ volumes:
   qdrant_storage:
     driver: local
   data:
-    driver: local
 
 networks:
   cartouche-network:
