@@ -94,7 +94,13 @@ class MemoryService:
         """
         try:
             vector_store = self._get_bot_vector_store(bot_id)
-            results = vector_store.similarity_search_with_score(query=query, k=limit)
+            try:
+                results = vector_store.similarity_search_with_score(query=query, k=limit)
+            except Exception as inner_e:
+                # Qdrant 404: collection exists, but no points (empty collection)
+                if '404' in str(inner_e) or 'Not Found' in str(inner_e):
+                    return []
+                raise
             memories = []
             for doc, score in results:
                 memories.append(
