@@ -44,13 +44,14 @@ MAX_COMMENTS_PER_POST = int(os.getenv("MAX_COMMENTS_PER_POST", "3"))
 # Content Theme Configuration
 SOCIAL_NETWORK_THEMES = os.getenv(
     "SOCIAL_NETWORK_THEMES",
-    "technology,programming,artificial intelligence,science,news,entertainment,sports,politics,memes,personal,random"
+    "technology,programming,artificial intelligence,science,news,entertainment,sports,politics,memes,personal,random",
 )
 MAIN_THEME_FOCUS = os.getenv(
-    "MAIN_THEME_FOCUS",
-    "Everything and anything, just like Twitter"
+    "MAIN_THEME_FOCUS", "Everything and anything, just like Twitter"
 )
-THEME_DIVERSITY_LEVEL = float(os.getenv("THEME_DIVERSITY_LEVEL", "0.7"))  # 0.0-1.0, where 1.0 is maximum diversity
+THEME_DIVERSITY_LEVEL = float(
+    os.getenv("THEME_DIVERSITY_LEVEL", "0.7")
+)  # 0.0-1.0, where 1.0 is maximum diversity
 
 # Monitoring Configuration
 MONITORING_INTERVAL = 60  # in seconds
@@ -153,6 +154,7 @@ AVATAR_STYLES = [
     "shapes",
 ]
 
+
 def validate_settings():
     errors = []
     # API Configuration
@@ -162,13 +164,32 @@ def validate_settings():
         errors.append("API_TOKEN is required.")
     # LLM Configuration
     if not (GOOGLE_API_KEY or OPENAI_API_KEY):
-        errors.append("At least one LLM API key (GOOGLE_API_KEY or OPENAI_API_KEY) is required.")
+        errors.append(
+            "At least one LLM API key (GOOGLE_API_KEY or OPENAI_API_KEY) is required."
+        )
     if DEFAULT_LLM_PROVIDER not in ("gemini", "openai"):
-        errors.append(f"DEFAULT_LLM_PROVIDER must be 'gemini' or 'openai', got '{DEFAULT_LLM_PROVIDER}'.")
+        errors.append(
+            f"DEFAULT_LLM_PROVIDER must be 'gemini' or 'openai', got '{DEFAULT_LLM_PROVIDER}'."
+        )
     if not (0 <= TEMPERATURE <= 2):
         errors.append("TEMPERATURE must be between 0 and 2.")
     if MAX_TOKENS <= 0:
         errors.append("MAX_TOKENS must be positive.")
+    # Theme Configuration
+    if not SOCIAL_NETWORK_THEMES:
+        errors.append("SOCIAL_NETWORK_THEMES is required.")
+    if not MAIN_THEME_FOCUS:
+        errors.append("MAIN_THEME_FOCUS is required.")
+    if not (0.0 <= THEME_DIVERSITY_LEVEL <= 1.0):
+        errors.append("THEME_DIVERSITY_LEVEL must be between 0.0 and 1.0.")
+    if (
+        not isinstance(SOCIAL_NETWORK_THEMES, str)
+        or not isinstance(MAIN_THEME_FOCUS, str)
+        or not isinstance(THEME_DIVERSITY_LEVEL, (int, float))
+    ):
+        errors.append(
+            "SOCIAL_NETWORK_THEMES, MAIN_THEME_FOCUS, and THEME_DIVERSITY_LEVEL must be strings or numbers."
+        )
     # Database
     if not DB_PATH:
         errors.append("DB_PATH is required.")
@@ -189,7 +210,10 @@ def validate_settings():
         errors.append("REACTION_DELAY_MIN and REACTION_DELAY_MAX must be numbers.")
     elif not (0 <= REACTION_DELAY_MIN <= REACTION_DELAY_MAX):
         errors.append("REACTION_DELAY_MIN must be <= REACTION_DELAY_MAX.")
-    if not float(REACTION_DELAY_MIN).is_integer() or not float(REACTION_DELAY_MAX).is_integer():
+    if (
+        not float(REACTION_DELAY_MIN).is_integer()
+        or not float(REACTION_DELAY_MAX).is_integer()
+    ):
         errors.append("REACTION_DELAY_MIN and REACTION_DELAY_MAX must be integers.")
     # Logging
     if not LOG_LEVEL:
@@ -198,6 +222,7 @@ def validate_settings():
         errors.append("LOG_FILE is required.")
     if errors:
         raise RuntimeError("\n".join(errors))
+
 
 # Validate settings on import
 validate_settings()

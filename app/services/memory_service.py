@@ -61,7 +61,9 @@ class MemoryService:
                 collection_name=collection_name,
             )
         except Exception as e:
-            logger.error(f"Failed to create/load vector store for bot {bot_id}: {str(e)}")
+            logger.error(
+                f"Failed to create/load vector store for bot {bot_id}: {str(e)}"
+            )
             raise DatabaseError(f"Failed to create/load vector store: {str(e)}")
 
     async def add_memory(self, bot_id: int, text: str, metadata: Dict[str, Any]) -> str:

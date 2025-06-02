@@ -316,10 +316,12 @@ class BotManager:
             comment_activities = self.activity_repository.get_activities_by_type(
                 bot_id, "comment", 0, 1000
             )
-            comment_count_on_post = sum(1 for a in comment_activities if a.target_id == str(post_id))
+            comment_count_on_post = sum(
+                1 for a in comment_activities if a.target_id == str(post_id)
+            )
 
             # Calculate comment probability based on existing comments
-            comment_probability = bot.comment_probability * (0.5 ** comment_count_on_post)
+            comment_probability = bot.comment_probability * (0.5**comment_count_on_post)
             has_followed = self.activity_repository.check_activity_exists(
                 bot_id, "follow", author_name
             )
@@ -359,7 +361,10 @@ class BotManager:
                     logger.error(f"Failed to like post: {str(e)}")
 
             # Try to comment
-            if comment_count_on_post < MAX_COMMENTS_PER_POST and random.random() < comment_probability:
+            if (
+                comment_count_on_post < MAX_COMMENTS_PER_POST
+                and random.random() < comment_probability
+            ):
                 try:
                     # Get relevant memories from MemoryService
                     search_results = await self.memory_service.search_memories(
@@ -413,9 +418,7 @@ class BotManager:
                                 "target_id": str(author_name),
                             }
                         )
-                        logger.info(
-                            f"Bot {bot.name} followed user {author_name}"
-                        )
+                        logger.info(f"Bot {bot.name} followed user {author_name}")
                         return {
                             "status": "followed",
                             "bot_id": bot_id,
