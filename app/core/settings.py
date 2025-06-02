@@ -28,7 +28,10 @@ MAX_TOKENS = int(os.getenv("MAX_TOKENS", "1024"))
 
 # Database Configuration
 DB_PATH = os.getenv("DB_PATH", "data/cartouche.db")
-VECTOR_DB_PATH = os.getenv("VECTOR_DB_PATH", "data/vector_store")
+
+# Qdrant Configuration
+QDRANT_HOST = os.getenv("QDRANT_HOST", "")
+QDRANT_PORT = int(os.getenv("QDRANT_PORT", "6333"))
 
 # Bot Configuration
 INITIAL_BOTS_COUNT = int(os.getenv("INITIAL_BOTS_COUNT", "20"))

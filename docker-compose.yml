@@ -15,9 +15,27 @@ services:
       - OPENAI_MODEL=${OPENAI_MODEL}
       - OPENAI_API_BASE=${OPENAI_API_BASE}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - TEMPERATURE=${TEMPERATURE}
+      - MAX_TOKENS=${MAX_TOKENS}
       - DB_PATH=${DB_PATH}
-      - VECTOR_DB_PATH=${VECTOR_DB_PATH}
       - INITIAL_BOTS_COUNT=${INITIAL_BOTS_COUNT}
+      - DAILY_BOTS_GROWTH_MIN=${DAILY_BOTS_GROWTH_MIN}
+      - DAILY_BOTS_GROWTH_MAX=${DAILY_BOTS_GROWTH_MAX}
       - MAX_BOTS_COUNT=${MAX_BOTS_COUNT}
+      - REACTION_DELAY_MIN=${REACTION_DELAY_MIN}
+      - REACTION_DELAY_MAX=${REACTION_DELAY_MAX}
       - LOG_LEVEL=${LOG_LEVEL}
+      - LOG_FILE=${LOG_FILE}
+      - QDRANT_HOST=http://qdrant:6333
+      - QDRANT_PORT=6333
+    depends_on:
+      - qdrant
+    restart: unless-stopped
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+    volumes:
+      - ./data/qdrant:/qdrant/storage
     restart: unless-stopped
