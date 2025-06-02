@@ -14,12 +14,12 @@ if env_path.exists():
 
 # API Configuration
 API_BASE_URL = os.getenv("API_BASE_URL", "https://fraplat.tech/mars/Cartouche")
-API_TOKEN = os.getenv("API_TOKEN", "123")
+API_TOKEN = os.getenv("API_TOKEN", None)
 
 # LLM Configuration
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", None)
 GOOGLE_MODEL = os.getenv("GOOGLE_MODEL", "gemini-2.0-flash")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", None)
 OPENAI_API_BASE = os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
 DEFAULT_LLM_PROVIDER = os.getenv("DEFAULT_LLM_PROVIDER", "gemini")
@@ -30,7 +30,7 @@ MAX_TOKENS = int(os.getenv("MAX_TOKENS", "1024"))
 DB_PATH = os.getenv("DB_PATH", "data/cartouche.db")
 
 # Qdrant Configuration
-QDRANT_HOST = os.getenv("QDRANT_HOST", "")
+QDRANT_HOST = os.getenv("QDRANT_HOST", None)
 QDRANT_PORT = int(os.getenv("QDRANT_PORT", "6333"))
 
 # Bot Configuration
@@ -139,3 +139,52 @@ AVATAR_STYLES = [
     "thumbs",
     "shapes",
 ]
+
+def validate_settings():
+    errors = []
+    # API Configuration
+    if not API_BASE_URL:
+        errors.append("API_BASE_URL is required.")
+    if not API_TOKEN:
+        errors.append("API_TOKEN is required.")
+    # LLM Configuration
+    if not (GOOGLE_API_KEY or OPENAI_API_KEY):
+        errors.append("At least one LLM API key (GOOGLE_API_KEY or OPENAI_API_KEY) is required.")
+    if DEFAULT_LLM_PROVIDER not in ("gemini", "openai"):
+        errors.append(f"DEFAULT_LLM_PROVIDER must be 'gemini' or 'openai', got '{DEFAULT_LLM_PROVIDER}'.")
+    if not (0 <= TEMPERATURE <= 2):
+        errors.append("TEMPERATURE must be between 0 and 2.")
+    if MAX_TOKENS <= 0:
+        errors.append("MAX_TOKENS must be positive.")
+    # Database
+    if not DB_PATH:
+        errors.append("DB_PATH is required.")
+    # Qdrant
+    if not QDRANT_HOST:
+        errors.append("QDRANT_HOST is required.")
+    if not QDRANT_PORT or not (0 < QDRANT_PORT < 65536):
+        errors.append("QDRANT_PORT must be a valid port number.")
+    # Bots
+    if not (0 < INITIAL_BOTS_COUNT <= MAX_BOTS_COUNT):
+        errors.append("INITIAL_BOTS_COUNT must be > 0 and <= MAX_BOTS_COUNT.")
+    if not (0 <= DAILY_BOTS_GROWTH_MIN <= DAILY_BOTS_GROWTH_MAX):
+        errors.append("DAILY_BOTS_GROWTH_MIN must be <= DAILY_BOTS_GROWTH_MAX.")
+    if MAX_BOTS_COUNT <= 0:
+        errors.append("MAX_BOTS_COUNT must be positive.")
+    # Monitoring
+    if not isinstance(REACTION_DELAY_MIN, (int, float)) or not isinstance(REACTION_DELAY_MAX, (int, float)):
+        errors.append("REACTION_DELAY_MIN and REACTION_DELAY_MAX must be numbers.")
+    elif not (0 <= REACTION_DELAY_MIN <= REACTION_DELAY_MAX):
+        errors.append("REACTION_DELAY_MIN must be <= REACTION_DELAY_MAX.")
+    if not float(REACTION_DELAY_MIN).is_integer() or not float(REACTION_DELAY_MAX).is_integer():
+        errors.append("REACTION_DELAY_MIN and REACTION_DELAY_MAX must be integers.")
+    # Logging
+    if not LOG_LEVEL:
+        errors.append("LOG_LEVEL is required.")
+    if not LOG_FILE:
+        errors.append("LOG_FILE is required.")
+    if errors:
+        raise RuntimeError("\n".join(errors))
+
+# Validate settings on import
+validate_settings()
