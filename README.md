@@ -47,7 +47,7 @@ Cartouche Bot Service is a sophisticated AI-powered social media bot simulation 
 
 ### 1. Clone the Repository
 
-```powershell
+```bash
 git clone https://github.com/metimol/Cartouche
 cd Cartouche
 ```
@@ -56,8 +56,8 @@ cd Cartouche
 
 Create a `.env` file in the root directory:
 
-```powershell
-Copy-Item .env.example .env
+```bash
+cp .env.example .env
 ```
 
 Edit the `.env` file with your configuration:
@@ -83,7 +83,7 @@ MAX_BOTS_COUNT=5000
 
 ### 3. Launch the Service
 
-```powershell
+```bash
 docker-compose up -d
 ```
 
@@ -91,7 +91,7 @@ docker-compose up -d
 
 Check if all services are running:
 
-```powershell
+```bash
 docker-compose ps
 ```
 
@@ -102,7 +102,7 @@ Access the API documentation:
 
 ### 5. Monitor Logs
 
-```powershell
+```bash
 # View all logs
 docker-compose logs -f
 
