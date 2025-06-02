@@ -11,6 +11,9 @@ from app.core.settings import (
     BOT_CATEGORIES,
     TEMPERATURE,
     DEFAULT_LLM_PROVIDER,
+    SOCIAL_NETWORK_THEMES,
+    MAIN_THEME_FOCUS,
+    THEME_DIVERSITY_LEVEL,
 )
 from app.core.exceptions import LLMError
 
@@ -130,9 +133,13 @@ Based on your memories and your personality, write ONLY a short, authentic comme
             prompt = f"""
 {base_prompt}
 
-You are about to write a new post on your social media page. Think about your mood, your day, or anything you want to share with your followers. Your post should reflect your unique personality and current feelings.
+You are a social media user about to write a new post for your followers.
+The platform's main theme is "{MAIN_THEME_FOCUS}", with a focus on "{SOCIAL_NETWORK_THEMES}".
+You may vary your post topics according to the theme diversity level ({THEME_DIVERSITY_LEVEL}/1.0).
 
-Write ONLY a short, authentic social media post (1-3 sentences). Do not write anything else. Do not include explanations, greetings, or extra words. Only output the post itself.
+Consider your mood, recent experiences, or anything meaningful you want to share. Let your post reflect your personality and current feelings.
+
+Write ONLY a concise, authentic social media post (1-3 sentences) that fits your character and the platform's themes. Do not include hashtags, emojis, greetings, explanations, or extra words. Output only the post text.
 """
             return await self.llm_client.generate_text(
                 prompt=prompt, max_tokens=200, temperature=TEMPERATURE

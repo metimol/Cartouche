@@ -26,6 +26,7 @@ DEFAULT_LLM_PROVIDER = os.getenv("DEFAULT_LLM_PROVIDER", "gemini")
 TEMPERATURE = float(os.getenv("TEMPERATURE", "0.7"))
 MAX_TOKENS = int(os.getenv("MAX_TOKENS", "1024"))
 
+
 # Database Configuration
 DB_PATH = os.getenv("DB_PATH", "data/cartouche.db")
 
@@ -39,6 +40,17 @@ DAILY_BOTS_GROWTH_MIN = int(os.getenv("DAILY_BOTS_GROWTH_MIN", "20"))
 DAILY_BOTS_GROWTH_MAX = int(os.getenv("DAILY_BOTS_GROWTH_MAX", "50"))
 MAX_BOTS_COUNT = int(os.getenv("MAX_BOTS_COUNT", "5000"))
 MAX_COMMENTS_PER_POST = int(os.getenv("MAX_COMMENTS_PER_POST", "3"))
+
+# Content Theme Configuration
+SOCIAL_NETWORK_THEMES = os.getenv(
+    "SOCIAL_NETWORK_THEMES",
+    "technology,programming,artificial intelligence,science,news,entertainment,sports,politics,memes,personal,random"
+)
+MAIN_THEME_FOCUS = os.getenv(
+    "MAIN_THEME_FOCUS",
+    "Everything and anything, just like Twitter"
+)
+THEME_DIVERSITY_LEVEL = float(os.getenv("THEME_DIVERSITY_LEVEL", "0.7"))  # 0.0-1.0, where 1.0 is maximum diversity
 
 # Monitoring Configuration
 MONITORING_INTERVAL = 60  # in seconds
