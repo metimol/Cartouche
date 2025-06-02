@@ -52,67 +52,67 @@ LOG_FILE = os.getenv("LOG_FILE", "logs/cartouche.log")
 # Bot categories and their base probabilities
 BOT_CATEGORIES = {
     "fan": {
-        "like_probability": 0.8,
-        "comment_probability": 0.5,
-        "follow_probability": 0.7,
-        "unfollow_probability": 0.1,
-        "post_probability": 0.4,
+        "like_probability": 0.85,  # Fans like almost everything
+        "comment_probability": 0.25,  # Comment less often than they like
+        "follow_probability": 0.75,  # High tendency to follow
+        "unfollow_probability": 0.05,  # Very rarely unfollow
+        "post_probability": 0.12,  # Don't post often, mostly consume
         "description": "Supportive, enthusiastic, positive",
     },
     "hater": {
-        "like_probability": 0.1,
-        "comment_probability": 0.4,
-        "follow_probability": 0.2,
-        "unfollow_probability": 0.6,
-        "post_probability": 0.2,
+        "like_probability": 0.08,  # Almost never like
+        "comment_probability": 0.45,  # Like to write negative comments
+        "follow_probability": 0.15,  # Rarely follow
+        "unfollow_probability": 0.70,  # Often unfollow
+        "post_probability": 0.18,  # Post criticism and negativity
         "description": "Critical, negative, provocative",
     },
     "silent": {
-        "like_probability": 0.4,
-        "comment_probability": 0.1,
-        "follow_probability": 0.3,
-        "unfollow_probability": 0.2,
-        "post_probability": 0.1,
+        "like_probability": 0.35,  # Like moderately
+        "comment_probability": 0.05,  # Very rarely comment
+        "follow_probability": 0.20,  # Cautiously follow
+        "unfollow_probability": 0.15,  # Quietly unfollow
+        "post_probability": 0.03,  # Almost never post
         "description": "Observant, rarely comments, occasional likes",
     },
     "random": {
-        "like_probability": 0.5,
-        "comment_probability": 0.3,
-        "follow_probability": 0.4,
-        "unfollow_probability": 0.4,
-        "post_probability": 0.15,
+        "like_probability": 0.45,  # Average number of likes
+        "comment_probability": 0.20,  # Sometimes comment
+        "follow_probability": 0.35,  # Unpredictably follow
+        "unfollow_probability": 0.30,  # May unfollow for no reason
+        "post_probability": 0.08,  # Rarely post
         "description": "Unpredictable, varied behavior",
     },
     "neutral": {
-        "like_probability": 0.5,
-        "comment_probability": 0.3,
-        "follow_probability": 0.5,
-        "unfollow_probability": 0.3,
-        "post_probability": 0.1,
+        "like_probability": 0.40,  # Like moderately
+        "comment_probability": 0.15,  # Comment thoughtfully
+        "follow_probability": 0.30,  # Follow thoughtfully
+        "unfollow_probability": 0.20,  # Unfollow rationally
+        "post_probability": 0.06,  # Rarely post, mostly observe
         "description": "Balanced, rational, thoughtful",
     },
     "humorous": {
-        "like_probability": 0.7,
-        "comment_probability": 0.6,
-        "follow_probability": 0.6,
-        "unfollow_probability": 0.2,
-        "post_probability": 0.4,
+        "like_probability": 0.60,  # Like funny content
+        "comment_probability": 0.35,  # Often joke in comments
+        "follow_probability": 0.45,  # Follow funny accounts
+        "unfollow_probability": 0.25,  # Unfollow if bored
+        "post_probability": 0.22,  # Actively post memes and jokes
         "description": "Funny, sarcastic, meme-oriented",
     },
     "provocative": {
-        "like_probability": 0.3,
-        "comment_probability": 0.7,
-        "follow_probability": 0.4,
-        "unfollow_probability": 0.5,
-        "post_probability": 0.2,
+        "like_probability": 0.25,  # Selectively like
+        "comment_probability": 0.55,  # Very active in comments
+        "follow_probability": 0.35,  # Follow controversial accounts
+        "unfollow_probability": 0.40,  # Unfollow "boring" ones
+        "post_probability": 0.28,  # Often post provocative content
         "description": "Challenging, questioning, debate-oriented",
     },
     "role_player": {
-        "like_probability": 0.6,
-        "comment_probability": 0.5,
-        "follow_probability": 0.5,
-        "unfollow_probability": 0.3,
-        "post_probability": 0.15,
+        "like_probability": 0.50,  # Like according to role
+        "comment_probability": 0.30,  # Comment in character
+        "follow_probability": 0.40,  # Thematically follow
+        "unfollow_probability": 0.25,  # Unfollow if off-topic
+        "post_probability": 0.16,  # Post content within role
         "description": "In-character, consistent persona",
     },
 }
