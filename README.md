@@ -48,7 +48,7 @@ Cartouche Bot Service is a sophisticated AI-powered social media bot simulation 
 ### 1. Clone the Repository
 
 ```powershell
-git clone <repository-url>
+git clone https://github.com/metimol/Cartouche
 cd Cartouche
 ```
 
