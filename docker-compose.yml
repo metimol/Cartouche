@@ -9,7 +9,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - data:/app/data
+      - cartouche_data:/app/data
     environment:
       # API Configuration
       - API_BASE_URL=${API_BASE_URL:-https://fraplat.tech/mars/Cartouche}
@@ -79,7 +79,8 @@ services:
 volumes:
   qdrant_storage:
     driver: local
-  data:
+  cartouche_data:
+    driver: local
 
 networks:
   cartouche-network:
