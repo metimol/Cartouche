@@ -575,13 +575,17 @@ class BotManager:
                 # Update existing bot
                 try:
                     self.bot_repository.update_bot(local_bots[name].id, bot_data)
+                    # Ensure memory is initialized
+                    self.memory_service._get_bot_vector_store(local_bots[name].id)
                     updated += 1
                 except SQLAlchemyError as e:
                     logger.error(f"Failed to update bot {name}: {str(e)}")
             else:
                 # Create new bot
                 try:
-                    self.bot_repository.create_bot(bot_data)
+                    new_bot = self.bot_repository.create_bot(bot_data)
+                    # Ensure memory is initialized
+                    self.memory_service._get_bot_vector_store(new_bot.id)
                     updated += 1
                 except SQLAlchemyError as e:
                     logger.error(f"Failed to create bot {name}: {str(e)}")
