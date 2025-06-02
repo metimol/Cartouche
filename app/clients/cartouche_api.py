@@ -52,21 +52,25 @@ class CartoucheAPIClient:
     @retry(
         stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10)
     )
-    async def get_posts(self, post_id: Optional[int] = None) -> List[Dict[str, Any]]:
+    async def get_posts(self, post_id: Optional[int] = None, limit: int = 50) -> List[Dict[str, Any]]:
         """
         Get posts from the API.
 
         Args:
             post_id: Optional post ID to get a specific post
+            limit: Limit for number of posts when getting all posts (default: 50)
 
         Returns:
             List of post dictionaries
         """
-        endpoint = "GetDocuments/Posts"
         if post_id:
-            endpoint += f"/{post_id}"
-
-        url = f"{self.base_url}/{endpoint}?token={self.token}"
+            # Get specific post
+            endpoint = f"GetDocuments/Posts/{post_id}"
+            url = f"{self.base_url}/{endpoint}?token={self.token}"
+        else:
+            # Get all posts with caching and limit
+            endpoint = "GetCachedDocuments/Posts/"
+            url = f"{self.base_url}/{endpoint}?token={self.token}&limit={limit}"
 
         if not self.session:
             self.session = aiohttp.ClientSession()
