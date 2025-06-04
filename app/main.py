@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.logging import setup_logging
 from app.core.exceptions import setup_exception_handlers
-from app.db.session import get_db, engine, Base
+from app.db.session import get_db, engine, Base, SessionLocal
 from app.services.scheduler import Scheduler
 from app.api.routes import router
 from app.core.settings import MONITORING_INTERVAL
@@ -108,12 +108,17 @@ async def initialize_background_tasks():
     )
 
 
+# Background Task Session Management:
+# The following asynchronous functions are periodically executed as background tasks.
+# Unlike FastAPI path operations that use dependency injection (e.g., Depends(get_db)),
+# these tasks require manual database session management.
+# Each task obtains a session directly using SessionLocal() and ensures it's closed
+# in a try/finally block to prevent connection leaks.
+
 async def initialize_bots():
     """Initialize bot population."""
+    db = SessionLocal()
     try:
-        # Get database session
-        db = next(get_db())
-
         # Create services
         content_generator = ContentGenerator()
         api_client = CartoucheAPIClient()
@@ -137,14 +142,14 @@ async def initialize_bots():
 
     except Exception as e:
         logger.error(f"Failed to initialize bots: {str(e)}")
+    finally:
+        db.close()
 
 
 async def daily_bot_growth():
     """Handle daily growth of bot population."""
+    db = SessionLocal()
     try:
-        # Get database session
-        db = next(get_db())
-
         # Create services
         content_generator = ContentGenerator()
         api_client = CartoucheAPIClient()
@@ -168,12 +173,14 @@ async def daily_bot_growth():
 
     except Exception as e:
         logger.error(f"Failed to handle daily bot growth: {str(e)}")
+    finally:
+        db.close()
 
 
 async def run_due_bot_activities():
     """Run due bot activities for all bots whose time has come."""
+    db = SessionLocal()
     try:
-        db = next(get_db())
         content_generator = ContentGenerator()
         api_client = CartoucheAPIClient()
         bot_repository = BotRepository(db)
@@ -193,14 +200,16 @@ async def run_due_bot_activities():
             logger.info("Ran due bot activities for all bots")
     except Exception as e:
         logger.error(f"Failed to run due bot activities: {str(e)}")
+    finally:
+        db.close()
 
 
 async def sync_bots_with_external_api_task():
     """
     Background task for syncing bots with external API.
     """
+    db = SessionLocal()
     try:
-        db = next(get_db())
         content_generator = ContentGenerator()
         api_client = CartoucheAPIClient()
         bot_repository = BotRepository(db)
@@ -220,6 +229,8 @@ async def sync_bots_with_external_api_task():
             logger.info(f"Synchronized {synced} bots with external API")
     except Exception as e:
         logger.error(f"Failed to sync bots with external API: {str(e)}")
+    finally:
+        db.close()
 
 
 @app.get("/")
