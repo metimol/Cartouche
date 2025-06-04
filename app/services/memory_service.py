@@ -135,3 +135,42 @@ class MemoryService:
         except Exception as e:
             logger.error(f"Failed to delete memories for bot {bot_id}: {str(e)}")
             raise DatabaseError(f"Failed to delete memories: {str(e)}")
+
+    def get_all_bot_collection_names(self) -> List[int]:
+        """
+        Retrieves all collection names from qDrant, parses them to extract bot IDs,
+        and returns a list of these bot IDs.
+
+        Returns:
+            List of bot IDs.
+
+        Raises:
+            DatabaseError: If fetching collections from qDrant fails or if parsing errors occur.
+        """
+        bot_ids: List[int] = []
+        try:
+            collections = self.qdrant_client.get_collections().collections
+            for collection_info in collections:
+                collection_name = collection_info.name
+                try:
+                    # Assuming format "bot_<id>"
+                    parts = collection_name.split("_")
+                    if len(parts) == 2 and parts[0] == "bot":
+                        bot_id = int(parts[1])
+                        bot_ids.append(bot_id)
+                    else:
+                        logger.warning(
+                            f"Unexpected collection name format: {collection_name}"
+                        )
+                except ValueError:
+                    logger.warning(
+                        f"Failed to parse bot ID from collection name: {collection_name}"
+                    )
+                except Exception as e:
+                    logger.error(
+                        f"An unexpected error occurred while parsing collection name {collection_name}: {str(e)}"
+                    )
+            return bot_ids
+        except Exception as e:
+            logger.error(f"Failed to retrieve collections from qDrant: {str(e)}")
+            raise DatabaseError(f"Failed to retrieve collections: {str(e)}")

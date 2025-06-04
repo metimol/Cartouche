@@ -595,5 +595,32 @@ class BotManager:
             if name not in external_bots:
                 self.bot_repository.delete_bot(bot.id)
 
-        logger.info(f"Bot synchronization complete. Synced {updated} bots.")
+        logger.info(f"Bot synchronization with external API and local DB complete. Synced {updated} bots.")
+
+        # Clean up qDrant collections for bots that no longer exist
+        try:
+            logger.info("Starting qDrant collections cleanup...")
+            local_db_bots = self.bot_repository.get_all_bots(limit=None) # Get all bots
+            local_bot_ids = [bot.id for bot in local_db_bots]
+
+            qdrant_bot_ids = self.memory_service.get_all_bot_collection_names()
+
+            deleted_collections_count = 0
+            for bot_id_qdrant in qdrant_bot_ids:
+                if bot_id_qdrant not in local_bot_ids:
+                    try:
+                        await self.memory_service.delete_bot_memories(bot_id_qdrant)
+                        logger.info(f"Deleted qDrant collection for bot_id {bot_id_qdrant} as bot no longer exists in local DB.")
+                        deleted_collections_count +=1
+                    except Exception as e:
+                        logger.error(f"Failed to delete qDrant collection for bot_id {bot_id_qdrant}: {str(e)}")
+
+            if deleted_collections_count > 0:
+                logger.info(f"qDrant collections cleanup complete. Deleted {deleted_collections_count} collections.")
+            else:
+                logger.info("qDrant collections cleanup complete. No orphaned collections found.")
+
+        except Exception as e:
+            logger.error(f"An error occurred during qDrant collections cleanup: {str(e)}")
+
         return updated
