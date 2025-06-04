@@ -25,7 +25,7 @@ openai>=1.0.0
 # Vector database and embeddings
 langchain-huggingface>=0.2.0
 langchain-qdrant>=0.2.0
-qdrant-client>=1.7.0
+qdrant-client==1.14.2
 
 # Testing
 pytest>=7.3.1

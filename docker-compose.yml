@@ -58,7 +58,7 @@ services:
     restart: unless-stopped
 
   qdrant:
-    image: qdrant/qdrant:v1.7.3
+    image: qdrant/qdrant:v1.14.2
     container_name: cartouche-qdrant
     ports:
       - "6333:6333"
