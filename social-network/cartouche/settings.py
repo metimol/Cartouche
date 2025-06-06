@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 import json
+from django.conf import settings
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -167,3 +168,11 @@ STATIC_URL = '/static/'
 MEDIA_URL = 'media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+if hasattr(settings, 'DJOSER'):
+    DJOSER = settings.DJOSER
+else:
+    try:
+        from .djoser_settings import DJOSER
+    except ImportError:
+        DJOSER = {}

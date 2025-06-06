@@ -91,3 +91,9 @@ class CommentSerializer(serializers.ModelSerializer):
             "name": user.profile.name if user.profile else None,
             "image": user.profile.image if user.profile and user.profile.image else None,
         }
+
+
+class FullUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
