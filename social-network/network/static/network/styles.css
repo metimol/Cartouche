@@ -1,0 +1,195 @@
+:root {
+    --accent-main: #21BB9F;
+    --accent-light: #64cfbc;
+    --accent-dark: #14705f;
+    
+    --like: #FB2576;
+    --comment: #FFAB31;
+    --bookmark: #0071F2;
+    --edit: #64BC26;
+    --delete: #FF0303;
+    --pin: #8B008B;
+}
+
+body[data-bs-theme="light"] {
+    --primary-clr: #FFF;
+    --secondary-clr: #FAFAFF;
+}
+
+body[data-bs-theme="dark"] {
+    --primary-clr: #111;
+    --secondary-clr: #232323;
+}
+
+/* Utils */
+
+a {
+    text-decoration: none;
+}
+
+.text-accent {
+    color: var(--accent-main);
+}
+
+.text-accent-light {
+    color: var(--accent-light);
+}
+
+.text-accent-dark {
+    color: var(--accent-dark);
+}
+
+.bg-primary-clr {
+    color: var(--text-main);
+    background-color: var(--primary-clr);
+}
+
+.bg-secondary-clr {
+    color: var(--text-main);
+    background-color: var(--secondary-clr);
+}
+
+.btn-accent {
+    color: var(--primary-clr);
+    background-color: var(--accent-main);
+}
+
+.btn-accent:hover {
+    color: var(--primary-clr);
+    background-color: var(--accent-light);
+}
+
+.btn-outline-accent {
+    color: var(--accent-main);
+    border: 1px solid var(--accent-main);
+}
+
+.btn-outline-accent:hover {
+    color: var(--primary-clr);
+    background-color: var(--accent-light);
+}
+
+.like i {
+    color: var(--like);
+}
+
+.comment i {
+    color: var(--comment);
+}
+
+.bookmark i {
+    color: var(--bookmark);
+}
+
+.edit i {
+    color: var(--edit);
+}
+
+.delete i {
+    color: var(--delete);
+}
+
+.pin i {
+    color: var(--pin);
+}
+
+/* Main */
+* {
+    font-family: 'Poppins', sans-serif;
+}
+
+body>.row {
+    height: 100vh;
+}
+
+.nav-item.active {
+    color: var(--accent-main);
+}
+
+.profile-img {
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+}
+
+.connection {
+    height: 100px;
+}
+
+.connection>img {
+    height: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+}
+
+.connection span {
+    color: var(--accent-main);
+}
+
+.post-pinned {
+    font-size: .8rem;
+    padding-left: .5rem;
+}
+
+.post-header,
+.comment-header {
+    height: 50px;
+    display: flex;
+    gap: 1rem;
+}
+
+.post-header img,
+.comment-header img {
+    aspect-ratio: 1 / 1;
+    height: 100%;
+    object-fit: cover;
+}
+
+.post-actions i {
+    width: 1.25rem;
+}
+
+.post-content {
+    display: block;
+}
+
+.post-edit-form {
+    display: none;
+}
+
+.post-actions>button.btn:not(:last-child) {
+    border-right: 1px solid #e9ecef;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: .35em;
+    height: .25em;
+}
+
+::-webkit-scrollbar-track {
+    background-color: var(--text-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent-light);
+}
+
+/* Scroll bar for mozilla */
+@supports (scrollbar-color: var(--text-dark) var(--accent-light)) {
+    * {
+        scrollbar-color: var(--accent-light) var(--text-dark);
+        /* scrollbar-width: thin; */
+    }
+}
+
+/* Media Queries */
+
+@media (min-width: 768px) {
+    body>.row>* {
+        height: 100%;
+    }
+
+    main {
+        overflow-y: scroll;
+    }
+}

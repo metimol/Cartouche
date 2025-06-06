@@ -1,10 +1,29 @@
 version: '3.8'
 
 services:
+  cartouche-social-network:
+    build: 
+      context: .
+      dockerfile: social-network/Dockerfile
+    container_name: cartouche-social-network
+    ports:
+      - "8000:8000"
+    depends_on:
+      - qdrant
+      - mysql
+    networks:
+      - cartouche-network
+    restart: unless-stopped
+    environment:
+      - MYSQL_HOST=${MYSQL_HOST:-mysql}
+      - MYSQL_PORT=${MYSQL_PORT:-3306}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-cartouche}
+      - MYSQL_USER=${MYSQL_USER:-cartouche_user}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-cartouche_pass}
   cartouche-bot-service:
     build: 
       context: .
-      dockerfile: Dockerfile
+      dockerfile: bot-system/Dockerfile
     container_name: cartouche-bot-service
     ports:
       - "8000:8000"
@@ -69,10 +88,28 @@ services:
       - cartouche-network
     restart: unless-stopped
 
+  mysql:
+    image: mysql:8.0
+    container_name: cartouche-mysql
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpass}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-cartouche}
+      - MYSQL_USER=${MYSQL_USER:-cartouche_user}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-cartouche_pass}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - cartouche-network
+
 volumes:
   qdrant_storage:
     driver: local
   cartouche_data:
+    driver: local
+  mysql_data:
     driver: local
 
 networks:

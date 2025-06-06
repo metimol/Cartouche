@@ -1,0 +1,45 @@
+{% load static %}
+
+{% if post.ispinned %}
+    <p class="post-pinned text-accent"><i class="fas fa-thumbtack"></i> Pinned</p>
+{% endif %}
+<div class="post-header">
+    <a href="{% url 'network:profile' post.user %}">
+        <img class="rounded-circle" src="{{ post.user.profile.image }}" alt="{{ post.user.profile.name }}">
+    </a>
+
+    <div>
+        <a class="d-flex gap-2" href="{% url 'network:profile' post.user %}">
+            <strong class="text-primary-emphasis">{{ post.user.profile.name }}</strong>
+            <span class="text-accent">@{{ post.user }}</span>
+        </a>
+        <small>{{ post.date | date:"g:i A • M d, Y" }}</small>
+    </div>
+
+    {% if user == post.user %}
+    <div class="ms-auto dropstart">
+        <button class="btn btn-sm" data-bs-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
+        <ul class="post-actions dropdown-menu">
+            <li>
+                <button data-postid="{{ post.pk }}" class="pin dropdown-item btn btn-sm">
+                    {% if post.ispinned %}
+                    <i class="fas fa-thumbtack"></i> Unpin from Profile
+                    {% else %}
+                    <i class="fas fa-thumbtack"></i> Pin to Profile
+                    {% endif %}
+                </button>
+            </li>
+            <li>
+                <button data-postid="{{ post.pk }}" class="edit dropdown-item btn btn-sm">
+                    <i class="far fa-edit"></i> Edit Post
+                </button>
+            </li>
+            <li>
+                <button data-postid="{{ post.pk }}" class="delete dropdown-item btn btn-sm">
+                    <i class="far fa-trash-alt"></i> Delete Post
+                </button>
+            </li>
+        </ul>
+    </div>
+    {% endif %}
+</div>

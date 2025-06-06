@@ -1,0 +1,28 @@
+{% extends "network/layout.html" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block body %}
+<section class="p-3">
+    <h1 class="text-primary-emphasis">Settings</h1>
+    <div class="theme-settings my-3">
+        <p class="text-secondary fs-4 fw-semibold">Theme</p>
+        <select id="theme-toggler" class="form-select" style="width: min(200px, 90%);">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+            <option value="auto">System Default</option>
+        </select>
+    </div>
+    <div class="settings-account my-3">
+        <p class="text-secondary fs-4 fw-semibold">Account</p>
+        {% if user.is_authenticated %}
+        <div class="d-flex gap-3 flex-column">
+            <a class="text-info" href="{% url 'network:change-password' %}">Change Password</a>
+            <a class="text-danger" href="{% url 'network:delete-account' %}">Delete Account</a>
+        </div>
+        {% else %}
+        <p class="m-1"><a href="{% url 'network:login' %}">Login</a> to access account settings</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% load static %}
+
+<nav class="my-4" aria-label="Pagination">
+    <ul class="pagination p-0 gap-5 align-items-center justify-content-center">
+        {% if posts_page.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ posts_page.previous_page_number }}" aria-label="Previous">Previous</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link" aria-label="Previous">Previous</span>
+        </li>
+        {% endif %}
+
+        <strong>Page {{ posts_page.number }} of {{ posts_page.paginator.num_pages }}</strong>
+
+        {% if posts_page.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ posts_page.next_page_number }}" aria-label="Next">Next</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link" aria-label="Next">Next</span>
+        </li>
+        {% endif %}
+    </ul>
+</nav>

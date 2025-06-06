@@ -1,0 +1,31 @@
+{% extends "network/layout.html" %}
+
+{% block title %}Update Profile{% endblock %}
+
+{% block body %}
+<section class="container p-4">
+    <h2 class="text-primary-emphasis">Update Profile: {{ user }}</h2>
+    <form class="row d-flex flex-column gap-4 py-2" action="{% url 'network:update_profile' %}" method="post">
+        {% csrf_token %}
+        <div class="col-12">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" maxlength="200" class="form-control" name="name" id="name" value="{{ profile.name }}" placeholder="E.g: John Smith" required>
+        </div>
+        <div class="col-12">
+            <label for="image" class="form-label">Image Link</label>
+            <input type="url" class="form-control" name="image" id="image" value="{{ profile.image }}" placeholder="Eg: http://www.example.com/me.jpg" required>
+        </div>
+        <div class="col-12">
+            <label for="dob" class="form-label">Birthday</label>
+            <input type="date" class="form-control" name="dob" id="dob" value='{{ profile.dob|date:"Y-m-d" }}' required>
+        </div>
+        <div class="col-12">
+            <label for="bio" class="form-label">Bio</label>
+            <textarea class="form-control" name="bio" id="bio" rows="5" placeholder="Something about yourself">{{ profile.bio }}</textarea>
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-accent w-100">Save Profile</button>
+        </div>
+    </form>
+</section>
+{% endblock %}

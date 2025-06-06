@@ -1,0 +1,29 @@
+{% extends "network/layout.html" %}
+
+{% block title %}Delete Account{% endblock %}
+
+{% block body %}
+
+<section class="p-4 h-100 d-flex flex-column gap-2 align-items-center justify-content-center">
+    <form class="bg-primary-clr rounded shadow-sm rounded-2 p-4 d-flex flex-column gap-2" action="{% url 'network:delete-account' %}"
+        method="post" style="width: min(400px, 90%);">
+        <h2 class="text-primary-emphasis text-center">Delete Account</h2>
+        {% csrf_token %}
+        {% if message %}
+        <div class="alert alert-warning d-flex align-items-center gap-2" role="alert">
+            <i class="fas fa-exclamation-circle"></i>
+            <div>{{ message }}</div>
+        </div>
+        {% endif %}
+        <p class="text-danger">
+            <small>Enter your password to confirm account deletion</small>
+        </p>
+        <div class="form-group">
+            <label for="password" class="form-label">Password</label>
+            <input class="form-control" type="password" name="password" id="password">
+        </div>
+        <input class="btn btn-danger mt-3" type="submit" value="Delete Account">
+    </form>
+</section>
+
+{% endblock %}

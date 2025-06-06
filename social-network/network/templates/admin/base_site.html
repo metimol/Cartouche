@@ -1,0 +1,26 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}Cartouche Admin{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}" style="color: var(--header-branding-color); text-decoration: none;">
+        <img src="{% static 'network/logo.png' %}" alt="Cartouche" height="32"
+            style="vertical-align: middle; margin-right: 8px; filter: brightness(0) invert(1);">
+        Cartouche Admin
+    </a>
+</h1>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<!-- Poppins -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+    href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    rel="stylesheet">
+<link rel="icon" href="{% static 'network/logo.png' %}" type="image/png">
+<link rel="stylesheet" href="{% static 'network/admin_styles.css' %}">
+{% endblock %}

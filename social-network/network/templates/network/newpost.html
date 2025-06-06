@@ -1,0 +1,20 @@
+{% extends "network/layout.html" %}
+
+{% block title %}New Post{% endblock %}
+
+{% block body %}
+<section class="container p-4">
+    <h2 class="text-primary-emphasis text-center mb-4">New Post</h2>
+    <form class="d-block mx-auto" action="{% url 'network:newpost' %}" method="post" style="width: min(600px, 90%);">
+        {% csrf_token %}
+        <div class="form-floating">
+            <textarea class="form-control" name="content" id="content" style="height: 60vh;"
+                placeholder="Got some thoughts.. Share it with your network" required>{{ profile.bio }}</textarea>
+            <label for="content">Got some thoughts.. Share it with your network</label>
+        </div>
+        <div class="mt-4">
+            <button type="submit" class="btn btn-accent w-100">Share Post</button>
+        </div>
+    </form>
+</section>
+{% endblock %}

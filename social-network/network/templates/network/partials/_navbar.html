@@ -1,0 +1,107 @@
+{% load static %}
+
+<nav class="col-lg-2 col-md-3 col-12 p-0 bg-primary-clr d-none d-md-flex flex-md-column">
+    <h2 class="m-4 d-flex align-items-center gap-2">
+        <a class="text-accent d-flex align-items-center" href="{% url 'network:index' %}">
+            <img src="{% static 'network/logo.png' %}" alt="Cartouche Logo" style="height: 32px;">
+            <span class="d-none d-md-inline ms-2">Cartouche</span>
+        </a>
+    </h2>
+
+    <div>
+        <ul class="navbar-nav mx-4">
+            <li class="nav-item {% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+                <a class="nav-link fs-5 d-flex align-items-center gap-2" href="{% url 'network:index' %}"><i data-feather="home"></i> Home</a>
+            </li>
+            {% if user.is_staff %}
+            <li class="nav-item {% if request.resolver_match.url_name == 'admin:index' %}active{% endif %}">
+                <a class="nav-link fs-5 d-flex align-items-center gap-2" href="{% url 'admin:index' %}"><i data-feather="zap"></i> Admin</a>
+            </li>
+            {% endif %}
+            {% if user.is_authenticated %}
+            <li class="nav-item {% if request.resolver_match.url_name == 'following' %}active{% endif %}">
+                <a class="nav-link fs-5 d-flex align-items-center gap-2" href="{% url 'network:following' %}"><i data-feather="users"></i> Following</a>
+            </li>
+            <li class="nav-item {% if request.resolver_match.url_name == 'bookmarks' %}active{% endif %}">
+                <a class="nav-link fs-5 d-flex align-items-center gap-2" href="{% url 'network:bookmarks' %}"><i data-feather="bookmark"></i> Bookmarks</a>
+            </li>
+            <li class="nav-item d-lg-none {% if request.resolver_match.url_name == 'newpost' %}active{% endif %}">
+                <a class="nav-link fs-5 d-flex align-items-center gap-2" href="{% url 'network:newpost' %}"><i data-feather="plus-square"></i> New Post</a>
+            </li>
+            <li class="nav-item {% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
+                <a class="nav-link fs-5 d-flex align-items-center gap-2" href="{% url 'network:settings' %}"><i data-feather="settings"></i> Settings</a>
+            </li>
+            <li class="nav-item {% if request.resolver_match.url_name == 'logout' %}active{% endif %}">
+                <a class="nav-link fs-5 d-flex align-items-center gap-2" href="{% url 'network:logout' %}"><i data-feather="log-out"></i> Log Out</a>
+            </li>
+            {% else %}
+            <li class="nav-item {% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
+                <a class="nav-link fs-5 d-flex align-items-center gap-2" href="{% url 'network:settings' %}"><i data-feather="settings"></i> Settings</a>
+            </li>
+            <li class="nav-item {% if request.resolver_match.url_name == 'login' %}active{% endif %}">
+                <a class="nav-link fs-5 d-flex align-items-center gap-2" href="{% url 'network:login' %}"><i data-feather="log-in"></i> Log In</a>
+            </li>
+            <li class="nav-item {% if request.resolver_match.url_name == 'register' %}active{% endif %}">
+                <a class="nav-link fs-5 d-flex align-items-center gap-2" href="{% url 'network:register' %}"><i data-feather="user-plus"></i> Register</a>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+
+    <div class="mt-auto px-4 py-3 border-top">
+        {% if user.is_authenticated %}
+        <a class="text-accent-dark fs-5" href="{% url 'network:profile' user %}">
+            <img class="profile-img rounded-circle" src="{{ user.profile.image }}" alt="{{ user }}"
+                style="height: 40px;"> <strong>{{ user }}</strong>
+        </a>
+        {% else %}
+        <a class="text-accent-dark fs-5" href="{% url 'network:login' %}">
+            <i class="far fa-user-circle"></i> <strong>Guest</strong>
+        </a>
+        {% endif %}
+    </div>
+</nav>
+
+<nav class="bg-primary-clr sticky-top shadow-sm d-flex d-md-none align-items-center gap-3 px-4 py-3">
+    <h2 class="m-0 d-flex align-items-center">
+        <a class="text-accent d-flex align-items-center" href="{% url 'network:index' %}">
+            <img src="{% static 'network/logo.png' %}" alt="Cartouche Logo" style="height: 28px;">
+            <span class="d-none d-sm-inline ms-2">Cartouche</span>
+        </a>
+    </h2>
+
+    <div class="ms-auto">
+        {% if user.is_authenticated %}
+        <a class="text-accent-dark fs-5" href="{% url 'network:profile' user %}">
+            <img class="profile-img rounded-circle" src="{{ user.profile.image }}" alt="{{ user }}"
+                style="height: 30px;"> <strong class="fw-medium">{{ user }}</strong>
+        </a>
+        {% else %}
+        <a class="text-accent-dark fs-5" href="{% url 'network:login' %}">
+            <i class="far fa-user-circle"></i> <strong class="fw-medium">Guest</strong>
+        </a>
+        {% endif %}
+    </div>
+    <div class="dropdown">
+        <button class="btn p-0 text-accent" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-bars fa-lg"></i>
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="{% url 'network:index' %}">Home</a></li>
+            {% if user.is_staff %}
+            <li><a class="dropdown-item" href="{% url 'admin:index' %}">Admin</a></li>
+            {% endif %}
+            {% if user.is_authenticated %}
+            <li><a class="dropdown-item" href="{% url 'network:following' %}">Following</a></li>
+            <li><a class="dropdown-item" href="{% url 'network:bookmarks' %}">Bookmarks</a></li>
+            <li><a class="dropdown-item" href="{% url 'network:newpost' %}">New Post</a></li>
+            <li><a class="dropdown-item" href="{% url 'network:settings' %}">Settings</a></li>
+            <li><a class="dropdown-item" href="{% url 'network:logout' %}">Log Out</a></li>
+            {% else %}
+            <li><a class="dropdown-item" href="{% url 'network:settings' %}">Settings</a></li>
+            <li><a class="dropdown-item" href="{% url 'network:login' %}">Log In</a></li>
+            <li><a class="dropdown-item" href="{% url 'network:register' %}">Register</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>

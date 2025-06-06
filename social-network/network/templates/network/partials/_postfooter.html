@@ -1,0 +1,50 @@
+{% load static %}
+
+<div class="post-footer mt-2">
+    <div class="post-actions btn-group w-100">
+        <button data-postid="{{ post.pk }}" class="like btn btn-sm flex-grow-1 rounded-0">
+            {% if post in user.liked_posts %}
+            <i class="fas fa-heart"></i> <span class="ml-1">{{ post.reactions_count }}</span>
+            {% else %}
+            <i class="far fa-heart"></i> <span class="ml-1">{{ post.reactions_count }}</span>
+            {% endif %}
+        </button>
+        <button data-postid="{{ post.pk }}" data-bs-toggle="modal" data-bs-target="#post{{ post.pk }}commentform"
+            class="comment btn btn-sm flex-grow-1 rounded-0">
+            <i class="far fa-comment-alt"></i> <span class="ml-1">{{ post.comments_count }}</span>
+        </button>
+        <button data-postid="{{ post.pk }}" class="bookmark btn btn-sm flex-grow-1 rounded-0">
+            {% if post in user.bookmarked_posts %}
+            <i class="fas fa-bookmark"></i>
+            {% else %}
+            <i class="far fa-bookmark"></i>
+            {% endif %}
+        </button>
+    </div>
+
+    <div class="modal fade" id="post{{ post.pk }}commentform" tabindex="-1"
+        aria-labelledby="post{{ post.pk }}commentformlabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="text-primary-emphasis modal-title fs-5" id="post{{ post.pk }}commentformlabel">New
+                        Comment</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="{% url 'network:comment' post.pk %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-floating">
+                            <textarea class="form-control" placeholder="Comment" name="content" id="content"
+                                style="height: 150px;" required></textarea>
+                            <label for="content">Comment</label>
+                        </div>
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-accent w-100">Post comment</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

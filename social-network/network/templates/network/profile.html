@@ -1,0 +1,111 @@
+{% extends "network/layout.html" %}
+
+{% block title %} {{ profile.name }} {% endblock %}
+
+{% block body %}
+<section class="container p-3">
+        <div class="row p-3 m-0 rounded bg-primary-clr">
+            <img class="col-lg-3 col-md-4 col-8 mx-auto p-2 img-thumbnail profile-img" src="{{ profile.image }}"
+                alt="{{ profile.user }}">
+            <div class="col-lg-9 col-md-8 col-12 mt-md-0 mt-3 d-flex flex-column">
+                <h1 class="text-primary-emphasis m-0 text-truncate">{{ profile.name }}</h1>
+                <a class="text-accent fs-5" href="{% url 'network:profile' profile.user %}">@{{ profile.user }}</a>
+                <p class="text-secondary fw-medium d-flex flex-md-column justify-content-between gap-1 my-2">
+                    <small>
+                        <i class="fas fa-birthday-cake"></i> Born {{ profile.dob|date:"M d, Y" }}
+                    </small>
+                    <small>
+                        <i class="fas fa-calendar-alt"></i> Joined {{ profile.user.date_joined|date:"M d, Y" }}
+                    </small>
+                </p>
+                <div class="my-2">
+                    {% if profile.user == user %}
+                    <a href="{% url 'network:update_profile' %}"
+                        class="btn btn-sm btn-outline-accent rounded-pill px-4 py-1">Edit Profile</a>
+                    {% elif profile.user in user.following_list %}
+                    <button type="button" class="connect btn btn-sm btn-outline-accent rounded-pill px-4 py-1"
+                        data-username="{{ profile.user.username }}">Unfollow</button>
+                    {% else %}
+                    <button type="button" class="connect btn btn-sm btn-accent rounded-pill px-4 py-1"
+                        data-username="{{ profile.user.username }}">Follow</button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <p class="my-4 fw-medium">{{ profile.bio }}</p>
+
+            <div class="py-2 rounded bg-secondary-clr d-flex align-items-center justify-content-evenly">
+                <button class="btn p-0 d-flex flex-column align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#followingModal">
+                    <strong class="fs-4">{{ profile.user.following_count }}</strong>
+                    <span>Following</span>
+                </button>
+                <button class="btn p-0 d-flex flex-column align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#followersModal">
+                    <strong class="fs-4">{{ profile.user.followers_count }}</strong>
+                    <span>Followers</span>
+                </button>
+                <div class="d-flex flex-column align-items-center justify-content-center">
+                    <strong class="fs-4">{{ profile.user.posts_count }}</strong>
+                    <span>Posts</span>
+                </div>
+            </div>
+
+            <!-- Following Model -->
+            <div class="modal fade" id="followingModal" tabindex="-1" aria-labelledby="followingModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="text-primary-emphasis modal-title" id="followingModalLabel">Following</h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body bg-secondary-clr d-flex flex-column gap-2">
+                            {% for person in profile.user.following_list %}
+                            <a href="{% url 'network:profile' person %}">
+                                <div class="connection bg-primary-clr d-flex gap-2 p-3 rounded-2">
+                                    <img class="rounded-circle" src="{{ person.profile.image }}" alt="{{ person.profile.name }}">
+                                    <div class="d-flex flex-column gap-1">
+                                        <h6 class="text-primary-emphasis m-0">{{ person.profile.name }}</h6>
+                                        <span>@{{ person }}</span>
+                                    </div>
+                                </div>
+                            </a>
+                            {% empty %}
+                            <h4 class="text-primary-emphasis">{{ profile.user }} is not following anyone yet</h4>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Followers Model -->
+            <div class="modal fade" id="followersModal" tabindex="-1" aria-labelledby="followersModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="text-primary-emphasis modal-title" id="followersModalLabel">Followers</h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body bg-secondary-clr d-flex flex-column gap-2">
+                            {% for person in profile.user.followers_list %}
+                            <a href="{% url 'network:profile' person %}">
+                                <div class="connection bg-primary-clr d-flex gap-2 p-3 rounded-2">
+                                    <img class="rounded-circle" src="{{ person.profile.image }}" alt="{{ person.profile.name }}">
+                                    <div class="d-flex flex-column gap-1">
+                                        <h6 class="text-primary-emphasis m-0">{{ person.profile.name }}</h6>
+                                        <span>@{{ person }}</span>
+                                    </div>
+                                </div>
+                            </a>
+                            {% empty %}
+                            <h4 class="text-primary-emphasis">{{ profile.user }} has no followers yet</h4>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <h3 class="text-primary-emphasis mt-3">Posts</h3>
+        {% include 'network/partials/_posts.html' %}
+</section>
+{% endblock %}

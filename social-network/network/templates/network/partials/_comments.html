@@ -1,0 +1,11 @@
+{% load static %}
+
+<div class="d-flex flex-column gap-2">
+    {% for comment in comments %}
+        <div class="bg-primary-clr p-3 rounded">
+            {% include "network/partials/_commentheader.html" %}
+            <span class="d-inline-block my-2 text-secondary">Replying to <a class="text-accent" href="{% url 'network:profile' comment.post.user %}">@{{ comment.post.user }}</a></span>
+            <p class="bg-secondary-clr d-block p-3 rounded-2">{{ comment.content }}</p>
+        </div>
+    {% endfor %}
+</div>

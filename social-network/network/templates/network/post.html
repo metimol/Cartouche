@@ -1,0 +1,30 @@
+{% extends "network/layout.html" %}
+
+{% block title %}Post: {{ post.pk }}{% endblock %}
+
+{% block body %}
+<section class="container px-3 py-4">
+    <div class="bg-primary-clr p-3 rounded">
+        {% include "network/partials/_postheader.html" %}
+        <p class="post-content bg-secondary-clr mt-3 p-3 rounded-2">{{ post.content }}</p>
+        {% if user == post.user %}
+        <form data-postid="{{ post.pk }}" class="post-edit-form my-3">
+            <div class="form-floating">
+                <textarea class="form-control" name="content" id="content" style="height: 100px;"
+                    placeholder="Updated post content" required>{{ post.content }}</textarea>
+                <label for="content">Updated post content</label>
+            </div>
+            <div class="mt-2">
+                <button type="submit" class="btn btn-accent w-100">Update Post</button>
+            </div>
+        </form>
+        {% endif %}
+        {% include "network/partials/_postfooter.html" %}
+    </div>
+    
+    <div>
+        <h4 class="text-primary-emphasis mt-3">Comments</h4>
+        {% include 'network/partials/_comments.html' %}
+    </div>
+</section>
+{% endblock %}

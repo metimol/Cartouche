@@ -1,0 +1,9 @@
+Django==4.2.3
+gunicorn==21.2.0
+djangorestframework==3.15.2
+django-filter==24.3
+Markdown==3.7
+djoser==2.3.1
+drf-nested-routers==0.94.1
+drf-spectacular==0.28.0
+mysqlclient==2.2.7

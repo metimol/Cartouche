@@ -1,0 +1,14 @@
+{% load static %}
+
+<div class="comment-header">
+    <a href="{% url 'network:profile' comment.user %}">
+        <img class="rounded-circle" src="{{ comment.user.profile.image }}" alt="{{ comment.user.profile.name }}">
+    </a>
+    <div>
+        <a class="d-flex gap-2" href="{% url 'network:profile' comment.user %}">
+            <strong class="text-primary-emphasis">{{ comment.user.profile.name }}</strong>
+            <span class="text-accent">@{{ comment.user }}</span>
+        </a>
+        <small>{{ comment.date | date:"g:i A - M d, Y" }}</small>
+    </div>
+</div>
