@@ -3,6 +3,13 @@ from django.db import models
 
 
 class User(AbstractUser):
+    is_bot = models.BooleanField(default=False)
+    category = models.CharField(max_length=100, default="", blank=True)
+    like_probability = models.FloatField(default=0.5)
+    comment_probability = models.FloatField(default=0.5)
+    follow_probability = models.FloatField(default=0.5)
+    unfollow_probability = models.FloatField(default=0.5)
+    repost_probability = models.FloatField(default=0.5)
 
     @property
     def followers_list(self):
