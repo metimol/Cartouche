@@ -20,6 +20,7 @@ services:
       - MYSQL_DATABASE=${MYSQL_DATABASE:-cartouche}
       - MYSQL_USER=${MYSQL_USER:-cartouche_user}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD:-cartouche_pass}
+      - DOMAIN=${DOMAIN:-localhost}
   cartouche-bot-service:
     build: 
       context: .
