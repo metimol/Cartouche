@@ -6,9 +6,8 @@ from rest_framework import status
 from rest_framework.filters import SearchFilter
 from network.models import *
 from .serializers import *
-from django.contrib.auth import get_user_model
 
-# Получение всех пользователей
+# Get all users
 class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ProfileSerializer
     queryset = Profile.objects.all()
@@ -16,7 +15,7 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ['name', 'user__username']
     lookup_field = 'user'
 
-# Получение всех постов и лайк поста
+# Get all posts and like a post
 class PostViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = PostSerializer
     queryset = Post.objects.all().order_by("-date")
@@ -33,7 +32,7 @@ class PostViewSet(viewsets.ReadOnlyModelViewSet):
             return Response({"message": "Like removed."}, status=status.HTTP_204_NO_CONTENT)
         return Response({"message": "Post liked."}, status=status.HTTP_201_CREATED)
 
-# Получение всех комментариев к посту и добавление комментария
+# Get all comments for a post and add a comment
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     http_method_names = ['get', 'post']
