@@ -3,18 +3,45 @@
 {% block title %}New Post{% endblock %}
 
 {% block body %}
-<section class="container p-4">
-    <h2 class="text-primary-emphasis text-center mb-4">New Post</h2>
-    <form class="d-block mx-auto" action="{% url 'network:newpost' %}" method="post" style="width: min(600px, 90%);">
-        {% csrf_token %}
-        <div class="form-floating">
-            <textarea class="form-control" name="content" id="content" style="height: 60vh;"
-                placeholder="Got some thoughts.. Share it with your network" required>{{ profile.bio }}</textarea>
-            <label for="content">Got some thoughts.. Share it with your network</label>
+<section class="container-fluid px-3 py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card border-0 shadow-sm bg-primary-clr">
+                <div class="card-body p-4">
+                    <h2 class="text-accent text-center mb-4 fw-bold">Share Your Thoughts</h2>
+                    
+                    <form action="{% url 'network:newpost' %}" method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <textarea 
+                                class="form-control border-2 border-accent" 
+                                name="content" 
+                                id="content" 
+                                rows="8"
+                                placeholder="What's on your mind?"
+                                required
+                                style="resize: vertical; min-height: 200px; word-wrap: break-word; overflow-wrap: break-word; white-space: pre-wrap;"
+                            >{{ profile.bio }}</textarea>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-accent btn-lg fw-semibold py-3">
+                                <i class="fas fa-share me-2"></i>
+                                Post It
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="text-center mt-3">
+                <small class="text-muted">
+                    <i class="fas fa-lightbulb me-1"></i>
+                    Share something awesome with your network
+                </small>
+            </div>
         </div>
-        <div class="mt-4">
-            <button type="submit" class="btn btn-accent w-100">Share Post</button>
-        </div>
-    </form>
+    </div>
 </section>
 {% endblock %}
