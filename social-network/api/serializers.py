@@ -13,18 +13,25 @@ class ProfileSerializer(serializers.ModelSerializer):
     following_count = serializers.IntegerField(source='user.following_count', read_only=True)
     followers_count = serializers.IntegerField(source='user.followers_count', read_only=True)
     posts_count = serializers.IntegerField(source='user.posts_count', read_only=True)
+    user_id = serializers.IntegerField(write_only=True, required=True)
 
     class Meta:
         model = Profile
-        fields = ['id', 'username', 'email', 'is_superuser', 'is_staff', 'date_joined', 'following', 'following_count', 'posts_count', 'followers_count', 'name', 'image', 'dob', 'bio']
+        fields = ['id', 'username', 'email', 'is_superuser', 'is_staff', 'date_joined', 'following', 'following_count', 'posts_count', 'followers_count', 'name', 'image', 'dob', 'bio', 'user_id']
         read_only_fields = ['id', 'username', 'email', 'is_superuser', 'is_staff', 'date_joined', 'following', 'following_count', 'posts_count', 'followers_count']
 
     def create(self, validated_data):
-        # Без пользователя нельзя создать профиль через API
-        raise serializers.ValidationError({"detail": "Profile creation not allowed in API without user context."})
-    
+        user_id = validated_data.pop('user_id', None)
+        if not user_id:
+            raise serializers.ValidationError({'user_id': 'user_id is required'})
+        user = User.objects.filter(id=user_id).first()
+        if not user:
+            raise serializers.ValidationError({'user_id': 'User not found'})
+        profile = Profile.objects.create(user=user, **validated_data)
+        return profile
+
     def get_following(self, obj):
-        # Нет пользователя, всегда False
+        # No user, always False
         return False
 
 
@@ -59,11 +66,11 @@ class PostSerializer(serializers.ModelSerializer):
         }
     
     def get_liked(self, obj):
-        # Нет пользователя, всегда False
+        # No user, always False
         return False
     
     def get_bookmarked(self, obj):
-        # Нет пользователя, всегда False
+        # No user, always False
         return False
     
 
