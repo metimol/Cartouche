@@ -107,7 +107,9 @@ DATABASES = {
 
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'api.authentication.StaticAPIKeyAuthentication',
+    ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
@@ -121,8 +123,35 @@ SPECTACULAR_SETTINGS = {
     'TITLE': 'Cartouche API',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'SWAGGER_UI_SETTINGS': {
+        'persistAuthorization': True,
+        'displayOperationId': True,
+        'tryItOutEnabled': True,
+        'supportedSubmitMethods': [
+            'get', 'post', 'put', 'delete', 'patch', 'head', 'options', 'trace'
+        ],
+    },
+    'SWAGGER_UI_DIST': 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@4.15.5',
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SERVE_PERMISSIONS': [],  # allow all to access docs
+    'SERVE_AUTHENTICATION': None,  # no auth for docs
+    'SERVE_SWAGGER_UI': True,
+    'SERVE_SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'persistAuthorization': True,
+    },
+    'SECURITY': [
+        {'ApiKeyAuth': []},
+    ],
+    'SECURITY_DEFINITIONS': {
+        'ApiKeyAuth': {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'X-API-KEY',
+            'description': 'Paste your API key here',
+        },
+    },
 }
-
 
 AUTH_USER_MODEL = "network.User"
 
@@ -166,6 +195,9 @@ STATIC_URL = '/static/'
 MEDIA_URL = 'media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Add your static API key here (should be kept secret in production)
+STATIC_API_KEY = os.environ.get('STATIC_API_KEY', 'supersecretkey')
 
 if hasattr(settings, 'DJOSER'):
     DJOSER = settings.DJOSER
