@@ -197,7 +197,7 @@ MEDIA_URL = 'media/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Add your static API key here (should be kept secret in production)
-STATIC_API_KEY = os.environ.get('STATIC_API_KEY', '123')
+STATIC_API_KEY = os.environ.get('API_KEY', '123')
 
 if hasattr(settings, 'DJOSER'):
     DJOSER = settings.DJOSER
