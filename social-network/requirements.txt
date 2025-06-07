@@ -7,3 +7,4 @@ djoser==2.3.1
 drf-nested-routers==0.94.1
 drf-spectacular==0.28.0
 mysqlclient==2.2.7
+python-dotenv==1.1.0
