@@ -7,6 +7,7 @@ from . import views
 router = DefaultRouter()
 router.register('profiles', views.ProfileViewSet)
 router.register('posts', views.PostViewSet)
+router.register('users', views.UserViewSet)
 
 
 posts_router = NestedDefaultRouter(router, 'posts', lookup='post')
