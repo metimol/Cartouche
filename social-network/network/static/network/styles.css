@@ -179,12 +179,24 @@ input[type="password"] {
 }
 
 .post-edit-form textarea,
-textarea[placeholder*="Share it with your network"] {
-    word-wrap: break-word;
-    word-break: break-word;
-    white-space: pre-wrap;
-    overflow-wrap: break-word;
+textarea[placeholder*="What's on your mind?"],
+textarea[name="content"] {
+    word-wrap: break-word !important;
+    word-break: break-word !important;
+    white-space: pre-wrap !important;
+    overflow-wrap: break-word !important;
     resize: vertical;
+    line-height: 1.5;
+}
+
+/* New Post Form Styles */
+.border-accent {
+    border-color: var(--accent-main) !important;
+}
+
+.border-accent:focus {
+    border-color: var(--accent-light) !important;
+    box-shadow: 0 0 0 0.25rem rgba(33, 187, 159, 0.25) !important;
 }
 
 /* Scrollbar Styles */
