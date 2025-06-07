@@ -8,12 +8,20 @@ from network.models import *
 from .serializers import *
 
 # Get all users
-class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
+class ProfileViewSet(viewsets.ModelViewSet):
     serializer_class = ProfileSerializer
     queryset = Profile.objects.all()
     filter_backends = [SearchFilter]
     search_fields = ['name', 'user__username']
     lookup_field = 'user'
+    http_method_names = ['get', 'post', 'head', 'options']
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 # Get all posts and like a post
 class PostViewSet(viewsets.ModelViewSet):

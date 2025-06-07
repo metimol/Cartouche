@@ -5,6 +5,7 @@ Handles creation, management, and scheduling of bots.
 
 from typing import Dict, Any
 import random
+import uuid
 from datetime import datetime, timedelta
 import aiohttp
 from sqlalchemy.exc import SQLAlchemyError
@@ -185,32 +186,33 @@ class BotManager:
 
             bot = self.bot_repository.create_bot(bot_data)
 
-            # Create bot in C# API
+            import datetime as dt
             api_bot_data = {
-                "Age": age,
-                "Avatar": avatar,
-                "FullName": full_name,
-                "Gender": gender,
-                "IsBot": True,
-                "Name": username,
-                "OnDate": datetime.utcnow().strftime("%m/%d/%Y"),
-                "Password": "bot",
-                "Prompt": BOT_PROMPTS.get(category, ""),
-                "Description": description,
-                "Category": category,
-                "Following": [],
-                "Settings": {
-                    "like_probability": like_probability,
-                    "comment_probability": comment_probability,
-                    "follow_probability": follow_probability,
-                    "unfollow_probability": unfollow_probability,
-                    "post_probability": post_probability,
-                },
+                "username": username,
+                "password": str(uuid.uuid4()),
+                "is_bot": True,
+                "category": category,
+                "like_probability": like_probability,
+                "comment_probability": comment_probability,
+                "follow_probability": follow_probability,
+                "unfollow_probability": unfollow_probability,
+                "repost_probability": post_probability,
             }
+            # Create bot in external API
+            user_response = await self.api_client.add_bot(api_bot_data)
+            user_id = user_response.get("id")
 
-            await self.api_client.add_bot(api_bot_data)
+            # Create profile in external API
+            profile_data = {
+                "user": user_id,
+                "name": full_name,
+                "image": avatar,
+                "dob": dt.date(dt.datetime.utcnow().year - age, 1, 1).isoformat(),
+                "bio": description or "",
+            }
+            await self.api_client.add_profile(profile_data)
 
-            return BotResponse.from_orm(bot)
+            return bot.__dict__
 
         except Exception as e:
             logger.error(f"Failed to create random bot: {str(e)}")

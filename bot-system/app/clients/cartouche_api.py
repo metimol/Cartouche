@@ -117,11 +117,8 @@ class CartoucheAPIClient:
         Returns:
             Response data
         """
-        endpoint = "AddDocument/Users"
-        url = f"{self.base_url}/{endpoint}?token={self.token}"
-
-        # Convert bot data to API format
-        formatted_data = JSONToStringConverter.format_bot_data(bot_data)
+        endpoint = "api/users"
+        url = f"{self.base_url.rstrip('/')}/{endpoint}"
 
         if not self.session:
             self.session = aiohttp.ClientSession()
@@ -130,9 +127,9 @@ class CartoucheAPIClient:
             need_to_close = False
 
         try:
-            headers = {"Content-Type": "text/plain; charset=utf-8"}
+            headers = {"X-API-KEY": self.token}
             async with self.session.post(
-                url, data=formatted_data, headers=headers
+                url, json=bot_data, headers=headers
             ) as response:
                 response_text = await response.text()
                 if response.status == 200:
@@ -345,6 +342,45 @@ class CartoucheAPIClient:
             logger.error(f"Error in follow_user: {str(e)}")
             raise APIError(f"API client error: {str(e)}")
 
+        finally:
+            if need_to_close and self.session:
+                await self.session.close()
+                self.session = None
+
+    async def add_profile(self, profile_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Add a new profile to the system (Django API).
+
+        Args:
+            profile_data: Profile data dictionary
+
+        Returns:
+            Response data
+        """
+        endpoint = "api/profiles/"
+        url = f"{self.base_url.rstrip('/')}/{endpoint}"
+
+        if not self.session:
+            self.session = aiohttp.ClientSession()
+            need_to_close = True
+        else:
+            need_to_close = False
+
+        try:
+            headers = {"X-API-KEY": self.token}
+            async with self.session.post(url, json=profile_data, headers=headers) as response:
+                response_text = await response.text()
+                if response.status in (200, 201):
+                    try:
+                        return json.loads(response_text)
+                    except Exception:
+                        return {"status": "success"}
+                else:
+                    logger.error(f"[API][ADD_PROFILE] Error: {response.status} - {response_text}")
+                    raise APIError(f"Failed to add profile: {response_text}", response.status)
+        except aiohttp.ClientError as e:
+            logger.error(f"Error in add_profile: {str(e)}")
+            raise APIError(f"API client error: {str(e)}")
         finally:
             if need_to_close and self.session:
                 await self.session.close()
