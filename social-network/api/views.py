@@ -23,15 +23,6 @@ class PostViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ['content', 'user__username', 'user__profile__name']
     lookup_field = 'id'
 
-    @action(detail=True, methods=['post'], url_name="react", permission_classes=[IsAuthenticated])
-    def react(self, request, id=None):
-        post = self.get_object()
-        reaction, created = Reaction.objects.get_or_create(user=request.user, post=post)
-        if not created:
-            reaction.delete()
-            return Response({"message": "Like removed."}, status=status.HTTP_204_NO_CONTENT)
-        return Response({"message": "Post liked."}, status=status.HTTP_201_CREATED)
-
 # Get all comments for a post and add a comment
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
@@ -42,5 +33,4 @@ class CommentViewSet(viewsets.ModelViewSet):
         return Comment.objects.filter(post_id=self.kwargs['post_id'])
 
     def get_serializer_context(self):
-        user_id = self.request.user.pk if self.request.user.is_authenticated else None
-        return { 'post_id': self.kwargs['post_id'], 'user_id': user_id }
+        return { 'post_id': self.kwargs['post_id'], 'user_id': None }

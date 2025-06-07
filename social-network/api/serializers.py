@@ -20,15 +20,11 @@ class ProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'username', 'email', 'is_superuser', 'is_staff', 'date_joined', 'following', 'following_count', 'posts_count', 'followers_count']
 
     def create(self, validated_data):
-        user_id = self.context['request'].user.id
-        if Profile.objects.filter(user_id=user_id).exists():
-            raise serializers.ValidationError({"detail": "A profile already exists for this user."})
-        return Profile.objects.create(user_id=user_id, **validated_data)
+        # Без пользователя нельзя создать профиль через API
+        raise serializers.ValidationError({"detail": "Profile creation not allowed in API without user context."})
     
     def get_following(self, obj):
-        if self.context['request'].user.is_authenticated:
-            result = Connection.objects.filter(user_id=obj.user.id, follower_id=self.context['request'].user.id)
-            return bool(len(result))
+        # Нет пользователя, всегда False
         return False
 
 
@@ -43,12 +39,11 @@ class PostSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "date", "ispinned", "liked", "bookmarked", "reactions_count", "comments_count", "user"]
 
     def create(self, validated_data):
-        user_id = self.context['request'].user.id
-        return Post.objects.create(user_id=user_id, **validated_data)
+        # Без пользователя нельзя создать пост через API
+        raise serializers.ValidationError({"detail": "Post creation not allowed in API without user context."})
     
     def get_user(self, obj):
         user = obj.user
-        
         return {
             "id": user.id,
             "username": user.username,
@@ -57,15 +52,11 @@ class PostSerializer(serializers.ModelSerializer):
         }
     
     def get_liked(self, obj):
-        if self.context['request'].user.is_authenticated:
-            result = Reaction.objects.filter(post_id=obj.id, user_id=self.context['request'].user.id)
-            return bool(len(result))
+        # Нет пользователя, всегда False
         return False
     
     def get_bookmarked(self, obj):
-        if self.context['request'].user.is_authenticated:
-            result = Bookmark.objects.filter(post_id=obj.id, user_id=self.context['request'].user.id)
-            return bool(len(result))
+        # Нет пользователя, всегда False
         return False
     
 
@@ -79,19 +70,17 @@ class CommentSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         post_id = self.context['post_id']
-        user_id = self.context['user_id']
-        return Comment.objects.create(post_id=post_id, user_id=user_id, **validated_data)
+        # Без пользователя нельзя создать комментарий через API
+        raise serializers.ValidationError({"detail": "Comment creation not allowed in API without user context."})
 
     def get_user(self, obj):
         user = obj.user
-        
         return {
             "id": user.id,
             "username": user.username,
             "name": user.profile.name if user.profile else None,
             "image": user.profile.image if user.profile and user.profile.image else None,
         }
-
 
 class FullUserSerializer(serializers.ModelSerializer):
     class Meta:
