@@ -202,7 +202,7 @@ class BotManager:
                 "unfollow_probability": unfollow_probability,
                 "repost_probability": post_probability,
             }
-            
+
             # Create bot in external API
             user_response = await self.api_client.add_bot(api_bot_data)
             user_id = user_response.get("id")
@@ -438,9 +438,8 @@ class BotManager:
 
             # Create post data
             post_data = {
-                "Name": str(getattr(bot, "name", "")),
-                "Text": post_text,
-                "OnDate": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S"),
+                "user_id": bot_id_val,
+                "content": post_text,
             }
 
             # Add post to API
@@ -451,7 +450,7 @@ class BotManager:
                 {
                     "bot_id": bot_id_val,
                     "activity_type": "post",
-                    "target_id": str(response.get("docID", "")),
+                    "target_id": str(response.get("id", "")),
                     "content": post_text,
                 }
             )

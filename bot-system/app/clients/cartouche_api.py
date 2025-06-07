@@ -172,10 +172,7 @@ class CartoucheAPIClient:
             async with self.session.post(url, json=profile_data, headers=headers) as response:
                 response_text = await response.text()
                 if response.status in (200, 201):
-                    try:
-                        return await response.json()
-                    except Exception:
-                        return {"status": "success"}
+                    return await response.json()
                 else:
                     logger.error(f"[API][ADD_PROFILE] Error: {response.status} - {response_text}")
                     raise APIError(f"Failed to add profile: {response_text}", response.status)
@@ -197,8 +194,8 @@ class CartoucheAPIClient:
         Returns:
             Response data
         """
-        endpoint = "AddDocument/Posts"
-        url = f"{self.base_url}/{endpoint}?token={self.token}"
+        endpoint = "api/posts/"
+        url = f"{self.base_url.rstrip('/')}/{endpoint}"
 
         if not self.session:
             self.session = aiohttp.ClientSession()
@@ -212,7 +209,7 @@ class CartoucheAPIClient:
                 url, json=post_data, headers=headers
             ) as response:
                 response_text = await response.text()
-                if response.status == 200:
+                if response.status in (200, 201):
                     try:
                         return await response.json()
                     except Exception as e:
@@ -227,7 +224,7 @@ class CartoucheAPIClient:
                     raise APIError(
                         f"Failed to add post: {response_text}", response.status
                     )
-        except aiohttp.ClientError as e:
+        except Exception as e:
             logger.error(f"Error in add_post: {str(e)}")
             raise APIError(f"API client error: {str(e)}")
 
