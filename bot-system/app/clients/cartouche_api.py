@@ -9,7 +9,7 @@ import json
 from typing import Dict, List, Any, Optional
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-from app.core.settings import API_BASE_URL, API_TOKEN
+from app.core.settings import SOCIAL_NETWORK_URL, API_KEY
 from app.core.exceptions import APIError
 from app.utils.json_to_string import JSONToStringConverter
 
@@ -22,7 +22,7 @@ logger = setup_logging()
 class CartoucheAPIClient:
     """Client for interacting with the Cartouche C# REST API."""
 
-    def __init__(self, base_url: str = API_BASE_URL, token: str = API_TOKEN):
+    def __init__(self, base_url: str = SOCIAL_NETWORK_URL, token: str = API_KEY):
         """
         Initialize the API client.
 
@@ -65,12 +65,12 @@ class CartoucheAPIClient:
         """
         if post_id:
             # Get specific post
-            endpoint = f"GetDocuments/Posts/{post_id}"
-            url = f"{self.base_url}/{endpoint}?token={self.token}"
+            endpoint = f"/api/posts/{post_id}"
+            url = f"{self.base_url}/{endpoint}"
         else:
             # Get all posts with caching and limit
-            endpoint = "GetCachedDocuments/Posts/"
-            url = f"{self.base_url}/{endpoint}?token={self.token}&limit={limit}"
+            endpoint = "/api/posts"
+            url = f"{self.base_url}/{endpoint}?limit={limit}"
 
         if not self.session:
             self.session = aiohttp.ClientSession()
@@ -79,7 +79,8 @@ class CartoucheAPIClient:
             need_to_close = False
 
         try:
-            async with self.session.get(url) as response:
+            headers = {"X-API-KEY": self.token}
+            async with self.session.get(url, headers=headers) as response:
                 response_text = await response.text()
                 if response.status == 200:
                     try:

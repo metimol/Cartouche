@@ -13,8 +13,8 @@ if env_path.exists():
     load_dotenv(dotenv_path=str(env_path))
 
 # API Configuration
-API_BASE_URL = os.getenv("API_BASE_URL", "https://fraplat.tech/mars/Cartouche")
-API_TOKEN = os.getenv("API_TOKEN", None)
+SOCIAL_NETWORK_URL = os.getenv("SOCIAL_NETWORK_URL", "")
+API_KEY = os.getenv("API_KEY", "")
 
 # LLM Configuration
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", None)
@@ -158,10 +158,10 @@ AVATAR_STYLES = [
 def validate_settings():
     errors = []
     # API Configuration
-    if not API_BASE_URL:
-        errors.append("API_BASE_URL is required.")
-    if not API_TOKEN:
-        errors.append("API_TOKEN is required.")
+    if not SOCIAL_NETWORK_URL:
+        errors.append("SOCIAL_NETWORK_URL is required.")
+    if not API_KEY:
+        errors.append("API_KEY is required.")
     # LLM Configuration
     if not (GOOGLE_API_KEY or OPENAI_API_KEY):
         errors.append(

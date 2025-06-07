@@ -23,6 +23,22 @@ class PostViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ['content', 'user__username', 'user__profile__name']
     lookup_field = 'id'
 
+    def get_queryset(self):
+        queryset = Post.objects.all().order_by("-date")
+        request = getattr(self, 'request', None)
+        if request is not None:
+            params = getattr(request, 'query_params', None)
+            if params is not None:
+                limit = params.get('limit')
+                if limit is not None:
+                    try:
+                        limit = int(limit)
+                        if limit > 0:
+                            queryset = queryset[:limit]
+                    except ValueError:
+                        pass  # ignore invalid limit
+        return queryset
+
 # Get all comments for a post and add a comment
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
