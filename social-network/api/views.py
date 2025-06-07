@@ -16,12 +16,13 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
     lookup_field = 'user'
 
 # Get all posts and like a post
-class PostViewSet(viewsets.ReadOnlyModelViewSet):
+class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
     queryset = Post.objects.all().order_by("-date")
     filter_backends = [SearchFilter]
     search_fields = ['content', 'user__username', 'user__profile__name']
     lookup_field = 'id'
+    http_method_names = ['get', 'post', 'head', 'options']
 
     def get_queryset(self):
         queryset = Post.objects.all().order_by("-date")
@@ -39,6 +40,28 @@ class PostViewSet(viewsets.ReadOnlyModelViewSet):
                         pass  # ignore invalid limit
         return queryset
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    @action(detail=True, methods=['post'], url_path='like')
+    def like(self, request, id=None):
+        post = self.get_object()
+        user_id = request.data.get('user_id')
+        if not user_id:
+            return Response({'detail': 'user_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+        user = User.objects.filter(id=user_id).first()
+        if not user:
+            return Response({'detail': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        reaction, created = Reaction.objects.get_or_create(post=post, user=user)
+        if not created:
+            reaction.delete()
+            return Response({'status': 'unliked', 'postReactionsCount': post.reactions_count})
+        return Response({'status': 'liked', 'postReactionsCount': post.reactions_count})
+
 # Get all comments for a post and add a comment
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
@@ -49,4 +72,13 @@ class CommentViewSet(viewsets.ModelViewSet):
         return Comment.objects.filter(post_id=self.kwargs['post_id'])
 
     def get_serializer_context(self):
-        return { 'post_id': self.kwargs['post_id'], 'user_id': None }
+        return { 'post_id': self.kwargs['post_id'] }
+
+    def create(self, request, *args, **kwargs):
+        data = request.data.copy()
+        data['post'] = self.kwargs['post_id']
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)

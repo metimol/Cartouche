@@ -65,12 +65,12 @@ class CartoucheAPIClient:
         """
         if post_id:
             # Get specific post
-            endpoint = f"/api/posts/{post_id}"
-            url = f"{self.base_url}/{endpoint}"
+            endpoint = f"api/posts/{post_id}"
+            url = f"{self.base_url.rstrip('/')}/{endpoint}"
         else:
             # Get all posts with caching and limit
-            endpoint = "/api/posts"
-            url = f"{self.base_url}/{endpoint}?limit={limit}"
+            endpoint = "api/posts"
+            url = f"{self.base_url.rstrip('/')}/{endpoint}?limit={limit}"
 
         if not self.session:
             self.session = aiohttp.ClientSession()

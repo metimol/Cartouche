@@ -16,8 +16,8 @@ from app.utils.avatar_generator import AvatarGenerator
 from app.utils.username_generator import UsernameGenerator
 from app.clients.cartouche_api import CartoucheAPIClient
 from app.core.settings import (
-    API_BASE_URL,
-    API_TOKEN,
+    SOCIAL_NETWORK_URL,
+    API_KEY,
     BOT_CATEGORIES,
     INITIAL_BOTS_COUNT,
     DAILY_BOTS_GROWTH_MIN,
@@ -245,31 +245,32 @@ class BotManager:
             BotError: If activity processing fails
         """
         try:
-            bot = self.bot_repository.get_bot_by_id(bot_id)
+            bot_id_val = int(bot_id) if not isinstance(bot_id, int) else bot_id
+            bot = self.bot_repository.get_bot_by_id(bot_id_val)
             if not bot:
                 raise BotError(f"Bot with ID {bot_id} not found")
 
             # Update last active time
-            self.bot_repository.update_last_active(bot_id)
+            self.bot_repository.update_last_active(bot_id_val)
 
             # Get recent posts
             posts = await self.api_client.get_posts()
             if not posts:
-                logger.info(f"No posts available for bot {bot.name} to react to")
-                return {"status": "no_posts", "bot_id": bot_id}
+                logger.info(f"No posts available for bot {getattr(bot, 'name', '')} to react to")
+                return {"status": "no_posts", "bot_id": bot_id_val}
 
             # Filter posts from the last 3 days (including today)
             now = datetime.utcnow()
             three_days_ago = now - timedelta(days=2)
             recent_posts = []
             for post in posts:
-                # Try to get date from post['json']['OnDate']
-                post_json = post.get("json", {})
-                on_date_str = post_json.get("OnDate")
+                on_date_str = post.get("date")
                 post_date = None
                 if on_date_str:
-                    fmt = "%Y-%m-%dT%H:%M:%S"
-                    post_date = datetime.strptime(on_date_str, fmt)
+                    try:
+                        post_date = datetime.strptime(on_date_str[:19], "%Y-%m-%dT%H:%M:%S")
+                    except Exception:
+                        continue
                 if (
                     post_date
                     and three_days_ago.date() <= post_date.date() <= now.date()
@@ -278,85 +279,66 @@ class BotManager:
 
             if not recent_posts:
                 logger.info(
-                    f"No recent posts (last 3 days) for bot {bot.name} to react to"
+                    f"No recent posts (last 3 days) for bot {getattr(bot, 'name', '')} to react to"
                 )
-                return {"status": "no_recent_posts", "bot_id": bot_id}
+                return {"status": "no_recent_posts", "bot_id": bot_id_val}
 
             # Select a random recent post
             post = random.choice(recent_posts)
-            post_id = post.get("docID")
+            post_id = post.get("id")
 
-            # Split the post into parts
-            post_json = post.get("json", {})
-            text = post_json.get("Text", "")
-            author = post_json.get("FullName", "")
-            author_name = post_json.get("Name", None)
-            date = post_json.get("OnDate", "")
-            comments = post_json.get("Comments", [])
-            likes = len(post_json.get("Likes", []))
+            # Split the post into parts (new structure)
+            text = post.get("content", "")
+            user = post.get("user", {})
+            author = user.get("name", "")
+            author_name = user.get("username", None)
+            date = post.get("date", "")
+            comments_count = post.get("comments_count", 0)
+            likes = post.get("reactions_count", 0)
 
-            # Format comments for LLM
-            if comments and isinstance(comments, list):
-                formatted_comments = "\n".join(
-                    f"- [{c.get('OnDate', '')}] {c.get('FullName', '')}: {c.get('Text', '')}"
-                    for c in comments
-                )
-            else:
-                formatted_comments = "No comments"
+            formatted_comments = f"Comments count: {comments_count}" if comments_count else "No comments"
 
-            # Prepare post info for llm models
             post_info = f"Author: {author}\nDate: {date}\nText: {text}\nComments:\n{formatted_comments}\nLikes: {likes}"
 
             # Check if bot has already interacted with this post
-            has_liked = self.activity_repository.check_activity_exists(
-                bot_id, "like", post_id
-            )
-            # Get existing comment activities for this post
-            # Limit to 1000 comments for performance
+            has_liked = bool(self.activity_repository.check_activity_exists(
+                bot_id_val, "like", post_id
+            ))
             comment_activities = self.activity_repository.get_activities_by_type(
-                bot_id, "comment", 0, 1000
+                bot_id_val, "comment", 0, 1000
             )
             comment_count_on_post = sum(
-                1 for a in comment_activities if a.target_id == str(post_id)
+                1 for a in comment_activities if str(a.target_id) == str(post_id)
             )
 
-            # Calculate comment probability based on existing comments
-            comment_probability = bot.comment_probability * (0.5**comment_count_on_post)
-            has_followed = self.activity_repository.check_activity_exists(
-                bot_id, "follow", author_name
-            )
+            comment_probability = float(getattr(bot, "comment_probability", 0.3)) * (0.5 ** comment_count_on_post)
+            has_followed = bool(self.activity_repository.check_activity_exists(
+                bot_id_val, "follow", author_name
+            ))
 
-            # Decide on action based on probabilities
             action_taken = False
 
             # Try to like
-            if not has_liked and random.random() < bot.like_probability:
+            if not has_liked and random.random() < float(getattr(bot, "like_probability", 0.5)):
                 try:
-                    await self.api_client.like_post(post_id, bot.name)
-
-                    # Record activity
+                    await self.api_client.like_post(post_id, str(getattr(bot, "name", "")))
                     self.activity_repository.create_activity(
                         {
-                            "bot_id": bot_id,
+                            "bot_id": bot_id_val,
                             "activity_type": "like",
                             "target_id": str(post_id),
                         }
                     )
-
-                    # Create memory
                     memory_text = await self.content_generator.generate_memory(
-                        bot.category, text, "post"
+                        str(getattr(bot, "category", "")), text, "post"
                     )
-
-                    # Add memory to MemoryService
                     await self.memory_service.add_memory(
-                        bot_id,
+                        bot_id_val,
                         memory_text,
                         {"context_type": "post", "context_id": str(post_id)},
                     )
-
                     action_taken = True
-                    logger.info(f"Bot {bot.name} liked post {post_id}")
+                    logger.info(f"Bot {getattr(bot, 'name', '')} liked post {post_id}")
                 except Exception as e:
                     logger.error(f"Failed to like post: {str(e)}")
 
@@ -366,39 +348,29 @@ class BotManager:
                 and random.random() < comment_probability
             ):
                 try:
-                    # Get relevant memories from MemoryService
                     search_results = await self.memory_service.search_memories(
-                        bot_id, text, limit=3
+                        bot_id_val, text, limit=3
                     )
                     memory_texts = [m["text"] for m in search_results]
-
-                    # Generate comment
                     comment_text = await self.content_generator.generate_comment(
-                        bot.category, post_info, memory_texts
+                        str(getattr(bot, "category", "")), post_info, memory_texts
                     )
-
-                    # Create comment data
                     comment_data = {
-                        "Name": bot.name,
+                        "Name": str(getattr(bot, "name", "")),
                         "Text": comment_text,
                         "OnDate": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S"),
                     }
-
-                    # Add comment to post
                     await self.api_client.add_comment(post_id, comment_data)
-
-                    # Record activity
                     self.activity_repository.create_activity(
                         {
-                            "bot_id": bot_id,
+                            "bot_id": bot_id_val,
                             "activity_type": "comment",
                             "target_id": str(post_id),
                             "content": comment_text,
                         }
                     )
-
                     action_taken = True
-                    logger.info(f"Bot {bot.name} commented on post {post_id}")
+                    logger.info(f"Bot {getattr(bot, 'name', '')} commented on post {post_id}")
                 except Exception as e:
                     logger.error(f"Failed to comment on post: {str(e)}")
 
@@ -406,22 +378,22 @@ class BotManager:
                 if (
                     not has_followed
                     and author_name
-                    and author_name != bot.name
-                    and random.random() < bot.follow_probability
+                    and author_name != str(getattr(bot, "name", ""))
+                    and random.random() < float(getattr(bot, "follow_probability", 0.4))
                 ):
                     try:
-                        await self.api_client.follow_user(author_name, bot.name)
+                        await self.api_client.follow_user(author_name, str(getattr(bot, "name", "")))
                         self.activity_repository.create_activity(
                             {
-                                "bot_id": bot_id,
+                                "bot_id": bot_id_val,
                                 "activity_type": "follow",
                                 "target_id": str(author_name),
                             }
                         )
-                        logger.info(f"Bot {bot.name} followed user {author_name}")
+                        logger.info(f"Bot {getattr(bot, 'name', '')} followed user {author_name}")
                         return {
                             "status": "followed",
-                            "bot_id": bot_id,
+                            "bot_id": bot_id_val,
                             "user_id": author_name,
                         }
                     except Exception as e:
@@ -429,15 +401,11 @@ class BotManager:
 
             if not action_taken:
                 logger.info(
-                    f"Bot {bot.name} decided not to interact with post {post_id}"
+                    f"Bot {getattr(bot, 'name', '')} decided not to interact with post {post_id}"
                 )
-                return {"status": "no_action", "bot_id": bot_id}
+                return {"status": "no_action", "bot_id": bot_id_val}
 
-            return {"status": "success", "bot_id": bot_id, "post_id": post_id}
-
-        except Exception as e:
-            logger.error(f"Failed to process bot activity: {str(e)}")
-            raise BotError(f"Failed to process bot activity: {str(e)}")
+            return {"status": "success", "bot_id": bot_id_val, "post_id": post_id}
 
     async def create_bot_post(self, bot_id: int) -> Dict[str, Any]:
         """
@@ -453,16 +421,17 @@ class BotManager:
             BotError: If post creation fails
         """
         try:
-            bot = self.bot_repository.get_bot_by_id(bot_id)
+            bot_id_val = int(bot_id) if not isinstance(bot_id, int) else bot_id
+            bot = self.bot_repository.get_bot_by_id(bot_id_val)
             if not bot:
                 raise BotError(f"Bot with ID {bot_id} not found")
 
             # Generate post content
-            post_text = await self.content_generator.generate_post(bot.category)
+            post_text = await self.content_generator.generate_post(str(getattr(bot, "category", "")))
 
             # Create post data
             post_data = {
-                "Name": bot.name,
+                "Name": str(getattr(bot, "name", "")),
                 "Text": post_text,
                 "OnDate": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S"),
             }
@@ -473,16 +442,16 @@ class BotManager:
             # Record activity
             self.activity_repository.create_activity(
                 {
-                    "bot_id": bot_id,
+                    "bot_id": bot_id_val,
                     "activity_type": "post",
                     "target_id": str(response.get("docID", "")),
                     "content": post_text,
                 }
             )
 
-            logger.info(f"Bot {bot.name} created post")
+            logger.info(f"Bot {getattr(bot, 'name', '')} created post")
 
-            return {"status": "success", "bot_id": bot_id, "post": post_data}
+            return {"status": "success", "bot_id": bot_id_val, "post": post_data}
 
         except Exception as e:
             logger.error(f"Failed to create bot post: {str(e)}")
@@ -494,23 +463,23 @@ class BotManager:
         This should be called periodically to make bots act autonomously.
         """
         now = datetime.utcnow()
-        bots = self.bot_repository.get_all_bots(limit=MAX_BOTS_COUNT)
+        bots = self.bot_repository.get_all_bots(limit=10000)
         for bot in bots:
-            # If the activity time has come or is not set
-            if not getattr(bot, "last_active", None) or bot.last_active <= now:
+            last_active = getattr(bot, "last_active", None)
+            if last_active is None or last_active <= now:
                 try:
-                    await self.process_bot_activity(bot.id)
+                    await self.process_bot_activity(int(getattr(bot, "id")))
                     # Occasionally the bot makes a post
-                    if random.random() < bot.post_probability:
-                        await self.create_bot_post(bot.id)
+                    if random.random() < float(getattr(bot, "post_probability", 0.1)):
+                        await self.create_bot_post(int(getattr(bot, "id")))
                 except Exception as e:
                     logger.error(
-                        f"Failed to run activity for bot {getattr(bot, 'name', bot.id)}: {str(e)}"
+                        f"Failed to run activity for bot {getattr(bot, 'name', getattr(bot, 'id', ''))}: {str(e)}"
                     )
                 # Reschedule the next activity time
                 minutes_delay = random.uniform(REACTION_DELAY_MIN, REACTION_DELAY_MAX)
                 next_activity = now + timedelta(minutes=minutes_delay)
-                self.bot_repository.update_bot(bot.id, {"last_active": next_activity})
+                self.bot_repository.update_bot(int(getattr(bot, "id")), {"last_active": next_activity})
 
     async def sync_bots_with_external_api(self) -> int:
         """
@@ -518,7 +487,7 @@ class BotManager:
         Returns:
             Number of bots synchronized
         """
-
+        from app.core.settings import API_KEY as API_TOKEN, SOCIAL_NETWORK_URL as API_BASE_URL
         url = f'{API_BASE_URL}/GetDocuments/Users/?token={API_TOKEN}&query={{"IsBot":true}}'
         logger.info("Starting bot synchronization with external API...")
         try:
@@ -534,7 +503,6 @@ class BotManager:
             logger.error(f"Error fetching bots from API: {str(e)}")
             return 0
 
-        # Map by name for quick lookup
         external_bots = {
             item["json"]["Name"]: item
             for item in data
@@ -543,7 +511,6 @@ class BotManager:
         local_bots = {b.name: b for b in self.bot_repository.get_all_bots(limit=10000)}
 
         updated = 0
-        # Add or update bots
         for name, ext in external_bots.items():
             ext_json = ext["json"]
             bot_data = {
@@ -572,36 +539,30 @@ class BotManager:
                 ),
             }
             if name in local_bots:
-                # Update existing bot
                 try:
-                    self.bot_repository.update_bot(local_bots[name].id, bot_data)
-                    # Ensure memory is initialized
-                    self.memory_service._get_bot_vector_store(local_bots[name].id)
+                    self.bot_repository.update_bot(int(getattr(local_bots[name], "id")), bot_data)
+                    self.memory_service._get_bot_vector_store(int(getattr(local_bots[name], "id")))
                     updated += 1
                 except SQLAlchemyError as e:
                     logger.error(f"Failed to update bot {name}: {str(e)}")
             else:
-                # Create new bot
                 try:
                     new_bot = self.bot_repository.create_bot(bot_data)
-                    # Ensure memory is initialized
-                    self.memory_service._get_bot_vector_store(new_bot.id)
+                    self.memory_service._get_bot_vector_store(int(getattr(new_bot, "id")))
                     updated += 1
                 except SQLAlchemyError as e:
                     logger.error(f"Failed to create bot {name}: {str(e)}")
 
-        # Remove local bots not present in external (strict sync needed)
         for name, bot in local_bots.items():
             if name not in external_bots:
-                self.bot_repository.delete_bot(bot.id)
+                self.bot_repository.delete_bot(int(getattr(bot, "id")))
 
         logger.info(f"Bot synchronization with external API and local DB complete. Synced {updated} bots.")
 
-        # Clean up qDrant collections for bots that no longer exist
         try:
             logger.info("Starting qDrant collections cleanup...")
-            local_db_bots = self.bot_repository.get_all_bots(limit=None) # Get all bots
-            local_bot_ids = [bot.id for bot in local_db_bots]
+            local_db_bots = self.bot_repository.get_all_bots(limit=10000)
+            local_bot_ids = [int(getattr(bot, "id")) for bot in local_db_bots]
 
             qdrant_bot_ids = self.memory_service.get_all_bot_collection_names()
 
@@ -613,7 +574,7 @@ class BotManager:
                         logger.info(f"Deleted qDrant collection for bot_id {bot_id_qdrant} as bot no longer exists in local DB.")
                         deleted_collections_count +=1
                     except Exception as e:
-                        logger.error(f"Failed to delete qDrant collection for bot_id {bot_id_qdrant}: {str(e)}")
+                        logger.error(f"Failed to delete qDrant collection for bot_id qdrant: {str(e)}")
 
             if deleted_collections_count > 0:
                 logger.info(f"qDrant collections cleanup complete. Deleted {deleted_collections_count} collections.")

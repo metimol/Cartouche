@@ -29,18 +29,25 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class PostSerializer(serializers.ModelSerializer):
-    user = serializers.SerializerMethodField()
-    liked = serializers.SerializerMethodField()
-    bookmarked = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField(read_only=True)
+    liked = serializers.SerializerMethodField(read_only=True)
+    bookmarked = serializers.SerializerMethodField(read_only=True)
+    user_id = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
         model = Post
-        fields = ["id", "content", "date", "ispinned", "liked", "bookmarked", "reactions_count", "comments_count", "user"]
+        fields = ["id", "content", "date", "ispinned", "liked", "bookmarked", "reactions_count", "comments_count", "user", "user_id"]
         read_only_fields = ["id", "date", "ispinned", "liked", "bookmarked", "reactions_count", "comments_count", "user"]
 
     def create(self, validated_data):
-        # Без пользователя нельзя создать пост через API
-        raise serializers.ValidationError({"detail": "Post creation not allowed in API without user context."})
+        user_id = validated_data.pop('user_id', None)
+        if not user_id:
+            raise serializers.ValidationError({"user_id": "user_id is required"})
+        user = User.objects.filter(id=user_id).first()
+        if not user:
+            raise serializers.ValidationError({"user_id": "User not found"})
+        post = Post.objects.create(user=user, **validated_data)
+        return post
     
     def get_user(self, obj):
         user = obj.user
@@ -61,17 +68,24 @@ class PostSerializer(serializers.ModelSerializer):
     
 
 class CommentSerializer(serializers.ModelSerializer):
-    user = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField(read_only=True)
+    user_id = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
         model = Comment
-        fields = ["id", "content", "post", "date", "user"]
-        read_only_fields = ["id", "post", "date", "user"]
+        fields = ["id", "content", "post", "date", "user", "user_id"]
+        read_only_fields = ["id", "date", "user"]
 
     def create(self, validated_data):
-        post_id = self.context['post_id']
-        # Без пользователя нельзя создать комментарий через API
-        raise serializers.ValidationError({"detail": "Comment creation not allowed in API without user context."})
+        user_id = validated_data.pop('user_id', None)
+        post = validated_data.get('post')
+        if not user_id:
+            raise serializers.ValidationError({"user_id": "user_id is required"})
+        user = User.objects.filter(id=user_id).first()
+        if not user:
+            raise serializers.ValidationError({"user_id": "User not found"})
+        comment = Comment.objects.create(user=user, **validated_data)
+        return comment
 
     def get_user(self, obj):
         user = obj.user
