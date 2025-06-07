@@ -187,10 +187,14 @@ class BotManager:
 
             bot = self.bot_repository.create_bot(bot_data)
 
+            first_name, last_name = full_name.split(" ", 1)
+
             api_bot_data = {
                 "username": username,
                 "password": str(uuid.uuid4()),
                 "is_bot": True,
+                "first_name": first_name,
+                "last_name": last_name,
                 "category": category,
                 "like_probability": like_probability,
                 "comment_probability": comment_probability,
@@ -198,6 +202,7 @@ class BotManager:
                 "unfollow_probability": unfollow_probability,
                 "repost_probability": post_probability,
             }
+            
             # Create bot in external API
             user_response = await self.api_client.add_bot(api_bot_data)
             user_id = user_response.get("id")
