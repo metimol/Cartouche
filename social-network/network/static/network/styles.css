@@ -193,3 +193,9 @@ body>.row {
         overflow-y: scroll;
     }
 }
+
+/* Fix for mobile header width */
+nav.d-md-none {
+    width: 100%;
+    box-sizing: border-box;
+}
