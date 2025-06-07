@@ -6,6 +6,7 @@ Handles creation, management, and scheduling of bots.
 from typing import Dict, Any
 import random
 import uuid
+import datetime as dt
 from datetime import datetime, timedelta
 import aiohttp
 from sqlalchemy.exc import SQLAlchemyError
@@ -186,7 +187,6 @@ class BotManager:
 
             bot = self.bot_repository.create_bot(bot_data)
 
-            import datetime as dt
             api_bot_data = {
                 "username": username,
                 "password": str(uuid.uuid4()),
@@ -204,7 +204,7 @@ class BotManager:
 
             # Create profile in external API
             profile_data = {
-                "user": user_id,
+                "user_id": user_id,
                 "name": full_name,
                 "image": avatar,
                 "dob": dt.date(dt.datetime.utcnow().year - age, 1, 1).isoformat(),

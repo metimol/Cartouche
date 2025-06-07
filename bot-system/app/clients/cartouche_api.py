@@ -3,7 +3,6 @@ API client for the Cartouche C# REST API.
 Handles communication with the main C# backend.
 """
 
-import logging
 import aiohttp
 import json
 from typing import Dict, List, Any, Optional
@@ -11,7 +10,6 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 
 from app.core.settings import SOCIAL_NETWORK_URL, API_KEY
 from app.core.exceptions import APIError
-from app.utils.json_to_string import JSONToStringConverter
 
 from app.core.logging import setup_logging
 
@@ -133,7 +131,7 @@ class CartoucheAPIClient:
             ) as response:
                 response_text = await response.text()
                 if response.status == 200:
-                    return {"status": "success"}
+                    return await response.json()
                 else:
                     logger.error(
                         f"[API][ADD_BOT] Error: {response.status} - {response_text}"
